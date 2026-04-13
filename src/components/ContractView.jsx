@@ -2483,7 +2483,7 @@ export function ContractPreview({ data, contractTypeId, position: _position, agr
 }
 
 // ─── ContractView — Main ──────────────────────────────────────────────────────
-export default function ContractView({ onLogout, employees = [], userRole, initialEmployeeId, initialMode, branch, setTasks }) {
+export default function ContractView({ onLogout, employees = [], userRole, initialEmployeeId, initialMode, branch: propsBranch, setTasks }) {
   const [step, _setStep] = useState('input');
   const [selectedContractType, setSelectedContractType] = useState(() => localStorage.getItem('contract_type') || 'hdld-ft');
   const [selectedPosition, setSelectedPosition] = useState(() => canonicalPositionLabel(localStorage.getItem('contract_position') || ''));
@@ -2522,7 +2522,7 @@ export default function ContractView({ onLogout, employees = [], userRole, initi
   const [fieldErrors, setFieldErrors] = useState({});
   const [printInfoCollapsed, setPrintInfoCollapsed] = useState(() => localStorage.getItem('ace_print_info_collapsed') === '1');
   const [quickPrintInfoCollapsed, setQuickPrintInfoCollapsed] = useState(() => localStorage.getItem('ace_quick_print_info_collapsed') === '1');
-  const branch = localStorage.getItem('user_branch') || 'Chi nhánh';
+  const branch = propsBranch || localStorage.getItem('user_branch') || 'Chi nhánh';
   const isAdmin = userRole === 'admin';
 
   useEffect(() => {
