@@ -1,0 +1,26 @@
+# Antigravity AI Rules - ACE HRM
+
+Follow these technical and design rules strictly.
+
+## 1. Typography & Formatting (STRICT)
+- **Global Font**: Helvetica.
+- **Bold Rule**: Only use `font-bold` or `font-black` for Titles and Headings. Body text MUST be `font-normal`.
+- **Theme**: Always refer to `src/utils/theme.js` for styling classes and constants.
+- **Sizes**: Use synchronized sizes from `THEME.typography.size`.
+
+## 2. Updated Recruitment Workflow
+- **Path A (Management)**: HRM Interviews.
+- **Path B (Branch)**: Branch Manager Interviews (HRM selects manual deadline).
+- **Control**: HRM monitoring of branch SLA based on chosen deadline. Auto-reminders at 3 days and on expiry.
+- **Evaluation**: Use the 5-10 point Rubric system from the workflow chart.
+- **Output**: Split-view synthesis -> Hire/Reject decision -> Auto Contract PDF.
+
+## 3. UI Aesthetics
+- **Management UI**: Table-List view with premium styling (hover effects, status badges).
+- **Modals**: Glassmorphism with `backdrop-blur-2xl`.
+- **Rounding**: Containers `rounded-[40px]`, buttons `rounded-[20px]`.
+
+## 4. Coding Practices
+- Vietnamese UI text only.
+- Lucide-react for icons.
+- No secrets in code. Use `.env`.

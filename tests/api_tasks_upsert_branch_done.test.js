@@ -1,14 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-vi.mock('../api/firebase-admin.js', () => {
-  return {
-    db: {
-      collection: vi.fn()
-    }
-  }
+vi.mock('@supabase/supabase-js', () => {
+  return { createClient: vi.fn() }
 })
 
-import { db } from '../api/firebase-admin.js'
+import { createClient } from '@supabase/supabase-js'
 import handler from '../api/[...path].js'
 
 function makeRes() {
@@ -31,10 +27,15 @@ function makeReq({ token, body } = {}) {
   }
 }
 
+function ok(data) {
+  return Promise.resolve({ data, error: null })
+}
+
 describe('/api/tasks/upsert (branch correction)', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    globalThis.process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({ project_id: 'test' })
+    globalThis.process.env.SUPABASE_URL = 'http://localhost:54321'
+    globalThis.process.env.SUPABASE_SERVICE_ROLE_KEY = 'service'
   })
 
   it('allows branch to revert DONE task (doneApproval PENDING) back to TODO and moves group back', async () => {
@@ -52,33 +53,32 @@ describe('/api/tasks/upsert (branch correction)', () => {
       },
     }
 
-    const mockDoc = (data) => ({
-      exists: !!data,
-      data: () => data,
-      get: vi.fn(() => Promise.resolve({ exists: !!data, data: () => data }))
-    })
-
-    const appSessionsColl = {
-      doc: vi.fn(() => ({
-        get: vi.fn(() => Promise.resolve(mockDoc(sessionRow)))
-      }))
+    const appSessions = {
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          limit: vi.fn(() => ok([sessionRow])),
+        })),
+      })),
     }
 
-    const setSpy = vi.fn(() => Promise.resolve())
-    const tasksColl = {
-      doc: vi.fn((id) => ({
-        get: vi.fn(() => Promise.resolve(mockDoc(curTaskRow))),
-        set: setSpy
-      }))
+    const transitionLog = { insert: vi.fn(() => ok([])) }
+
+    const tasks = {
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          limit: vi.fn(() => ok([curTaskRow])),
+        })),
+      })),
+      upsert: vi.fn(() => ok([])),
     }
 
-    const transitionLogColl = { add: vi.fn(() => Promise.resolve()) }
-
-    db.collection.mockImplementation((name) => {
-      if (name === 'app_sessions') return appSessionsColl
-      if (name === 'tasks') return tasksColl
-      if (name === 'task_transition_log') return transitionLogColl
-      throw new Error(`unexpected collection ${name}`)
+    createClient.mockReturnValue({
+      from: vi.fn((table) => {
+        if (table === 'app_sessions') return appSessions
+        if (table === 'tasks') return tasks
+        if (table === 'task_transition_log') return transitionLog
+        throw new Error(`unexpected table ${table}`)
+      }),
     })
 
     const req = makeReq({ token: 'tok', body: { task: { id: 't1', status: 'TODO' } } })
@@ -88,14 +88,14 @@ describe('/api/tasks/upsert (branch correction)', () => {
     const payload = JSON.parse(res.body)
     expect(res.statusCode).toBe(200)
     expect(payload.ok).toBe(true)
-    expect(setSpy).toHaveBeenCalledTimes(1)
+    expect(tasks.upsert).toHaveBeenCalledTimes(1)
 
-    const upsertArg = setSpy.mock.calls[0][0]
+    const upsertArg = tasks.upsert.mock.calls[0][0][0]
     expect(upsertArg.group).toBe('TRUNG MỸ TÂY')
     expect(upsertArg.status).toBe('TODO')
     expect(upsertArg.data.group).toBe('TRUNG MỸ TÂY')
     expect(upsertArg.data.doneApproval.status).toBe('CANCELLED_BY_BRANCH')
-    expect(transitionLogColl.add).toHaveBeenCalledTimes(1)
+    expect(transitionLog.insert).toHaveBeenCalledTimes(1)
   })
 })
 

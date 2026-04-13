@@ -400,6 +400,7 @@ function WorkflowAuditTrail({ logs }) {
 
 function ContractWorkflowTracker({ userRole, branch, setTasks }) {
   const [items, setItems] = useState([]);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [filterQuery, setFilterQuery] = useState('');
   
@@ -456,6 +457,94 @@ function ContractWorkflowTracker({ userRole, branch, setTasks }) {
       activityLog: [{ action: 'Hệ thống tự động tạo từ Quy trình Hợp đồng', time: new Date().toISOString(), user: 'system' }]
     };
     setTasks(prev => [newTask, ...prev]);
+  };
+
+  const handleFileUploadReal = async (file, item, setUploadLoading) => {
+    if (!file) return;
+    setUploadLoading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result.split(',')[1];
+          const payload = {
+            action: "uploadFile",
+            secret: import.meta.env.VITE_SYNC_SECRET || "moon_map_2026",
+            fileName: file.name,
+            mimeType: file.type,
+            base64: base64,
+            ma_nv: item.employeeId || item.ma_nv,
+            ho_ten: item.employeeName || item.ho_ten,
+            vi_tri: item.chuc_vu || item.vi_tri || item.position || "Không rõ",
+            branch: currentBranch || "Khac",
+            loai_ho_so: "Quy trình Hợp đồng"
+          };
+
+        // Gửi tới API trung gian của bạn (api/[...path].js)
+        const resp = await apiFetch('/api/contract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await resp.json();
+        if (result.ok) {
+          // Thành công: Cập nhật link Drive vào DB
+          updateItem(item.id, item.workflowStage, 'UPLOAD_SUCCESS', `Đã upload file lên Drive: ${file.name}`, { 
+            driveViewUrl: result.url,
+            driveFileId: result.fileId,
+            [item.workflowStage === 1 ? 'nvScanFile' : 'finalScanFile']: file.name 
+          });
+          
+          // Ghi thêm log vào SQL (Supabase) thông qua API
+          apiFetch('/api/contracts/issue-log', {
+            method: 'POST',
+            body: JSON.stringify({
+              issueKey: item.id,
+              method: 'UPLOAD_TO_DRIVE',
+              employeeId: item.employeeId || item.ma_nv,
+              employeeName: item.employeeName || item.ho_ten,
+              filename: file.name,
+              driveFileId: result.fileId,
+              driveViewUrl: result.url
+            })
+          }).catch(() => {});
+          
+          alert("Tải lên thành công!");
+        } else {
+          const newItem = {
+            ...formData,
+            id: 'ISSUE-' + Date.now(),
+            workflowStage: 1, // Giai đoạn 1: Chờ quét bản gốc
+            workflowStatus: 'WAITING_SCAN',
+            auditTrail: [
+              { action: 'Bắt đầu quy trình cấp phát HĐ', time: new Date().toISOString(), user: String(localStorage.getItem('saved_username') || 'system') }
+            ],
+            // Copy explicit fields for convenience
+             soHd: formData.so_hd,
+             ho_ten: formData.ho_ten,
+             ma_nv: formData.ma_nv,
+             branch: currentBranch,
+             vi_tri: formData.vi_tri || formData.chuc_vu
+          };
+
+          const next = [...items, newItem];
+          localStorage.setItem('ace_contract_issue_log_v1', JSON.stringify(next));
+          setItems(next);
+          alert(`Đã lưu quy trình cho ${formData.ho_ten}. Bạn có thể theo dõi trong danh sách quy trình.`);
+          alert("Lỗi đọc file");
+        }
+        setUploadLoading(false);
+      };
+      reader.onerror = () => {
+        alert("Lỗi đọc file");
+        setUploadLoading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi: " + err.message);
+      setUploadLoading(false);
+    }
   };
 
   const updateItem = (id, nextStage, status, auditAction, extra = {}) => {
@@ -698,12 +787,14 @@ function ContractWorkflowTracker({ userRole, branch, setTasks }) {
                             onChange={(e) => {
                               const f = e.target.files?.[0];
                               if (!f) return;
-                              updateItem(selectedItem.id, 1, 'ĐÃ UPLOAD BẢN QUÉT NV', `Đã upload bản scan NV: ${f.name}`, { nvScanFile: f.name });
+                              handleFileUploadReal(f, selectedItem, setUploadLoading);
                             }}
                           />
                           <label htmlFor="upload-scan-nv" className="flex flex-col items-center justify-center gap-4 w-full py-10 bg-white border-2 border-slate-200 border-dashed rounded-[24px] cursor-pointer group-hover:border-indigo-400 transition-all">
-                            <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">↑</div>
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{selectedItem.nvScanFile || 'CHỌN FILE PDF ĐỂ TẢI LÊN'}</span>
+                            <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                              {uploadLoading ? <Loader2 className="animate-spin" /> : '↑'}
+                            </div>
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{uploadLoading ? 'ĐANG TẢI LÊN...' : (selectedItem.nvScanFile || 'CHỌN FILE PDF ĐỂ TẢI LÊN')}</span>
                           </label>
                         </div>
 
@@ -739,12 +830,14 @@ function ContractWorkflowTracker({ userRole, branch, setTasks }) {
                             onChange={(e) => {
                               const f = e.target.files?.[0];
                               if (!f) return;
-                              updateItem(selectedItem.id, 2, 'ĐÃ UPLOAD BẢN QUÉT FINAL', `Đã upload bản scan FINAL: ${f.name}`, { finalScanFile: f.name });
+                              handleFileUploadReal(f, selectedItem, setUploadLoading);
                             }}
                           />
                           <label htmlFor="upload-scan-final" className="flex flex-col items-center justify-center gap-4 w-full py-10 bg-white border-2 border-slate-200 border-dashed rounded-[24px] cursor-pointer group-hover:border-emerald-400 transition-all">
-                            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">↑</div>
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{selectedItem.finalScanFile || 'TẢI LÊN BẢN SCAN CÓ MỘC'}</span>
+                            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                              {uploadLoading ? <Loader2 className="animate-spin" /> : '↑'}
+                            </div>
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{uploadLoading ? 'ĐANG TẢI LÊN...' : (selectedItem.finalScanFile || 'TẢI LÊN BẢN SCAN CÓ MỘC')}</span>
                           </label>
                         </div>
 
@@ -2483,7 +2576,7 @@ export function ContractPreview({ data, contractTypeId, position: _position, agr
 }
 
 // ─── ContractView — Main ──────────────────────────────────────────────────────
-export default function ContractView({ onLogout, employees = [], userRole, initialEmployeeId, initialMode, branch: propsBranch, setTasks }) {
+export default function ContractView({ onLogout, employees = [], userRole, initialEmployeeId, initialMode, branch, setTasks }) {
   const [step, _setStep] = useState('input');
   const [selectedContractType, setSelectedContractType] = useState(() => localStorage.getItem('contract_type') || 'hdld-ft');
   const [selectedPosition, setSelectedPosition] = useState(() => canonicalPositionLabel(localStorage.getItem('contract_position') || ''));
@@ -2522,7 +2615,7 @@ export default function ContractView({ onLogout, employees = [], userRole, initi
   const [fieldErrors, setFieldErrors] = useState({});
   const [printInfoCollapsed, setPrintInfoCollapsed] = useState(() => localStorage.getItem('ace_print_info_collapsed') === '1');
   const [quickPrintInfoCollapsed, setQuickPrintInfoCollapsed] = useState(() => localStorage.getItem('ace_quick_print_info_collapsed') === '1');
-  const branch = propsBranch || localStorage.getItem('user_branch') || 'Chi nhánh';
+  const currentBranch = branch || localStorage.getItem('user_branch') || 'Chi nhánh';
   const isAdmin = userRole === 'admin';
 
   useEffect(() => {
@@ -2535,8 +2628,8 @@ export default function ContractView({ onLogout, employees = [], userRole, initi
 
   const filteredEmployees = React.useMemo(() => {
     if (isAdmin) return employees;
-    return employees.filter(e => e.department === branch);
-  }, [branch, employees, isAdmin]);
+    return employees.filter(e => e.department === currentBranch);
+  }, [currentBranch, employees, isAdmin]);
 
   const positionOptions = React.useMemo(() => {
     const map = new Map();
@@ -2812,6 +2905,28 @@ export default function ContractView({ onLogout, employees = [], userRole, initi
       localStorage.setItem('preview_position', selectedPosition);
       localStorage.setItem('preview_agreement_type', selectedAgreementType || '');
       localStorage.setItem('preview_commitment_type', selectedCommitmentType || '');
+      
+      // Tự động lưu vào Nhật ký Quy trình để phần Báo tăng có thể lấy dữ liệu
+      const rawLogs = JSON.parse(localStorage.getItem('ace_contract_issue_log_v1') || '[]');
+      
+      // Lọc bỏ bất kỳ dòng nào cũ trùng Mã nhân viên để tránh lặp
+      const filteredLogs = rawLogs.filter(log => log.ma_nv !== formData.ma_nv && log.employeeId !== formData.ma_nv);
+      
+      const newItem = {
+        ...formData,
+        id: 'ISSUE-' + Date.now(),
+        soHd: formData.so_hd,
+        ho_ten: formData.ho_ten,
+        ma_nv: formData.ma_nv,
+        branch: branch,
+        vi_tri: formData.chuc_vu || selectedPosition,
+        workflowStage: 1,
+        workflowStatus: 'WAITING_SCAN',
+        auditTrail: [{ action: 'Cập nhật hồ sơ từ dữ liệu in HĐ', time: new Date().toISOString(), user: String(localStorage.getItem('saved_username') || 'system') }]
+      };
+      
+      localStorage.setItem('ace_contract_issue_log_v1', JSON.stringify([newItem, ...filteredLogs]));
+
       window.open(window.location.origin + '?preview=contract', '_blank');
     }
   };

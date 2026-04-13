@@ -416,14 +416,14 @@ function EmployeeCsvImportModal({ existingEmployees, isAdmin, branchId, onClose,
     onApply(mergeResult.merged);
   };
 
-  const syncToFirebase = async () => {
+  const syncToSupabase = async () => {
     if (!mergeResult) return;
     setError('');
     setSyncMessage('');
     setSyncBusy(true);
     try {
       if (!isAdmin) {
-        setError('Chỉ tài khoản Admin được phép lưu nhân sự lên Firebase.');
+        setError('Chỉ tài khoản Admin được phép lưu nhân sự lên Supabase.');
         return;
       }
       const token = String(localStorage.getItem('token') || '').trim();
@@ -452,10 +452,10 @@ function EmployeeCsvImportModal({ existingEmployees, isAdmin, branchId, onClose,
         data = null;
       }
       if (!resp.ok || !data?.ok) {
-        setError(data?.message || 'Lưu Firebase thất bại.');
+        setError(data?.message || 'Lưu Supabase thất bại.');
         return;
       }
-      setSyncMessage(`Đã lưu Firebase: ${data.employees} nhân viên · ${data.branches} chi nhánh`);
+      setSyncMessage(`Đã lưu Supabase: ${data.employees} nhân viên · ${data.branches} chi nhánh`);
       onApply(mergeResult.merged);
     } catch (e) {
       setError(e?.message || String(e));
@@ -525,8 +525,8 @@ function EmployeeCsvImportModal({ existingEmployees, isAdmin, branchId, onClose,
               Hủy
             </button>
             {isAdmin && (
-              <button disabled={!mergeResult || busy || syncBusy} onClick={syncToFirebase} className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-black hover:bg-emerald-700 disabled:opacity-50 transition-colors">
-                {syncBusy ? 'Đang lưu...' : 'Lưu vào Firebase'}
+              <button disabled={!mergeResult || busy || syncBusy} onClick={syncToSupabase} className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-black hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+                {syncBusy ? 'ĐANG LƯU…' : 'LƯU SUPABASE'}
               </button>
             )}
             {!isAdmin && (

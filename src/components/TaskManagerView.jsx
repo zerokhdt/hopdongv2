@@ -31,7 +31,7 @@ export default function TaskManagerView({
   const [isAllCollapsed, setIsAllCollapsed] = useState(false);
   const [calendarMode, setCalendarMode] = useState('summary');
   const [selectedTask, setSelectedTask] = useState(null);
-  const [filters, setFilters] = useState({ search: '', status: 'ALL', priority: 'ALL', quickFilter: '', sort: '', type: 'ALL', assignee: '' });
+  const [filters, setFilters] = useState({ search: '', status: 'ALL', priority: 'ALL', quickFilter: '', sort: '', type: 'ALL' });
   const [isMyTaskExpanded, setIsMyTaskExpanded] = useState(true);
   const [myTaskBusy, setMyTaskBusy] = useState(false);
   const [pendingMovementApprovals, setPendingMovementApprovals] = useState([]);
@@ -180,7 +180,6 @@ export default function TaskManagerView({
     if (filters.quickFilter === 'today') result = result.filter(t => t.endDate && isToday(parseISO(t.endDate)));
     if (filters.quickFilter === 'week') result = result.filter(t => t.endDate && isThisWeek(parseISO(t.endDate)));
     if (filters.quickFilter === 'overdue') result = result.filter(t => t.endDate && isBefore(parseISO(t.endDate), now) && t.status !== 'DONE' && t.status !== 'CANCELLED');
-    if (filters.assignee) result = result.filter(t => t.assignee === filters.assignee);
 
     if (filters.sort === 'date_asc') result.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
     if (filters.sort === 'date_desc') result.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
@@ -255,7 +254,7 @@ export default function TaskManagerView({
 
       {/* Filter Bar (only for work board) */}
       {subTab === 'work-board' && (
-        <FilterBar filters={filters} onChange={setFilters} isAdmin={isAdmin} teamMembers={teamMembers} />
+        <FilterBar filters={filters} onChange={setFilters} isAdmin={isAdmin} />
       )}
 
       {/* Main content area */}

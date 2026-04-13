@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import TaskManagerView from './components/TaskManagerView';
@@ -11,11 +11,9 @@ import PersonnelMovementView from './components/PersonnelMovementView';
 import PersonnelSummaryView from './components/PersonnelSummaryView';
 import PersonnelReportView from './components/PersonnelReportView';
 import MonthlyEvaluationView from './components/MonthlyEvaluationView';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { useToast } from './components/Toast';
+import RecruitmentView from './components/RecruitmentView';
 import { SEED_DATA } from './data/employees_seed';
-import { auth } from './utils/firebase.js';
-import { signOut } from 'firebase/auth';
+import { supabase } from './utils/supabase.js';
 import { apiFetch } from './utils/api.js';
 
 const EMPTY_TASK = {
@@ -76,13 +74,10 @@ const INITIAL_TASKS = [
 ];
 
 export default function App() {
-  const toast = useToast();
   const isContractPreview = window.location.search.includes('preview=contract');
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('user');
-  const [userBranch, setUserBranch] = useState('');
-  const [username, setUsername] = useState('');
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [activeTab, setActiveTab] = useState('task-manager');
   const [activeGroup, setActiveGroup] = useState('ALL');
@@ -109,17 +104,6 @@ export default function App() {
 
   const [groups, setGroups] = useState(SEED_DATA.branches);
 
-  // Auto-logout helper — called when any API returns 401
-  const handleUnauthorized = useCallback(() => {
-    toast.warning('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_branch');
-    localStorage.removeItem('token');
-    localStorage.removeItem('saved_username');
-    setIsLoggedIn(false);
-    signOut(auth).catch(() => {});
-  }, [toast]);
-
   // Đã bỏ việc lưu vào localStorage để đảm bảo clean dữ liệu khi F5
 
   useEffect(() => {
@@ -134,7 +118,6 @@ export default function App() {
         try {
           const token = localStorage.getItem('token') || ''
           const resp = await apiFetch('/api/tasks/list', { headers: { Authorization: `Bearer ${token}` } })
-          if (resp.status === 401) { handleUnauthorized(); return; }
           if (resp.ok) {
             const data = await resp.json()
             if (data?.ok && Array.isArray(data.tasks)) {
@@ -149,23 +132,21 @@ export default function App() {
             setTasks(data2.tasks.map(normalizeTask));
           }
         } catch (_e) {
-          console.error('Auto-fetch tasks failed:', _e);
+          console.error("Auto-fetch tasks failed:", _e);
+          // Gợi ý cho người dùng kiểm tra cấu hình
+          if (location.hostname.includes('vercel.app')) {
+            console.warn("Mẹo: Đảm bảo bạn đã thêm VITE_SCRIPT_URL và VITE_SYNC_SECRET vào Environment Variables trên Vercel Dashboard.");
+          }
         }
       };
       fetchTasks();
     }
-  }, [isLoggedIn, handleUnauthorized]);
+  }, [isLoggedIn]);
 
   const handleLogin = (token) => {
     try { localStorage.setItem('token', String(token || '')) } catch (_e) {}
-    const role = localStorage.getItem('user_role') || 'user';
-    const branch = localStorage.getItem('user_branch') || '';
-    const uname = localStorage.getItem('saved_username') || '';
-    setUserRole(role);
-    setUserBranch(branch);
-    setUsername(uname);
+    setUserRole(localStorage.getItem('user_role') || 'user');
     setIsLoggedIn(true);
-    toast.success(`Xin chào${uname ? `, ${uname}` : ''}! Đã đăng nhập thành công.`);
   };
 
   const handleCreateContractForEmployee = (emp) => {
@@ -186,23 +167,25 @@ export default function App() {
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_branch');
     localStorage.removeItem('token');
-    localStorage.removeItem('saved_username');
     setIsLoggedIn(false);
-    setUserBranch('');
-    setUsername('');
-    signOut(auth).catch(() => {});
+    if (supabase && supabase.auth) supabase.auth.signOut();
   };
+
+  useEffect(() => {
+    if (!supabase || !supabase.auth) return
+    supabase.auth.getSession().then(() => {})
+  }, [])
+
 
   const onSyncPull = async (silent = false) => {
     try {
       const token = localStorage.getItem('token') || ''
       const resp = await apiFetch('/api/tasks/list', { headers: { Authorization: `Bearer ${token}` } })
-      if (resp.status === 401) { handleUnauthorized(); return; }
       if (resp.ok) {
         const data = await resp.json()
         if (data?.ok && Array.isArray(data.tasks)) {
           setTasks(data.tasks.map(normalizeTask))
-          if (!silent) toast.success('Đã tải dữ liệu mới nhất từ Firebase.')
+          if (!silent) alert("Đã tải dữ liệu mới nhất từ Supabase về máy.")
           return
         }
       }
@@ -210,10 +193,10 @@ export default function App() {
       const data2 = await resp2.json();
       if ((data2.status === 'success' || data2.success === true) && data2.tasks) {
         setTasks(data2.tasks.map(normalizeTask));
-        if (!silent) toast.success('Đã tải dữ liệu mới nhất từ Sheet.');
+        if (!silent) alert("Đã tải dữ liệu mới nhất từ Sheet về máy.");
       }
     } catch (e) {
-      if (!silent) toast.error('Lỗi tải dữ liệu: ' + e.message);
+      if (!silent) alert("Lỗi tải dữ liệu: " + e.message);
     }
   };
 
@@ -225,11 +208,10 @@ export default function App() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ tasks }),
       })
-      if (resp.status === 401) { handleUnauthorized(); return; }
       if (resp.ok) {
         const data = await resp.json()
         if (data?.ok) {
-          if (!silent) toast.success('Đã đẩy dữ liệu lên Firebase thành công!')
+          if (!silent) alert(`Đã đẩy dữ liệu lên Supabase thành công!`)
           return
         }
       }
@@ -241,12 +223,12 @@ export default function App() {
       const data2 = await resp2.json();
       if ((data2.status === 'success' || data2.success === true) && data2.tasks) {
         setTasks(data2.tasks.map(normalizeTask));
-        if (!silent) toast.success('Đã đẩy dữ liệu lên Sheet thành công!');
+        if (!silent) alert(`Đã đẩy dữ liệu lên Sheet thành công!`);
       } else if (!silent) {
-        toast.error('Lỗi đẩy dữ liệu: ' + (data2.message || 'Không xác định'));
+        alert("Lỗi đẩy dữ liệu: " + (data2.message || "Không xác định"));
       }
     } catch (e) {
-      if (!silent) toast.error('Lỗi kết nối: ' + e.message);
+      if (!silent) alert("Lỗi kết nối: " + e.message);
     }
   };
 
@@ -286,7 +268,10 @@ export default function App() {
   }).length;
 
   const getRequestMeta = () => {
-    return { originUsername: username, originRole: userRole, originBranch: userBranch, createdAt: new Date().toISOString() };
+    const originUsername = String(localStorage.getItem('saved_username') || '').trim();
+    const originRole = String(localStorage.getItem('user_role') || '').trim() || 'user';
+    const originBranch = String(localStorage.getItem('user_branch') || '').trim();
+    return { originUsername, originRole, originBranch, createdAt: new Date().toISOString() };
   };
 
   const handleCreateTask = (newTask) => {
@@ -317,7 +302,6 @@ export default function App() {
         const token = String(localStorage.getItem('token') || '').trim();
         if (!token) return;
         const resp = await apiFetch('/api/notifications/poll', { headers: { Authorization: `Bearer ${token}` } });
-        if (resp.status === 401) { handleUnauthorized(); return; }
         if (!resp.ok) return;
         const data = await resp.json();
         const list = Array.isArray(data?.notifications) ? data.notifications : [];
@@ -331,23 +315,21 @@ export default function App() {
           if (kind === 'TASK_DONE') {
             const actor = n.payload?.actor || '';
             const group = n.payload?.fromGroup || '';
-            toast.success(
-              `Task đã hoàn thành: "${title}"${group ? ` (${group})` : ''}${actor ? ` · bởi ${actor}` : ''}`,
-              'Hoàn thành'
-            );
+            const msg = `Task đã hoàn thành: ${title}${group ? ` (${group})` : ''}${actor ? ` - bởi ${actor}` : ''}`;
+            try { window.alert(msg); } catch (_e) {}
           } else if (kind === 'TASK_DONE_REQUEST') {
             const actor = n.payload?.actor || '';
             const group = n.payload?.fromGroup || '';
-            toast.warning(
-              `Chi nhánh báo hoàn thành: "${title}"${group ? ` (${group})` : ''}${actor ? ` · ${actor}` : ''}`,
-              'Chờ duyệt'
-            );
+            const msg = `Chi nhánh đã báo hoàn thành task: ${title}${group ? ` (${group})` : ''}${actor ? ` - bởi ${actor}` : ''}`;
+            try { window.alert(msg); } catch (_e) {}
             try { localStorage.setItem('ace_task_switch_to_done_admin', '1'); } catch (_e) {}
             try { setActiveTab('task-manager'); } catch (_e) {}
           } else if (kind === 'TASK_DONE_APPROVED') {
-            toast.success(`HRM đã duyệt hoàn thành: "${title}"`, 'Đã duyệt ✅');
+            const msg = `HRM đã duyệt hoàn thành: ${title}`;
+            try { window.alert(msg); } catch (_e) {}
           } else if (kind === 'TASK_DONE_REJECTED') {
-            toast.error(`HRM từ chối hoàn thành: "${title}"`, 'Từ chối ❌');
+            const msg = `HRM từ chối hoàn thành: ${title}`;
+            try { window.alert(msg); } catch (_e) {}
           }
         });
         if (ids.length > 0) {
@@ -359,14 +341,13 @@ export default function App() {
         }
       } catch (_e) {}
     };
-    // Reduced from 3s to 15s to save Supabase quota
-    const timer = setInterval(tick, 15000);
+    const timer = setInterval(tick, 3000);
     tick();
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [isLoggedIn, handleUnauthorized, toast]);
+  }, [isLoggedIn]);
 
   if (isContractPreview) {
     const data = JSON.parse(localStorage.getItem('preview_data') || '{}');
@@ -405,9 +386,6 @@ export default function App() {
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
         <Header 
           userRole={userRole}
-          activeTab={activeTab}
-          username={username}
-          userBranch={userBranch}
           onAddTask={() => {
             const now = new Date();
             const end = new Date();
@@ -417,6 +395,7 @@ export default function App() {
             const startStr = new Date(now - tzOffset).toISOString().slice(0, 16);
             const endStr = new Date(end - tzOffset).toISOString().slice(0, 16);
             
+            // Tính toán mặc định nhắc nhở trước 1h
             const reminderDate = new Date(now.getTime() - 60 * 60000);
             const reminderStr = new Date(reminderDate - tzOffset).toISOString().slice(0, 16);
 
@@ -436,146 +415,136 @@ export default function App() {
         />
         <main className="flex-1 overflow-hidden bg-[#F2F4F7]">
           {activeTab === 'task-manager' && (
-            <ErrorBoundary>
-              <TaskManagerView 
-                tasks={filteredTasks} 
-                setTasks={setTasks}
-                onPersistTask={(task) => {
-                  try {
-                    const token = localStorage.getItem('token') || ''
-                    const normalized = {
-                      ...task,
-                      requestMeta: task?.requestMeta || getRequestMeta(),
-                    };
-                    const group = String(normalized.group || '').trim();
-                    const progressNum = typeof normalized.progress === 'number' ? normalized.progress : Number(normalized.progress || 0);
-                    if (progressNum === 100 && String(normalized.status || '').trim() !== 'DONE') {
-                      normalized.status = 'DONE';
-                      normalized.lastUpdated = new Date().toISOString();
-                    }
-                    const isDone = String(normalized.status || '').trim() === 'DONE';
-                    const alreadyDoneGroup = group.endsWith('__DONE');
-                    if (isDone && group && !alreadyDoneGroup) {
-                      try {
-                        if (userRole !== 'admin') {
-                          localStorage.setItem('ace_task_switch_to_done', '1');
-                        }
-                      } catch (_e) {}
-                      apiFetch('/api/tasks/complete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                        body: JSON.stringify({ id: normalized.id }),
+            <TaskManagerView 
+              tasks={filteredTasks} 
+              setTasks={setTasks}
+              onPersistTask={(task) => {
+                try {
+                  const token = localStorage.getItem('token') || ''
+                  const normalized = {
+                    ...task,
+                    requestMeta: task?.requestMeta || getRequestMeta(),
+                  };
+                  const group = String(normalized.group || '').trim();
+                  const progressNum = typeof normalized.progress === 'number' ? normalized.progress : Number(normalized.progress || 0);
+                  if (progressNum === 100 && String(normalized.status || '').trim() !== 'DONE') {
+                    normalized.status = 'DONE';
+                    normalized.lastUpdated = new Date().toISOString();
+                  }
+                  const isDone = String(normalized.status || '').trim() === 'DONE';
+                  const alreadyDoneGroup = group.endsWith('__DONE');
+                  if (isDone && group && !alreadyDoneGroup) {
+                    try {
+                      if (String(localStorage.getItem('user_role') || '').trim() !== 'admin') {
+                        localStorage.setItem('ace_task_switch_to_done', '1');
+                      }
+                    } catch (_e) {}
+                    apiFetch('/api/tasks/complete', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                      body: JSON.stringify({ id: normalized.id }),
+                    })
+                      .then(r => r.json().then(j => ({ ok: r.ok, body: j })))
+                      .then(({ ok, body }) => {
+                        if (!ok || !body?.ok || !body?.task) return;
+                        setTasks(prev => prev.map(t => t.id === body.task.id ? normalizeTask(body.task) : t));
                       })
-                        .then(r => r.json().then(j => ({ ok: r.ok, body: j })))
-                        .then(({ ok, body }) => {
-                          if (!ok || !body?.ok || !body?.task) return;
-                          setTasks(prev => prev.map(t => t.id === body.task.id ? normalizeTask(body.task) : t));
-                        })
-                        .catch(() => {});
-                      return;
-                    }
-                    apiFetch('/api/tasks/upsert', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                      body: JSON.stringify({ task: normalized }),
-                    }).catch(() => {})
-                  } catch (_e) {}
-                }}
-                onDeleteTask={(id) => {
-                  try {
-                    const token = localStorage.getItem('token') || ''
-                    apiFetch('/api/tasks/delete', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                      body: JSON.stringify({ id }),
-                    }).catch(() => {})
-                  } catch (_e) {}
-                }}
-                onOpenEmployeeRequests={() => setActiveTab('personnel')}
-                onOpenPersonnelMovements={() => setActiveTab('personnel-movements')}
-                colorConfig={colorConfig} 
-                teamMembers={teamMembers} 
-                userRole={userRole} 
-                branchId={userBranch}
-                username={username}
-                employees={employees}
-                setEmployees={setEmployees}
-                movements={movements}
-                setMovements={setMovements}
-              />
-            </ErrorBoundary>
+                      .catch(() => {});
+                    return;
+                  }
+                  apiFetch('/api/tasks/upsert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ task: normalized }),
+                  }).catch(() => {})
+                } catch (_e) {}
+              }}
+              onDeleteTask={(id) => {
+                try {
+                  const token = localStorage.getItem('token') || ''
+                  apiFetch('/api/tasks/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ id }),
+                  }).catch(() => {})
+                } catch (_e) {}
+              }}
+              onOpenEmployeeRequests={() => setActiveTab('personnel')}
+              onOpenPersonnelMovements={() => setActiveTab('personnel-movements')}
+              colorConfig={colorConfig} 
+              teamMembers={teamMembers} 
+              userRole={userRole} 
+              branchId={localStorage.getItem('user_branch')}
+              employees={employees}
+              setEmployees={setEmployees}
+              movements={movements}
+              setMovements={setMovements}
+            />
           )}
           {activeTab === 'contract' && (
-            <ErrorBoundary>
-              <ContractView 
-                onLogout={handleLogout} 
-                employees={employees}
-                userRole={userRole}
-                initialEmployeeId={contractEmployeeId}
-              />
-            </ErrorBoundary>
+            <ContractView 
+              onLogout={handleLogout} 
+              employees={employees}
+              userRole={userRole}
+              initialEmployeeId={contractEmployeeId}
+            />
           )}
           {activeTab === 'personnel-evaluation' && (
-            <ErrorBoundary>
-              <MonthlyEvaluationView
-                userRole={userRole}
-                branches={groups}
-                employees={employees}
-              />
-            </ErrorBoundary>
+            <MonthlyEvaluationView
+              userRole={userRole}
+              branches={groups}
+              employees={employees}
+            />
           )}
           {activeTab === 'personnel' && (
-            <ErrorBoundary>
-              <EmployeeView 
-                employees={employees} 
-                setEmployees={setEmployees} 
-                userRole={userRole} 
-                branchId={userBranch}
-                movements={movements}
-                branches={groups}
-                onCreateContract={handleCreateContractForEmployee}
-              />
-            </ErrorBoundary>
+            <EmployeeView 
+              employees={employees} 
+              setEmployees={setEmployees} 
+              userRole={userRole} 
+              branchId={localStorage.getItem('user_branch')}
+              movements={movements}
+              branches={groups}
+              onCreateContract={handleCreateContractForEmployee}
+            />
           )}
           {activeTab === 'personnel-summary' && (
-            <ErrorBoundary>
-              <PersonnelSummaryView 
-                employees={employees} 
-                branches={groups}
-              />
-            </ErrorBoundary>
+            <PersonnelSummaryView 
+              employees={employees} 
+              branches={groups}
+            />
           )}
           {activeTab === 'personnel-report' && (
-            <ErrorBoundary>
-              <PersonnelReportView 
-                employees={employees} 
-                branches={groups}
-              />
-            </ErrorBoundary>
+            <PersonnelReportView 
+              employees={employees} 
+              branches={groups}
+            />
           )}
           {activeTab === 'personnel-movements' && (
-            <ErrorBoundary>
-              <PersonnelMovementView 
-                employees={employees} 
-                setEmployees={setEmployees} 
-                movements={movements}
-                setMovements={setMovements}
-                userRole={userRole} 
-                branchId={userBranch}
-              />
-            </ErrorBoundary>
+            <PersonnelMovementView 
+              employees={employees} 
+              setEmployees={setEmployees} 
+              movements={movements}
+              setMovements={setMovements}
+              userRole={userRole} 
+              branchId={localStorage.getItem('user_branch')}
+            />
           )}
           {activeTab === 'personnel-contracts' && (
-            <ErrorBoundary>
-              <ContractView 
-                onLogout={handleLogout} 
-                employees={employees}
-                userRole={userRole}
-                initialMode="workflow"
-                branch={userBranch}
-                setTasks={setTasks}
-              />
-            </ErrorBoundary>
+            <ContractView 
+              onLogout={handleLogout} 
+              employees={employees}
+              userRole={userRole}
+              initialMode="workflow"
+              branch={localStorage.getItem('user_branch')}
+              setTasks={setTasks}
+            />
+          )}
+          {activeTab === 'recruitment' && (
+            <RecruitmentView 
+              userRole={userRole}
+              branchId={localStorage.getItem('user_branch')}
+              employees={employees}
+            />
           )}
           {activeTab === 'info' && (
             <div className="p-6 h-full bg-[#F2F4F7]">

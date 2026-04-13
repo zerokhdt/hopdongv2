@@ -40,10 +40,10 @@ const TASK_TYPES = [
   { value: 'GENERAL', label: '📌 Khác' },
 ];
 
-export default function FilterBar({ filters, onChange, isAdmin, teamMembers = [] }) {
-  const hasActiveFilters = filters.search || filters.status !== 'ALL' || filters.priority !== 'ALL' || filters.quickFilter || filters.assignee || (isAdmin && filters.type && filters.type !== 'ALL');
+export default function FilterBar({ filters, onChange, isAdmin }) {
+  const hasActiveFilters = filters.search || filters.status !== 'ALL' || filters.priority !== 'ALL' || filters.quickFilter || (isAdmin && filters.type && filters.type !== 'ALL');
 
-  const reset = () => onChange({ search: '', status: 'ALL', priority: 'ALL', quickFilter: '', sort: '', type: 'ALL', assignee: '' });
+  const reset = () => onChange({ search: '', status: 'ALL', priority: 'ALL', quickFilter: '', sort: '', type: 'ALL' });
 
   return (
     <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 bg-white border-b border-slate-100 flex-shrink-0">
@@ -143,21 +143,6 @@ export default function FilterBar({ filters, onChange, isAdmin, teamMembers = []
             className="appearance-none pl-2.5 pr-7 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
           >
             {TASK_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-          </select>
-          <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-        </div>
-      )}
-
-      {/* Assignee filter */}
-      {teamMembers.length > 0 && (
-        <div className="relative">
-          <select
-            value={filters.assignee || ''}
-            onChange={e => onChange({ ...filters, assignee: e.target.value })}
-            className="appearance-none pl-2.5 pr-7 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
-          >
-            <option value="">Tất cả người thực hiện</option>
-            {teamMembers.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
           <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         </div>

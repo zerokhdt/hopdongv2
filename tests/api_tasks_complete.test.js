@@ -1,17 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-vi.mock('../api/firebase-admin.js', () => {
-  return {
-    db: {
-      collection: vi.fn()
-    },
-    auth: {
-      verifyIdToken: vi.fn()
-    }
-  }
+vi.mock('@supabase/supabase-js', () => {
+  return { createClient: vi.fn() }
 })
 
-import { db } from '../api/firebase-admin.js'
+import { createClient } from '@supabase/supabase-js'
 import handler from '../api/[...path].js'
 
 function makeRes() {
@@ -45,7 +38,8 @@ function err(message) {
 describe('/api/tasks/complete (router)', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    globalThis.process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({ project_id: 'test' })
+    globalThis.process.env.SUPABASE_URL = 'http://localhost:54321'
+    globalThis.process.env.SUPABASE_SERVICE_ROLE_KEY = 'service'
   })
 
   it('completes task, moves to done group, logs, and notifies creator when admin', async () => {
@@ -58,35 +52,47 @@ describe('/api/tasks/complete (router)', () => {
       created_by: 'hr',
       data: { id: 't1', group: 'TRUNG MỸ TÂY', status: 'IN_PROGRESS', title: 'Test', requestMeta: { originUsername: 'hr', originRole: 'admin', originBranch: 'HQ' } },
     }
-
-    const mockDoc = (data) => ({
-      exists: !!data,
-      data: () => data,
-      get: vi.fn(() => Promise.resolve({ exists: !!data, data: () => data }))
-    })
-
-    const appSessionsColl = {
-      doc: vi.fn(() => ({
-        get: vi.fn(() => Promise.resolve(mockDoc(sessionRow)))
-      }))
+    const updatedTaskRow = {
+      ...curTaskRow,
+      group: 'TRUNG MỸ TÂY__DONE',
+      status: 'DONE',
+      data: { ...curTaskRow.data, group: 'TRUNG MỸ TÂY__DONE', status: 'DONE' },
     }
 
-    const tasksColl = {
-      doc: vi.fn((id) => ({
-        get: vi.fn(() => Promise.resolve(mockDoc(curTaskRow))),
-        update: vi.fn(() => Promise.resolve())
-      }))
+    const tasks = {
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          limit: vi.fn(() => ok([curTaskRow])),
+        })),
+      })),
+      update: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          select: vi.fn(() => ({
+            limit: vi.fn(() => ok([updatedTaskRow])),
+          })),
+        })),
+      })),
     }
 
-    const transitionLogColl = { add: vi.fn(() => Promise.resolve()) }
-    const notificationsColl = { add: vi.fn(() => Promise.resolve()) }
+    const appSessions = {
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          limit: vi.fn(() => ok([sessionRow])),
+        })),
+      })),
+    }
 
-    db.collection.mockImplementation((name) => {
-      if (name === 'app_sessions') return appSessionsColl
-      if (name === 'tasks') return tasksColl
-      if (name === 'task_transition_log') return transitionLogColl
-      if (name === 'app_notifications') return notificationsColl
-      throw new Error(`unexpected collection ${name}`)
+    const transitionLog = { insert: vi.fn(() => ok([])) }
+    const notifications = { insert: vi.fn(() => ok([])) }
+
+    createClient.mockReturnValue({
+      from: vi.fn((table) => {
+        if (table === 'app_sessions') return appSessions
+        if (table === 'tasks') return tasks
+        if (table === 'task_transition_log') return transitionLog
+        if (table === 'app_notifications') return notifications
+        throw new Error(`unexpected table ${table}`)
+      }),
     })
 
     const req = makeReq({ token: 'tok', body: { id: 't1' } })
@@ -98,7 +104,7 @@ describe('/api/tasks/complete (router)', () => {
     expect(payload.ok).toBe(true)
     expect(payload.task.group).toBe('TRUNG MỸ TÂY__DONE')
     expect(payload.task.status).toBe('DONE')
-    expect(notificationsColl.add).toHaveBeenCalledTimes(1)
+    expect(notifications.insert).toHaveBeenCalledTimes(1)
   })
 
   it('rolls back task update if notify insert fails when admin', async () => {
@@ -111,36 +117,55 @@ describe('/api/tasks/complete (router)', () => {
       created_by: 'hr',
       data: { id: 't1', group: 'TRUNG MỸ TÂY', status: 'IN_PROGRESS', title: 'Test', requestMeta: { originUsername: 'hr', originRole: 'admin', originBranch: 'HQ' } },
     }
-
-    const mockDoc = (data) => ({
-      exists: !!data,
-      data: () => data,
-      get: vi.fn(() => Promise.resolve({ exists: !!data, data: () => data }))
-    })
-
-    const appSessionsColl = {
-      doc: vi.fn(() => ({
-        get: vi.fn(() => Promise.resolve(mockDoc(sessionRow)))
-      }))
+    const updatedTaskRow = {
+      ...curTaskRow,
+      group: 'TRUNG MỸ TÂY__DONE',
+      status: 'DONE',
+      data: { ...curTaskRow.data, group: 'TRUNG MỸ TÂY__DONE', status: 'DONE' },
     }
 
-    const updateSpy = vi.fn(() => Promise.resolve())
-    const tasksColl = {
-      doc: vi.fn((id) => ({
-        get: vi.fn(() => Promise.resolve(mockDoc(curTaskRow))),
-        update: updateSpy
-      }))
+    const updateSpy = vi.fn(() => ({
+      eq: vi.fn(() => ({
+        select: vi.fn(() => ({
+          limit: vi.fn(() => ok([updatedTaskRow])),
+        })),
+      })),
+    }))
+    const rollbackSpy = vi.fn(() => ({
+      eq: vi.fn(() => ok([])),
+    }))
+
+    const tasks = {
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          limit: vi.fn(() => ok([curTaskRow])),
+        })),
+      })),
+      update: vi.fn((payload) => {
+        if (payload && payload.status === 'DONE') return updateSpy(payload)
+        return rollbackSpy(payload)
+      }),
     }
 
-    const transitionLogColl = { add: vi.fn(() => Promise.resolve()) }
-    const notificationsColl = { add: vi.fn(() => Promise.reject(new Error('notify_failed'))) }
+    const appSessions = {
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          limit: vi.fn(() => ok([sessionRow])),
+        })),
+      })),
+    }
 
-    db.collection.mockImplementation((name) => {
-      if (name === 'app_sessions') return appSessionsColl
-      if (name === 'tasks') return tasksColl
-      if (name === 'task_transition_log') return transitionLogColl
-      if (name === 'app_notifications') return notificationsColl
-      throw new Error(`unexpected collection ${name}`)
+    const transitionLog = { insert: vi.fn(() => ok([])) }
+    const notifications = { insert: vi.fn(() => err('notify_failed')) }
+
+    createClient.mockReturnValue({
+      from: vi.fn((table) => {
+        if (table === 'app_sessions') return appSessions
+        if (table === 'tasks') return tasks
+        if (table === 'task_transition_log') return transitionLog
+        if (table === 'app_notifications') return notifications
+        throw new Error(`unexpected table ${table}`)
+      }),
     })
 
     const req = makeReq({ token: 'tok', body: { id: 't1' } })
@@ -150,7 +175,6 @@ describe('/api/tasks/complete (router)', () => {
     const payload = JSON.parse(res.body)
     expect(res.statusCode).toBe(500)
     expect(payload.ok).toBe(false)
-    // First update was to DONE, second update (rollback) is to previous status
-    expect(updateSpy).toHaveBeenCalledTimes(2)
+    expect(rollbackSpy).toHaveBeenCalled()
   })
 })

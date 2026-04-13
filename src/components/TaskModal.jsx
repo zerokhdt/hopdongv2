@@ -166,10 +166,9 @@ export default function TaskModal({ task, onClose, onSave, groups = [], teamMemb
 
   const handleAddComment = () => {
     if (newComment.trim()) {
-      const savedUsername = localStorage.getItem('saved_username') || 'Người dùng';
       handleChange('comments', [
         ...editedTask.comments,
-        { id: Date.now().toString(), text: newComment.trim(), author: savedUsername, createdAt: new Date().toISOString() }
+        { id: Date.now().toString(), text: newComment.trim(), author: 'Cá Nhân', createdAt: new Date().toISOString() }
       ]);
       setNewComment('');
     }

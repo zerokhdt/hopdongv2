@@ -18,13 +18,6 @@ function ContextMenu({ task, onStatusChange, onDelete, onClose, isAdmin }) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [onClose]);
 
-  const handleDelete = () => {
-    if (window.confirm(`Bạn có chắc muốn xóa task "${task.title}" không? Hành động này không thể hoàn tác.`)) {
-      onDelete();
-    }
-    onClose();
-  };
-
   return (
     <div ref={ref} className="absolute right-0 top-8 z-50 bg-white border border-slate-200 rounded-xl shadow-xl py-1 w-44 text-sm" onClick={e => e.stopPropagation()}>
       <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Đổi trạng thái</div>
@@ -37,7 +30,7 @@ function ContextMenu({ task, onStatusChange, onDelete, onClose, isAdmin }) {
       {isAdmin && (
         <>
           <div className="my-1 border-t border-slate-100" />
-          <button onClick={handleDelete}
+          <button onClick={() => { onDelete(); onClose(); }}
             className="w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-500 font-semibold transition-colors">
             🗑 Xóa task
           </button>
@@ -47,7 +40,7 @@ function ContextMenu({ task, onStatusChange, onDelete, onClose, isAdmin }) {
   );
 }
 
-function TaskCard({ task, isDragging, onClick, colorConfig, onStatusChange, onDelete, userRole, onPrintContract }) {
+export default function TaskCard({ task, isDragging, onClick, colorConfig, onStatusChange, onDelete, userRole, onPrintContract }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const themeColor = colorConfig?.statuses?.[task.status] || 'slate';
   const theme = THEMES[themeColor] || THEMES.slate;
@@ -114,6 +107,16 @@ function TaskCard({ task, isDragging, onClick, colorConfig, onStatusChange, onDe
       {/* Notes preview */}
       {task.notes && <p className="text-xs text-slate-400 line-clamp-1 mb-2">{task.notes}</p>}
 
+      {/* In Hợp Đồng Button */}
+      <div className="mt-3 mb-2">
+        <button
+          onClick={(e) => { e.stopPropagation(); onPrintContract && onPrintContract(task); }}
+          className="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 border border-blue-200 shadow-sm transition-colors"
+        >
+          🖨️ Yêu cầu In Hợp Đồng
+        </button>
+      </div>
+
       {/* Bottom row */}
       <div className="flex items-center justify-between pt-2 border-t border-black/5">
         <div className={`flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded ${isOverdue ? 'bg-red-50 text-red-500' : 'text-slate-400'}`}>
@@ -148,12 +151,3 @@ function TaskCard({ task, isDragging, onClick, colorConfig, onStatusChange, onDe
     </div>
   );
 }
-
-export default React.memo(TaskCard, (prev, next) => {
-  // Only re-render if lastUpdated, status or isDragging changed
-  return (
-    prev.task.lastUpdated === next.task.lastUpdated &&
-    prev.task.status === next.task.status &&
-    prev.isDragging === next.isDragging
-  );
-});

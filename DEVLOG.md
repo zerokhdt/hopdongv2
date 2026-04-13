@@ -98,37 +98,6 @@ Files: `src/components/ContractView.jsx`, `public/templates/hdld-ft.docx`, `pack
 - Branch imports auto-override `department` with current branch for visibility.
 - Added selectable import list with “select all” and per-row checkboxes.
 - Encoding hardening: heuristic decoder (UTF‑8, Windows‑1258/1252, UTF‑16LE) with header scoring; BOM cleanup.
-
----
-
-## 2026-04-13
-
-### Chuyển đổi từ Supabase sang Firebase
-- Thay thế Supabase SDK bằng Firebase SDK (Frontend) và Firebase Admin SDK (API).
-- Chuyển đổi Database từ Supabase (SQL) sang Firebase Firestore (NoSQL).
-- Cập nhật logic Authentication sang Firebase Auth (giữ nguyên login bằng username thông qua mapping API).
-- Cập nhật toàn bộ các API routes trong `api/[...path].js` để sử dụng Firestore thay vì Supabase.
-- Thêm các scripts seeding dữ liệu mới cho Firebase (`scripts/firebase_seed_users.mjs`, `scripts/firebase_seed_employees_from_csv.mjs`).
-- Cập nhật tài liệu hướng dẫn cấu hình trong `docs/FIREBASE_SETUP.md`.
-- Dọn dẹp các file liên quan đến Supabase (`src/utils/supabase.js`, `supabase_migration.sql`, v.v.).
-
-Files:
-- `package.json`
-- `api/[...path].js`
-- `api/firebase-admin.js`
-- `src/utils/firebase.js`
-- `src/App.jsx`
-- `src/components/LoginView.jsx`
-- `src/components/EmployeeView.jsx`
-- `scripts/firebase_seed_users.mjs`
-- `scripts/firebase_seed_employees_from_csv.mjs`
-- `docs/FIREBASE_SETUP.md`
-
-Verification:
-- Build frontend thành công.
-- API routes đã được rewrite sang Firestore logic.
-- Scripts seeding đã sẵn sàng.
-
 Files: `src/components/EmployeeView.jsx`
 
 ### Misc
