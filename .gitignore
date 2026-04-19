@@ -17,6 +17,7 @@ vite.config.js.timestamp-*.mjs
 .env
 .env.*
 !.env.example
+serviceAccountKey.json
 
 # Local backups/exports
 .backups

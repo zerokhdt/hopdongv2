@@ -5,7 +5,11 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores([
+    'dist',
+    'scripts/google_apps_script.js',
+    'scripts/google_app_scrip_Email Templates.js',
+  ]),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -41,6 +45,15 @@ export default defineConfig([
     files: ['api/**/*.js', 'vite.config.js'],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  {
+    files: ['functions/**/*.js', 'scripts/**/*.{js,mjs,cjs}'],
+    languageOptions: {
+      globals: globals.node,
+      parserOptions: {
+        sourceType: 'module',
+      },
     },
   },
   {

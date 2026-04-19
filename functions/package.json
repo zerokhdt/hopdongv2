@@ -1,0 +1,27 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for ACE HRM API",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^5.0.0",
+    "cors": "^2.8.5",
+    "@supabase/supabase-js": "^2.103.1",
+    "nodemailer": "^8.0.5",
+    "uuid": "^11.1.0",
+    "docxtemplater": "^3.66.3",
+    "pizzip": "^3.1.8",
+    "dotenv": "^16.4.7"
+  },
+  "private": true
+}

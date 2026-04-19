@@ -41,8 +41,9 @@ export default defineConfig(({ mode }) => {
   if (!process.env.APP_ACCOUNTS_JSON && env.APP_ACCOUNTS_JSON) {
     process.env.APP_ACCOUNTS_JSON = env.APP_ACCOUNTS_JSON
   }
-  if (!process.env.SUPABASE_URL && env.SUPABASE_URL) process.env.SUPABASE_URL = env.SUPABASE_URL
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY && env.SUPABASE_SERVICE_ROLE_KEY) process.env.SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY
+  for (const k of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ANON_KEY']) {
+    if (!process.env[k] && env[k]) process.env[k] = env[k]
+  }
   const syncTarget = String(env.VITE_SCRIPT_URL || '').trim()
   const contractTarget = String(env.VITE_CONTRACT_SCRIPT_URL || env.VITE_SCRIPT_URL || DEFAULT_CONTRACT_SCRIPT_URL).trim()
   const proxy = {}
@@ -68,6 +69,10 @@ export default defineConfig(({ mode }) => {
     },
     followRedirects: true,
   }
+  proxy['/api/'] = {
+    target: env.VITE_API_BASE_URL || 'http://localhost:3000',
+    changeOrigin: true,
+  }
   return {
     plugins: [
       react(),
@@ -83,6 +88,29 @@ export default defineConfig(({ mode }) => {
               await handler(req, res)
             } catch {
               vercelRes(res).status(500).json({ success: false, message: 'Local login API error' })
+            }
+          })
+        },
+      },
+      {
+        name: 'local-api',
+        configureServer(server) {
+          server.middlewares.use(async (req, res, next) => {
+            if (!req.url || !req.url.startsWith('/api/')) return next()
+            if (req.url.startsWith('/api/sync') || req.url.startsWith('/api/contract')) return next()
+            if (req.url.startsWith('/api/login')) return next()
+            
+            try {
+              const { default: handler } = await import('./api/index.js')
+              const pathname = req.url.replace(/^\/api\//, '').split('?')[0]
+              const pathParts = pathname.split('/').filter(Boolean)
+              req.query = { path: pathParts }
+              req.body = await parseBody(req)
+              vercelRes(res)
+              await handler(req, res)
+            } catch (error) {
+              console.error('API error:', error)
+              vercelRes(res).status(500).json({ ok: false, message: 'Internal server error' })
             }
           })
         },

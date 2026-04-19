@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import TaskManagerView from './components/TaskManagerView';
-import TaskModal from './components/TaskModal';
-import SettingsModal from './components/SettingsModal';
-import LoginView from './components/LoginView';
-import ContractView, { ContractPreview } from './components/ContractView';
-import EmployeeView from './components/EmployeeView';
-import PersonnelMovementView from './components/PersonnelMovementView';
-import PersonnelSummaryView from './components/PersonnelSummaryView';
-import PersonnelReportView from './components/PersonnelReportView';
-import MonthlyEvaluationView from './components/MonthlyEvaluationView';
-import RecruitmentView from './components/RecruitmentView';
-import { SEED_DATA } from './data/employees_seed';
-import { supabase } from './utils/supabase.js';
+import Sidebar from './components/layout/Sidebar';
+import TaskManagerView from './components/views/TaskManagerView';
+import TaskModal from './components/modals/TaskModal';
+import SettingsModal from './components/modals/SettingsModal';
+import LoginView from './components/views/LoginView';
+import ContractView, { ContractPreview } from './components/views/ContractView';
+import EmployeeView from './components/views/EmployeeView';
+import PersonnelMovementView from './components/views/PersonnelMovementView';
+import PersonnelSummaryView from './components/views/PersonnelSummaryView';
+import PersonnelReportView from './components/views/PersonnelReportView';
+import MonthlyEvaluationView from './components/views/MonthlyEvaluationView';
+import RecruitmentView from './components/views/RecruitmentView';
+import InterviewView from './components/views/InterviewView';
+import { auth } from './utils/firebase.js';
+import { signOut } from 'firebase/auth';
 import { apiFetch } from './utils/api.js';
+import { generateDemoData } from './utils/mockData.js';
 
 const EMPTY_TASK = {
   title: '', group: '', startDate: '', endDate: '',
@@ -65,33 +66,31 @@ const normalizeTask = (task) => {
   };
 };
 
-const INITIAL_TASKS = [
-  { id: 't1', title: 'Kiểm tra hợp đồng đến hạn (HRM)', group: 'XÓM MỚI', status: 'TODO', priority: 'high', assignee: 'Thanh Hải', notes: 'HRM báo: Vui lòng kiểm tra danh sách hợp đồng sẽ hết hạn trong tháng tới và chuẩn bị hồ sơ tái ký.', subtasks: [{ id: 'st1', title: 'Lập danh sách nhân viên hết hạn HĐ', isCompleted: false }] },
-  { id: 't2', title: 'Cập nhật thông tin nhân viên mới (HRM)', group: 'THỐNG NHẤT', status: 'IN_PROGRESS', priority: 'medium', assignee: 'Jessie', notes: 'HRM báo: Cập nhật CCCD, địa chỉ tạm trú và số tài khoản ngân hàng cho nhân viên mới tuyển.', subtasks: [] },
-  { id: 't3', title: 'Sắp xếp phỏng vấn Giáo viên (HRM)', group: 'GÒ XOÀI', status: 'TODO', priority: 'critical', assignee: 'Quyên', notes: 'HRM báo: Sắp xếp lịch phỏng vấn cho 3 ứng viên vị trí Giáo viên Tiếng Anh tại chi nhánh.', subtasks: [] },
-  { id: 't4', title: 'Nộp file cứng hồ sơ nhân sự (HRM)', group: 'HEAD OFFICE', status: 'DONE', priority: 'low', assignee: 'Ms. Chinh', notes: 'HRM báo: Thu thập và nộp bản cứng hồ sơ của các chi nhánh về văn phòng trung tâm.', subtasks: [] },
-  { id: 't5', title: 'Rà soát hồ sơ phỏng vấn (HRM)', group: 'XÓM MỚI', status: 'TODO', priority: 'medium', assignee: 'Lê Văn Tám', notes: 'HRM báo: Kiểm tra lại các file mềm hồ sơ phỏng vấn tuần qua.', subtasks: [] },
-];
+const INITIAL_TASKS = [];
 
 export default function App() {
   const isContractPreview = window.location.search.includes('preview=contract');
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('user');
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const [tasks, setTasks] = useState([]);
   const [activeTab, setActiveTab] = useState('task-manager');
   const [activeGroup, setActiveGroup] = useState('ALL');
   const [isAddingTask, setIsAddingTask] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [contractEmployeeId, setContractEmployeeId] = useState('');
+  const [selectedCandidateId, setSelectedCandidateId] = useState(null);
+  
+  // State quản lý đóng/mở Sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   const [employees, setEmployees] = useState(() => {
     try {
       const raw = localStorage.getItem('ace_hrm_employees_v1');
       const parsed = raw ? JSON.parse(raw) : null;
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : SEED_DATA.employees;
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : [];
     } catch (_e) {
-      return SEED_DATA.employees;
+      return [];
     }
   });
 
@@ -102,15 +101,22 @@ export default function App() {
     groups: { 'TRUNG MỸ TÂY': 'blue', 'NGUYỄN ẢNH THỦ': 'orange', 'NHÂN SỰ': 'purple', 'Gia đình': 'pink' }
   });
 
-  const [groups, setGroups] = useState(SEED_DATA.branches);
+  const [groups, setGroups] = useState([]);
 
-  // Đã bỏ việc lưu vào localStorage để đảm bảo clean dữ liệu khi F5
+  const [movements, setMovements] = useState([]);
 
   useEffect(() => {
     try {
       localStorage.setItem('ace_hrm_employees_v1', JSON.stringify(employees));
     } catch (_e) {}
   }, [employees]);
+
+  useEffect(() => {
+    const raw = localStorage.getItem('ace_hrm_font_scale');
+    if (raw) {
+      document.documentElement.style.setProperty('--base-scale', raw);
+    }
+  }, []);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -125,18 +131,8 @@ export default function App() {
               return
             }
           }
-          const resp2 = await apiFetch('/api/sync');
-          if (!resp2.ok) throw new Error(`HTTP Error ${resp2.status}`);
-          const data2 = await resp2.json();
-          if ((data2.status === 'success' || data2.success === true) && data2.tasks && data2.tasks.length > 0) {
-            setTasks(data2.tasks.map(normalizeTask));
-          }
         } catch (_e) {
           console.error("Auto-fetch tasks failed:", _e);
-          // Gợi ý cho người dùng kiểm tra cấu hình
-          if (location.hostname.includes('vercel.app')) {
-            console.warn("Mẹo: Đảm bảo bạn đã thêm VITE_SCRIPT_URL và VITE_SYNC_SECRET vào Environment Variables trên Vercel Dashboard.");
-          }
         }
       };
       fetchTasks();
@@ -156,24 +152,22 @@ export default function App() {
     setActiveTab('contract')
   }
 
-  const [movements, setMovements] = useState([
-    { id: 'MOV1', type: 'ONBOARDING', employeeName: 'Trần Văn A', status: 'APPROVED', branchId: 'TRUNG MỸ TÂY', createdAt: '2024-01-10T09:00:00Z', details: { name: 'Trần Văn A', position: 'Giáo viên', department: 'TRUNG MỸ TÂY', startDate: '2024-01-15' } },
-    { id: 'MOV2', type: 'LEAVE', employeeName: 'Huỳnh Ngọc Bảo Lâm', status: 'APPROVED', branchId: 'NGUYỄN ẢNH THỦ', createdAt: '2024-03-27T14:30:00Z', details: { from: '2024-04-10', to: '2024-04-11', days: 2, reason: 'Nghỉ phép năm' } },
-    { id: 'MOV3', type: 'CAREER_CHANGE', employeeName: 'Nguyễn Trường Thanh Trí', status: 'APPROVED', branchId: 'LIÊN KHU 4-5', createdAt: '2023-12-15T11:20:00Z', details: { newRole: 'Quản lý chi nhánh', branch: 'LIÊN KHU 4-5' } },
-    { id: 'MOV4', type: 'LEAVE', employeeName: 'Ms. Chinh', status: 'APPROVED', branchId: 'HQ', createdAt: '2024-03-20T08:00:00Z', details: { from: '2024-05-01', to: '2024-10-28', days: 180, reason: 'Nghỉ thai sản' } },
-  ]);
+  const handleSelectCandidate = (candidateId) => {
+    setSelectedCandidateId(candidateId);
+    setActiveTab('interview');
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_branch');
-    localStorage.removeItem('token');
     setIsLoggedIn(false);
-    if (supabase && supabase.auth) supabase.auth.signOut();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_branch');
+    localStorage.removeItem('user_role');
+    signOut(auth).catch(console.error);
+    setTasks([]);
   };
 
   useEffect(() => {
-    if (!supabase || !supabase.auth) return
-    supabase.auth.getSession().then(() => {})
+    // Firebase Auth session check is handled by the SDK
   }, [])
 
 
@@ -185,15 +179,9 @@ export default function App() {
         const data = await resp.json()
         if (data?.ok && Array.isArray(data.tasks)) {
           setTasks(data.tasks.map(normalizeTask))
-          if (!silent) alert("Đã tải dữ liệu mới nhất từ Supabase về máy.")
+          if (!silent) alert("Đã tải dữ liệu mới nhất từ Firebase về máy.")
           return
         }
-      }
-      const resp2 = await apiFetch('/api/sync');
-      const data2 = await resp2.json();
-      if ((data2.status === 'success' || data2.success === true) && data2.tasks) {
-        setTasks(data2.tasks.map(normalizeTask));
-        if (!silent) alert("Đã tải dữ liệu mới nhất từ Sheet về máy.");
       }
     } catch (e) {
       if (!silent) alert("Lỗi tải dữ liệu: " + e.message);
@@ -211,21 +199,9 @@ export default function App() {
       if (resp.ok) {
         const data = await resp.json()
         if (data?.ok) {
-          if (!silent) alert(`Đã đẩy dữ liệu lên Supabase thành công!`)
+          if (!silent) alert(`Đã đẩy dữ liệu lên Firebase thành công!`)
           return
         }
-      }
-      const resp2 = await apiFetch('/api/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tasks }),
-      });
-      const data2 = await resp2.json();
-      if ((data2.status === 'success' || data2.success === true) && data2.tasks) {
-        setTasks(data2.tasks.map(normalizeTask));
-        if (!silent) alert(`Đã đẩy dữ liệu lên Sheet thành công!`);
-      } else if (!silent) {
-        alert("Lỗi đẩy dữ liệu: " + (data2.message || "Không xác định"));
       }
     } catch (e) {
       if (!silent) alert("Lỗi kết nối: " + e.message);
@@ -254,6 +230,44 @@ export default function App() {
     if (groupName && !groups.includes(groupName)) {
       setGroups([...groups, groupName]);
     }
+  };
+
+  const handleUseDemoData = () => {
+    const demo = generateDemoData();
+    
+    const keysToClear = [
+      'ace_hrm_employees_v1',
+      'ace_recruitment_candidates_v1',
+      'ace_contract_issue_log_v1',
+      'ace_hrm_movements_v1',
+      'ace_mock_movements',
+      'ace_position_contract_mapping_v1',
+      'ace_hrm_font_scale',
+      'ace_hrm_mask_salary',
+    ];
+    keysToClear.forEach((k) => {
+      try { localStorage.removeItem(k); } catch (_e) {}
+    });
+
+    try { localStorage.setItem('ace_demo_mode', '1'); } catch (_e) {}
+    try { localStorage.setItem('ace_hrm_employees_v1', JSON.stringify(demo.employees)); } catch (_e) {}
+    try { localStorage.setItem('ace_recruitment_candidates_v1', JSON.stringify(demo.candidates)); } catch (_e) {}
+    try { localStorage.setItem('ace_contract_issue_log_v1', JSON.stringify(demo.contracts || [])); } catch (_e) {}
+    try { localStorage.setItem('ace_hrm_movements_v1', JSON.stringify(demo.movements || [])); } catch (_e) {}
+    try { localStorage.setItem('ace_position_contract_mapping_v1', JSON.stringify(demo.positionMappings || {})); } catch (_e) {}
+    try { localStorage.setItem('ace_hrm_font_scale', '1.0'); } catch (_e) {}
+    
+    // Cập nhật state hiện tại (để thấy thay đổi ngay nếu không load lại kịp)
+    setEmployees(demo.employees);
+    setGroups(demo.branches);
+    setColorConfig(demo.colorConfig);
+    if (typeof setMovements === 'function') setMovements(demo.movements);
+    
+    // Refresh để đảm bảo tính nhất quán (RecruitmentView, Sidebar, etc. đều nạp lại)
+    setTimeout(() => {
+      alert('ĐÃ GHI ĐÈ TOÀN HỆ THỐNG: 300 nhân viên, 180 ứng viên, 50 biến động nhân sự và cấu hình hợp đồng mẫu đã được nạp. Hệ thống sẽ khởi động lại.');
+      window.location.reload();
+    }, 500);
   };
 
   const filteredTasks = activeGroup === 'ALL' 
@@ -299,9 +313,7 @@ export default function App() {
     let cancelled = false;
     const tick = async () => {
       try {
-        const token = String(localStorage.getItem('token') || '').trim();
-        if (!token) return;
-        const resp = await apiFetch('/api/notifications/poll', { headers: { Authorization: `Bearer ${token}` } });
+        const resp = await apiFetch('/api/notifications/poll');
         if (!resp.ok) return;
         const data = await resp.json();
         const list = Array.isArray(data?.notifications) ? data.notifications : [];
@@ -333,6 +345,7 @@ export default function App() {
           }
         });
         if (ids.length > 0) {
+          const token = localStorage.getItem('token') || '';
           apiFetch('/api/notifications/ack', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -375,45 +388,56 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-white text-slate-800 font-sans overflow-hidden">
-      <Sidebar 
-        activeTab={activeTab} setActiveTab={setActiveTab} 
-        groups={groups} tasks={tasks}
-        activeGroup={activeGroup} setActiveGroup={setActiveGroup} 
-        onAddGroup={handleAddGroup} 
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        userRole={userRole}
-      />
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
-        <Header 
-          userRole={userRole}
-          onAddTask={() => {
-            const now = new Date();
-            const end = new Date();
-            end.setHours(23, 59, 59, 999);
-            
-            const tzOffset = now.getTimezoneOffset() * 60000;
-            const startStr = new Date(now - tzOffset).toISOString().slice(0, 16);
-            const endStr = new Date(end - tzOffset).toISOString().slice(0, 16);
-            
-            // Tính toán mặc định nhắc nhở trước 1h
-            const reminderDate = new Date(now.getTime() - 60 * 60000);
-            const reminderStr = new Date(reminderDate - tzOffset).toISOString().slice(0, 16);
+      
+      {/* SIDEBAR WRAPPER - Xử lý hiệu ứng thu gọn / mở rộng */}
+      <div 
+        className={`transition-all duration-300 ease-in-out flex-shrink-0 z-20 ${
+          isSidebarOpen ? 'w-64' : 'w-0'
+        } overflow-hidden`}
+      >
+        <div className="w-full h-full">
+          <Sidebar 
+            activeTab={activeTab} setActiveTab={setActiveTab} 
+            groups={groups} tasks={tasks}
+            activeGroup={activeGroup} setActiveGroup={setActiveGroup} 
+            onAddGroup={handleAddGroup} 
+            onOpenSettings={() => setIsSettingsOpen(true)}
+            userRole={userRole}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            isSidebarOpen={isSidebarOpen}
+            onLogout={handleLogout}
+            onSyncPull={onSyncPull}
+            onSyncPush={onSyncPush}
+            reminderCount={reminderCount}
+            onAddTask={() => {
+              const now = new Date();
+              const end = new Date();
+              end.setHours(23, 59, 59, 999);
+              
+              const tzOffset = now.getTimezoneOffset() * 60000;
+              const startStr = new Date(now - tzOffset).toISOString().slice(0, 16);
+              const endStr = new Date(end - tzOffset).toISOString().slice(0, 16);
+              
+              const reminderDate = new Date(now.getTime() - 60 * 60000);
+              const reminderStr = new Date(reminderDate - tzOffset).toISOString().slice(0, 16);
+  
+              setIsAddingTask({ 
+                ...EMPTY_TASK, 
+                group: activeGroup === 'ALL' ? '' : activeGroup,
+                startDate: startStr, 
+                endDate: endStr,
+                reminder: reminderStr,
+                reminderType: '1h'
+              });
+            }}
+          />
+        </div>
+      </div>
 
-            setIsAddingTask({ 
-              ...EMPTY_TASK, 
-              group: activeGroup === 'ALL' ? '' : activeGroup,
-              startDate: startStr, 
-              endDate: endStr,
-              reminder: reminderStr,
-              reminderType: '1h'
-            });
-          }}
-          reminderCount={reminderCount} 
-          onSyncPull={onSyncPull}
-          onSyncPush={onSyncPush}
-          onLogout={handleLogout}
-        />
-        <main className="flex-1 overflow-hidden bg-[#F2F4F7]">
+      {/* KHU VỰC NỘI DUNG CHÍNH */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
+        
+        <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#F2F4F7]">
           {activeTab === 'task-manager' && (
             <TaskManagerView 
               tasks={filteredTasks} 
@@ -516,6 +540,7 @@ export default function App() {
           {activeTab === 'personnel-report' && (
             <PersonnelReportView 
               employees={employees} 
+              setEmployees={setEmployees}
               branches={groups}
             />
           )}
@@ -539,11 +564,20 @@ export default function App() {
               setTasks={setTasks}
             />
           )}
-          {activeTab === 'recruitment' && (
+          {(activeTab === 'recruitment' || activeTab.startsWith('recruitment-')) && (
             <RecruitmentView 
               userRole={userRole}
               branchId={localStorage.getItem('user_branch')}
               employees={employees}
+              onSelectCandidate={handleSelectCandidate}
+              subTab={activeTab}
+              onNavigateSubTab={setActiveTab}
+            />
+          )}
+          {activeTab === 'interview' && (
+            <InterviewView 
+              candidateId={selectedCandidateId}
+              onBack={() => setActiveTab('recruitment')}
             />
           )}
           {activeTab === 'info' && (
@@ -556,6 +590,7 @@ export default function App() {
           )}
         </main>
       </div>
+      
       {isAddingTask && (
         <TaskModal
           task={isAddingTask}
@@ -572,6 +607,7 @@ export default function App() {
           onSave={setColorConfig}
           onClose={() => setIsSettingsOpen(false)}
           groups={groups}
+          onUseDemoData={handleUseDemoData}
         />
       )}
     </div>

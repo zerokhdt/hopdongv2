@@ -63,7 +63,10 @@ export function importEmployeesFromCsv(csvText) {
 
   dataRows.forEach((r, rowOffset) => {
     const rowNum = headerRowIdx + 2 + rowOffset;
-    const id = stripLeadingApostrophe(getCellAny(r, headerIndex, ['Mã NV', 'Ma NV', 'Mã Nhân Viên', 'Ma Nhan Vien', 'MANV', 'MaNV'])).trim();
+    const rawId = stripLeadingApostrophe(getCellAny(r, headerIndex, ['Mã NV', 'Ma NV', 'Mã Nhân Viên', 'Ma Nhan Vien', 'MANV', 'MaNV'])).trim();
+    // Normalize to 4-digit numeric format (0xxx)
+    const numericPart = rawId.replace(/\D/g, '');
+    const id = numericPart ? numericPart.padStart(4, '0') : rawId;
     const name = getCellAny(r, headerIndex, ['Họ và Tên', 'Ho va Ten', 'Họ Tên', 'Ho Ten', 'Tên Nhân Viên', 'Ten Nhan Vien']).trim();
 
     if (!id || !name) {

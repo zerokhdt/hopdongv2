@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     });
   }
   
-  if (username === 'chinhanh1' && password === '123456') {
+  if (username === 'trungmytay' && password === '123456') {
     return res.status(200).json({
       success: true,
       token: 'fake-jwt-token-branch-' + Date.now(),
