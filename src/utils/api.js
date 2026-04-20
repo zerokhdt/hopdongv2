@@ -14,13 +14,27 @@ export function apiUrl(path) {
 }
 
 export async function apiFetch(path, options = {}) {
-  const user = auth.currentUser;
-  if (user) {
-    const token = await user.getIdToken();
-    options.headers = {
-      ...options.headers,
-      'Authorization': `Bearer ${token}`,
-    };
+  const hasAuthHeader = Boolean(options?.headers && (options.headers.Authorization || options.headers.authorization));
+  if (!hasAuthHeader) {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const token = await user.getIdToken();
+        options.headers = {
+          ...options.headers,
+          Authorization: `Bearer ${token}`,
+        };
+      } catch (_e) {
+      }
+    } else if (typeof window !== 'undefined') {
+      const token = String(localStorage.getItem('token') || '').trim();
+      if (token) {
+        options.headers = {
+          ...options.headers,
+          Authorization: `Bearer ${token}`,
+        };
+      }
+    }
   }
   return fetch(apiUrl(path), options);
 }

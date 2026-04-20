@@ -215,16 +215,18 @@ async function handleTasksList(req, res) {
   const role = safeString(ctx.session.role);
   const branch = safeString(ctx.session.branch);
   const branchDone = branch ? `${branch}__DONE` : '';
-  
-  let query = firestore.collection('tasks').orderBy('updated_at', 'desc');
-  
-  if (role !== 'admin') {
-    const allowedGroups = [branch, branchDone, 'ALL', 'ALL__DONE', 'HQ', 'HQ__DONE'];
-    query = query.where('group', 'in', allowedGroups);
+
+  if (role === 'admin') {
+    const snapshot = await firestore.collection('tasks').orderBy('updated_at', 'desc').get();
+    const tasks = snapshot.docs.map(doc => doc.data().data).filter(Boolean);
+    return json(res, 200, { ok: true, tasks });
   }
-  
-  const snapshot = await query.get();
-  const tasks = snapshot.docs.map(doc => doc.data().data).filter(Boolean);
+
+  const allowedGroups = [branch, branchDone, 'ALL', 'ALL__DONE', 'HQ', 'HQ__DONE'].filter(Boolean);
+  const snapshot = await firestore.collection('tasks').where('group', 'in', allowedGroups).get();
+  const rows = snapshot.docs.map(doc => doc.data()).filter(Boolean);
+  rows.sort((a, b) => safeString(b.updated_at).localeCompare(safeString(a.updated_at)));
+  const tasks = rows.map(r => r.data).filter(Boolean);
   return json(res, 200, { ok: true, tasks });
 }
 
