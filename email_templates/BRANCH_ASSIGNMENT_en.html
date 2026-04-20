@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #f9fafb; padding: 25px; border-radius: 0 0 8px 8px; }
+    .info-row { margin-bottom: 12px; }
+    .label { font-weight: bold; color: #4b5563; min-width: 160px; display: inline-block; }
+    .action-btn { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; 
+      text-decoration: none; border-radius: 6px; margin-top: 20px; font-weight: bold; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>ACE HRM - New Candidate Notification</h2>
+    </div>
+    <div class="content">
+      <p>Hello <strong>{{branch_name}}</strong> Branch,</p>
+      <p>ACE HRM system has received a new candidate application for your review:</p>
+      
+      <div style="background: white; padding: 18px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2563eb;">
+        <div class="info-row"><span class="label">Full Name:</span> {{candidate_name}}</div>
+        <div class="info-row"><span class="label">Position:</span> {{position}}</div>
+        <div class="info-row"><span class="label">Phone:</span> {{phone}}</div>
+        <div class="info-row"><span class="label">Email:</span> {{email}}</div>
+        <div class="info-row"><span class="label">Applied At:</span> {{applied_at}}</div>
+      </div>
+
+      <p><strong>📋 Attached Documents:</strong></p>
+      <ul>
+        <li><a href="{{cv_url}}">View Candidate's CV</a></li>
+        {{#if video_url}}<li><a href="{{video_url}}">View Introduction Video</a></li>{{/if}}
+      </ul>
+
+      <p>Please review the profile and update status in ACE HRM system:</p>
+      <a href="https://script.google.com/macros/s/{{script_id}}/exec?branch={{branch_name}}" 
+         class="action-btn" target="_blank">
+        🔍 Access System
+      </a>
+
+      <div class="footer">
+        <p>This is an automated email from ACE HRM system. Please do not reply to this email.</p>
+        <p>📞 Support Hotline: 0988 888 888 | ✉️ Email: ace.hrm@gmail.com</p>
+        <div style="font-size: 11px; color: #cbd5e1; text-align: center; margin-top: 10px;">
+          [Ref: CID-{{candidate_id}}]
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

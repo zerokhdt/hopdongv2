@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Phỏng Vấn</title>
+    <!-- Tích hợp Tailwind CSS qua CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tích hợp Lucide Icons qua CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50 min-h-screen text-slate-800 font-sans">
+
+    <div id="app-container" class="p-6 h-full">
+        <!-- Nút Quay lại -->
+        <button id="btn-back" class="mb-4 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 flex items-center gap-2 font-semibold transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Quay lại danh sách
+        </button>
+
+        <!-- Trạng thái Loading -->
+        <div id="view-loading" class="flex items-center justify-center h-64">
+            <i data-lucide="loader" class="animate-spin text-blue-500 w-12 h-12"></i>
+        </div>
+
+        <!-- Trạng thái Lỗi -->
+        <div id="view-error" class="hidden flex-col items-center justify-center h-64 text-red-500">
+            <i data-lucide="alert-triangle" class="w-12 h-12 mb-4"></i>
+            <p id="error-message" class="text-lg font-bold">Lỗi: Không xác định</p>
+            <button id="btn-retry" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Thử lại
+            </button>
+        </div>
+
+        <!-- Giao diện chính -->
+        <div id="view-main" class="hidden flex-col h-[calc(100vh-100px)]">
+            
+            <!-- View Controls (Tùy chọn hiển thị) -->
+            <div class="flex items-center gap-4 sm:gap-6 mb-4 bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-slate-200 shrink-0">
+                <span class="text-sm font-bold text-slate-700 uppercase tracking-wider hidden sm:inline-block">
+                    <i data-lucide="layout" class="w-4 h-4 inline-block mr-1 align-text-bottom"></i> Chế độ xem:
+                </span>
+                <label class="flex items-center gap-2 cursor-pointer select-none hover:text-blue-600 transition-colors">
+                    <input type="checkbox" id="toggle-profile" checked class="w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
+                    <span class="text-sm sm:text-base font-semibold">Sơ yếu lý lịch</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer select-none hover:text-blue-600 transition-colors">
+                    <input type="checkbox" id="toggle-form" checked class="w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
+                    <span class="text-sm sm:text-base font-semibold">Form phỏng vấn</span>
+                </label>
+            </div>
+
+            <!-- Panels Container -->
+            <div id="panels-container" class="flex-grow flex flex-col lg:flex-row gap-6 min-h-0">
+                
+                <!-- PANEL 1: SƠ YẾU LÝ LỊCH -->
+                <div id="panel-profile" class="flex-1 bg-white shadow-md rounded-lg p-6 overflow-y-auto border border-slate-200 transition-all duration-300">
+                    <h5 class="text-xl font-bold text-blue-800 mb-4 border-b pb-2">CHI TIẾT HỒ SƠ ỨNG VIÊN</h5>
+                    
+                    <div class="mb-6">
+                        <div class="text-[13px] uppercase tracking-widest text-slate-500 font-bold mt-5 mb-2">1. Thông tin cá nhân</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                            <div><strong class="text-slate-600">Họ và tên:</strong> <span id="lbl_name" class="text-red-600 font-bold text-lg ml-1">---</span></div>
+                            <div class="flex gap-6">
+                                <div><strong class="text-slate-600">Ngày sinh:</strong> <span id="lbl_dob" class="ml-1">---</span></div>
+                                <div><strong class="text-slate-600">Giới tính:</strong> <span id="lbl_gender" class="ml-1">---</span></div>
+                            </div>
+                            <div><strong class="text-slate-600">Số điện thoại:</strong> <span id="lbl_phone" class="text-blue-600 font-bold ml-1">---</span></div>
+                            <div><strong class="text-slate-600">Email:</strong> <span id="lbl_email" class="ml-1">---</span></div>
+                            <div class="md:col-span-2"><strong class="text-slate-600">Địa chỉ:</strong> <span id="lbl_address" class="ml-1">---</span></div>
+                            <div class="md:col-span-2"><strong class="text-slate-600">Loại nhà ở:</strong> <span id="lbl_housing" class="font-bold text-slate-500 ml-1">---</span></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 text-sm">
+                        <div class="text-[13px] uppercase tracking-widest text-slate-500 font-bold mt-5 mb-2">2. Chuyên môn & Nhu cầu</div>
+                        <div class="space-y-3">
+                            <div><strong class="text-slate-600 inline-block w-36">Vị trí ứng tuyển:</strong> <span id="lbl_position" class="text-green-600 font-bold">---</span></div>
+                            <div><strong class="text-slate-600 inline-block w-36">Trường tốt nghiệp:</strong> <span id="lbl_uni">---</span></div>
+                            <div><strong class="text-slate-600 inline-block w-36">Chuyên ngành:</strong> <span id="lbl_major">---</span></div>
+                            <div><strong class="text-slate-600 inline-block w-36">Kinh nghiệm:</strong> <span id="lbl_exp">---</span></div>
+                            <div><strong class="text-slate-600 inline-block w-36">Nơi làm việc cũ:</strong> <span id="lbl_oldCompany">---</span></div>
+                            <div><strong class="text-slate-600 inline-block w-36">Lý do nghỉ việc:</strong> <span id="lbl_reason" class="italic text-red-500">---</span></div>
+                            <div class="mt-2">
+                                <strong class="text-slate-600 block mb-1">Miêu tả bản thân:</strong> 
+                                <p id="lbl_describe" class="italic text-slate-600 whitespace-pre-wrap bg-slate-50 p-3 rounded border border-slate-100">---</p>
+                            </div>
+                            <div class="mt-2"><strong class="text-slate-600 inline-block w-36">Mong muốn/Đề xuất:</strong> <span id="lbl_expect" class="italic text-green-600">---</span></div>
+                            <div class="mt-2"><strong class="text-slate-600 inline-block w-36">Thời gian làm việc:</strong> <span id="lbl_time" class="text-orange-500 font-medium">---</span></div>
+                            <div class="mt-2"><strong class="text-slate-600 inline-block w-36">Lương mong muốn:</strong> <span id="lbl_salaryWant" class="font-bold">---</span></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 border-2 border-dashed border-blue-600 rounded-lg p-5 mt-6">
+                        <h6 class="mb-4 text-blue-800 text-center font-bold">TÀI LIỆU ĐÍNH KÈM</h6>
+                        <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-slate-800 mb-2">1. CV Ứng viên:</p>
+                                <a id="btnOpenCv" href="#" target="_blank" class="hidden px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700 text-center w-full shadow-sm transition">MỞ XEM CV</a>
+                                <span id="noCvText" class="text-red-500 italic text-sm">(Không có thông tin này)</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-slate-800 mb-2">2. Video Giới thiệu:</p>
+                                <a id="btnOpenVideo" href="#" target="_blank" class="hidden px-4 py-2 bg-green-600 text-white text-sm font-bold rounded hover:bg-green-700 text-center w-full shadow-sm transition">MỞ XEM VIDEO</a>
+                                <span id="noVideoText" class="text-red-500 italic text-sm">(Không có thông tin này)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL 2: FORM PHỎNG VẤN -->
+                <div id="panel-form" class="flex-1 bg-white shadow-md rounded-lg p-6 overflow-y-auto border border-slate-200 transition-all duration-300">
+                    <form id="interviewForm" class="flex flex-col h-full">
+                        <h3 class="text-xl font-bold text-red-600 mb-4 border-b-2 border-slate-800 pb-2 text-center uppercase tracking-wider">FORM DÀNH CHO NGƯỜI PHỎNG VẤN (FORM FOR INTERVIEWER)</h3>
+                        
+                        <div class="flex-grow overflow-auto">
+                            <table class="w-full border-collapse border border-gray-800 text-sm">
+                                <tbody>
+                                    <!-- Hàng 1 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold w-1/4">Họ và Tên</td>
+                                        <td class="border border-gray-800 p-2" colspan="2">
+                                            <input type="text" id="form-name" readonly class="w-full border-none bg-transparent font-bold text-blue-600 outline-none" />
+                                        </td>
+                                        <td rowspan="3" class="border border-gray-800 p-2 text-center text-gray-500 w-48 align-top">
+                                            <div class="mb-2">
+                                                <label class="block text-sm font-bold text-slate-700 mb-2">Ảnh chụp ứng viên</label>
+                                                <div class="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors relative">
+                                                    
+                                                    <div id="photo-preview-wrapper" class="hidden relative">
+                                                        <img id="photo-preview" src="" alt="Preview" class="max-h-32 mx-auto rounded-lg object-contain" />
+                                                        <button type="button" id="btn-remove-photo" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md">
+                                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                                        </button>
+                                                    </div>
+
+                                                    <div id="photo-placeholder">
+                                                        <i data-lucide="upload" class="mx-auto mb-2 text-slate-400 w-8 h-8"></i>
+                                                        <p class="text-xs text-slate-500 mb-2">Kéo thả ảnh hoặc click</p>
+                                                        <input type="file" accept="image/*" id="photoUpload" class="hidden" />
+                                                        <label for="photoUpload" class="inline-block px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer text-xs transition">Chọn ảnh</label>
+                                                        <p class="text-[10px] text-slate-400 mt-2">JPEG, PNG (< 5MB)</p>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 2 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold">Vị trí ứng tuyển:</td>
+                                        <td class="border border-gray-800 p-2" colspan="2">
+                                            <input type="text" id="form-position" readonly class="w-full border-none bg-transparent outline-none" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 3 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold">Số điện thoại:</td>
+                                        <td class="border border-gray-800 p-2" colspan="2">
+                                            <input type="text" id="form-phone" readonly class="w-full border-none bg-transparent outline-none" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 4 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold">Nơi ở hiện tại:</td>
+                                        <td class="border border-gray-800 p-2" colspan="3">
+                                            <input type="text" id="form-address" class="w-full border-none bg-transparent outline-none" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 5 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold">Loại nhà ở:</td>
+                                        <td class="border border-gray-800 p-2" colspan="3">
+                                            <input type="text" id="form-housing" readonly class="w-full border-none bg-transparent italic text-gray-500 outline-none" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 6 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold">Lý do nghỉ việc:</td>
+                                        <td class="border border-gray-800 p-2" colspan="3">
+                                            <input type="text" id="form-reason" readonly class="w-full border-none bg-transparent italic text-gray-500 outline-none" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 7 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold">Tốt nghiệp trường:</td>
+                                        <td class="border border-gray-800 p-2">
+                                            <input type="text" id="form-school" class="w-full border-none bg-transparent outline-none" />
+                                        </td>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold" colspan="2">
+                                            Chuyên ngành:
+                                            <input type="text" id="form-major" class="ml-2 inline border-b border-gray-300 w-32 bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 8 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold" rowspan="2">Bằng cấp liên quan:</td>
+                                        <td class="border border-gray-800 p-2">
+                                            Bằng TN:
+                                            <input type="text" id="form-degree" class="ml-2 inline border-b border-gray-300 w-3/4 bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold" colspan="2">
+                                            IELTS/TOEIC:
+                                            <input type="text" id="form-engCert" class="ml-2 inline border-b border-gray-800 bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 9 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2">
+                                            TESOL:
+                                            <input type="text" id="form-tesol" class="ml-2 inline border-b border-gray-300 w-3/4 bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold" colspan="2">
+                                            NV Sư phạm:
+                                            <input type="text" id="form-pedagogy" class="ml-2 inline border-b border-gray-800 bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 10 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-yellow-100 font-bold" rowspan="4">Nhận xét chi tiết:</td>
+                                        <td class="border border-gray-800 p-2" colspan="3">
+                                            Trình độ Tiếng Anh:
+                                            <input type="text" id="form-engLevel" class="ml-2 inline border-b border-gray-300 w-12 text-center bg-transparent outline-none focus:border-blue-500" />
+                                            /10. Ghi chú:
+                                            <input type="text" id="form-engNote" class="ml-2 inline border-b border-gray-300 w-1/2 bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 11 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2" colspan="3">
+                                            Ngoại hình:
+                                            <input type="text" id="form-appearance" class="ml-2 inline border-b border-gray-300 w-[80%] bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 12 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2" colspan="3">
+                                            Kinh nghiệm:
+                                            <textarea id="form-experience" rows="2" class="w-full border-none bg-transparent resize-none outline-none focus:bg-slate-50"></textarea>
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 13 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2" colspan="3">
+                                            Ghi chú thêm:
+                                            <textarea id="form-note" rows="2" class="w-full border-none bg-transparent resize-none outline-none focus:bg-slate-50"></textarea>
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 14 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-green-100 font-bold">Mức lương mong muốn:</td>
+                                        <td class="border border-gray-800 p-2">
+                                            <input type="text" id="form-salaryWant" class="w-full border-none bg-transparent outline-none" />
+                                        </td>
+                                        <td class="border border-gray-800 p-2 bg-green-100 font-bold" colspan="2">
+                                            Lương thỏa thuận:
+                                            <input type="text" id="form-salaryOk" class="ml-2 inline border-b border-gray-800 bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                    </tr>
+                                    <!-- Hàng 15 -->
+                                    <tr>
+                                        <td class="border border-gray-800 p-2 bg-blue-100 font-bold">Mức lương thử việc:</td>
+                                        <td class="border border-gray-800 p-2">
+                                            <input type="text" id="form-salaryProb" class="w-full border-none bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                        <td class="border border-gray-800 p-2 bg-blue-100 font-bold" colspan="2">
+                                            Thời gian thử việc:
+                                            <input type="text" id="form-timeProb" class="ml-2 inline border-b border-gray-800 bg-transparent outline-none focus:border-blue-500" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Tương tác: Người phỏng vấn & Lưu -->
+                            <div class="mt-5">
+                                <input type="text" id="form-interviewer" placeholder="Nhập tên người phỏng vấn..." class="w-full p-3 border border-gray-300 rounded-lg mb-4 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow" />
+                                
+                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                    <div>
+                                        <label for="form-status" class="block text-sm font-bold text-slate-700 mb-1">Cập nhật trạng thái:</label>
+                                        <select id="form-status" class="p-2 border border-slate-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 transition outline-none min-w-[200px]">
+                                            <option value="PENDING">Chờ phỏng vấn</option>
+                                            <option value="PASSED">Đạt</option>
+                                            <option value="FAILED">Không đạt</option>
+                                            <option value="OFFERED">Đã mời nhận việc</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" id="btn-submit" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
+                                        <i data-lucide="check-circle" class="w-5 h-5 mr-2 icon-default"></i>
+                                        <span class="btn-text">LƯU KẾT QUẢ PHỎNG VẤN</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Thông báo thành công -->
+                    <div id="save-message" class="hidden mt-4 p-3 bg-green-100 text-green-800 rounded-lg flex items-center transition-all duration-300">
+                        <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Lưu kết quả thành công!
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Script xử lý Logic (Tương đương React Component) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Khởi tạo Icons
+            lucide.createIcons();
+
+            // Lấy ID ứng viên từ URL (?id=...) hoặc dùng ID mặc định
+            const urlParams = new URLSearchParams(window.location.search);
+            const candidateId = urlParams.get('id') || 'CAND_DEMO_001';
+
+            // Trạng thái dữ liệu
+            let currentCandidate = null;
+            let currentFile = null;
+            let currentPhotoUrl = '';
+            const userBranch = localStorage.getItem('user_branch') || '';
+
+            // Cache các phần tử DOM
+            const viewLoading = document.getElementById('view-loading');
+            const viewError = document.getElementById('view-error');
+            const viewMain = document.getElementById('view-main');
+            const errorMessage = document.getElementById('error-message');
+            
+            // --- VIEW LAYOUT LOGIC ---
+            const toggleProfile = document.getElementById('toggle-profile');
+            const toggleForm = document.getElementById('toggle-form');
+            const panelProfile = document.getElementById('panel-profile');
+            const panelForm = document.getElementById('panel-form');
+
+            function updateLayout(e) {
+                const showProfile = toggleProfile.checked;
+                const showForm = toggleForm.checked;
+
+                // Ngăn người dùng tắt cả 2 chế độ xem cùng lúc
+                if (!showProfile && !showForm) {
+                    alert("Vui lòng chọn ít nhất 1 chế độ xem!");
+                    e.target.checked = true; // Bật lại checkbox vừa bị tắt
+                    return;
+                }
+
+                if (showProfile && showForm) {
+                    // Cả 2: Hiển thị song song (50 - 50)
+                    panelProfile.classList.remove('hidden', 'lg:w-[60%]', 'mx-auto');
+                    panelProfile.classList.add('flex-1');
+                    
+                    panelForm.classList.remove('hidden', 'lg:w-[60%]', 'mx-auto');
+                    panelForm.classList.add('flex-1');
+                } else if (showProfile) {
+                    // Chỉ xem Sơ yếu lý lịch: Căn giữa màn hình
+                    panelProfile.classList.remove('hidden', 'flex-1');
+                    panelProfile.classList.add('lg:w-[60%]', 'mx-auto', 'w-full');
+                    
+                    panelForm.classList.add('hidden');
+                    panelForm.classList.remove('flex-1', 'lg:w-[60%]', 'mx-auto');
+                } else if (showForm) {
+                    // Chỉ xem Form Phỏng vấn: Căn giữa màn hình
+                    panelProfile.classList.add('hidden');
+                    panelProfile.classList.remove('flex-1', 'lg:w-[60%]', 'mx-auto');
+
+                    panelForm.classList.remove('hidden', 'flex-1');
+                    panelForm.classList.add('lg:w-[60%]', 'mx-auto', 'w-full');
+                }
+            }
+
+            // Gắn sự kiện thay đổi layout khi tick chọn
+            toggleProfile.addEventListener('change', updateLayout);
+            toggleForm.addEventListener('change', updateLayout);
+
+            // --- HÀM GIẢ LẬP API (MOCK DATA) ---
+            // ĐỂ SỬ DỤNG THỰC TẾ: Hãy thay thế thân hàm này bằng logic fetch từ Google Apps Script / Firebase của bạn
+            async function fetchCandidateData(id) {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        // Giả lập dữ liệu trả về từ API - Cập nhật field giống với FRONTEND.HTML cũ
+                        resolve({
+                            id: id,
+                            "Họ và tên ứng viên": "Nguyễn Văn Demo",
+                            "Ngày sinh": "01/01/1995",
+                            "Giới tính": "Nam",
+                            "Số điện thoại": "0987654321",
+                            "Email": "nguyenvandemo@example.com",
+                            "Vị trí ứng tuyển": "Giáo viên Tiếng Anh",
+                            "Địa chỉ": "Quận 1, TP. Hồ Chí Minh",
+                            "Trường": "Đại học Sư Phạm",
+                            "Chuyên ngành": "Sư phạm Tiếng Anh",
+                            "Kinh nghiệm": "2 năm giảng dạy tại trung tâm XYZ",
+                            "Công ty cũ": "Trung tâm Anh ngữ XYZ",
+                            "Miêu tả bản thân": "Năng động, nhiệt huyết, yêu trẻ con...",
+                            "Thời gian rảnh": "Toàn thời gian",
+                            "Lương mong muốn": "15,000,000 VND",
+                            "Loại nhà ở": "Nhà trọ",
+                            "Lý do nghỉ việc": "Tìm kiếm cơ hội thăng tiến",
+                            "Mong muốn/Đề xuất": "Đóng BHXH đầy đủ",
+                            "Link CV": "https://example.com/cv.pdf",
+                            "Link Video": "https://youtube.com/watch?v=demo",
+                            "status": "PENDING",
+                            "photoUrl": ""
+                        });
+                        // Bỏ comment dòng dưới để test trường hợp lỗi
+                        // reject(new Error("Không thể tải dữ liệu ứng viên."));
+                    }, 1000);
+                });
+            }
+
+            async function saveInterviewResult(payload) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        console.log("Dữ liệu đã lưu:", payload);
+                        resolve('Lưu kết quả thành công!');
+                    }, 1500);
+                });
+            }
+
+            // --- LOGIC GIAO DIỆN ---
+            
+            // Hàm render thông tin lên UI
+            function populateUI(data) {
+                // 1. Cột Sơ yếu lý lịch (Panel 1)
+                document.getElementById('lbl_name').innerText = data["Họ và tên ứng viên"] || data["Họ và tên"] || "---";
+                document.getElementById('lbl_dob').innerText = data["Ngày sinh"] || "---";
+                document.getElementById('lbl_gender').innerText = data["Giới tính"] || "---";
+                document.getElementById('lbl_position').innerText = data["Vị trí ứng tuyển"] || "---";
+                document.getElementById('lbl_phone').innerText = data["Số điện thoại"] || data["SĐT"] || "---";
+                document.getElementById('lbl_email').innerText = data["Email"] || data["Email Address"] || "---";
+                document.getElementById('lbl_address').innerText = data["Địa chỉ"] || "---";
+                document.getElementById('lbl_housing').innerText = data["Loại nhà ở"] || "---";
+                
+                document.getElementById('lbl_uni').innerText = data["Trường"] || "---";
+                document.getElementById('lbl_major').innerText = data["Chuyên ngành"] || "---";
+                document.getElementById('lbl_exp').innerText = data["Kinh nghiệm"] || "---";
+                document.getElementById('lbl_oldCompany').innerText = data["Công ty cũ"] || "---";
+                document.getElementById('lbl_reason').innerText = data["Lý do nghỉ việc"] || "---";
+                document.getElementById('lbl_describe').innerText = data["Miêu tả bản thân"] || "---";
+                document.getElementById('lbl_expect').innerText = data["Mong muốn/Đề xuất"] || "---";
+                document.getElementById('lbl_time').innerText = data["Thời gian rảnh"] || "---";
+                document.getElementById('lbl_salaryWant').innerText = data["Lương mong muốn"] || "---";
+
+                // Xử lý nút mở CV
+                const cvUrl = data["Link CV"] || data["Link CV của bạn"];
+                if(cvUrl && cvUrl.toString().trim() !== "") {
+                   document.getElementById('btnOpenCv').href = cvUrl;
+                   document.getElementById('btnOpenCv').classList.remove('hidden');
+                   document.getElementById('btnOpenCv').classList.add('inline-block');
+                   document.getElementById('noCvText').classList.add('hidden');
+                } else {
+                   document.getElementById('btnOpenCv').classList.add('hidden');
+                   document.getElementById('btnOpenCv').classList.remove('inline-block');
+                   document.getElementById('noCvText').classList.remove('hidden');
+                }
+
+                // Xử lý nút mở Video
+                const videoUrl = data["Link Video"];
+                if(videoUrl && videoUrl.toString().trim() !== "") {
+                   document.getElementById('btnOpenVideo').href = videoUrl;
+                   document.getElementById('btnOpenVideo').classList.remove('hidden');
+                   document.getElementById('btnOpenVideo').classList.add('inline-block');
+                   document.getElementById('noVideoText').classList.add('hidden');
+                } else {
+                   document.getElementById('btnOpenVideo').classList.add('hidden');
+                   document.getElementById('btnOpenVideo').classList.remove('inline-block');
+                   document.getElementById('noVideoText').classList.remove('hidden');
+                }
+
+                // 2. Điền Form Phỏng Vấn (Panel 2)
+                document.getElementById('form-name').value = data['Họ và tên ứng viên'] || data['Họ và tên'] || '';
+                document.getElementById('form-position').value = data['Vị trí ứng tuyển'] || '';
+                document.getElementById('form-phone').value = data['Số điện thoại'] || data['SĐT'] || '';
+                document.getElementById('form-address').value = data['Địa chỉ'] || '';
+                document.getElementById('form-housing').value = data['Loại nhà ở'] || '';
+                document.getElementById('form-reason').value = data['Lý do nghỉ việc'] || '';
+                
+                // Điền các field input (nếu có sẵn data từ trước)
+                const fields = ['school', 'major', 'degree', 'engCert', 'tesol', 'pedagogy', 'engLevel', 'engNote', 'appearance', 'experience', 'note', 'salaryWant', 'salaryOk', 'salaryProb', 'timeProb', 'interviewer'];
+                fields.forEach(field => {
+                    if (data[field]) document.getElementById(`form-${field}`).value = data[field];
+                });
+
+                if (data.status) document.getElementById('form-status').value = data.status;
+                if (data.photoUrl) setPhotoPreview(data.photoUrl);
+            }
+
+            // Xử lý tải dữ liệu
+            async function loadData() {
+                try {
+                    viewLoading.classList.remove('hidden');
+                    viewError.classList.add('hidden');
+                    viewMain.classList.add('hidden');
+
+                    currentCandidate = await fetchCandidateData(candidateId);
+                    populateUI(currentCandidate);
+
+                    viewLoading.classList.add('hidden');
+                    viewMain.classList.remove('hidden');
+                } catch (error) {
+                    viewLoading.classList.add('hidden');
+                    viewError.classList.remove('hidden');
+                    errorMessage.innerText = `Lỗi: ${error.message}`;
+                }
+            }
+
+            // Gọi hàm tải khi vào trang
+            loadData();
+
+            // Nút thử lại và quay lại
+            document.getElementById('btn-retry').addEventListener('click', loadData);
+            document.getElementById('btn-back').addEventListener('click', () => {
+                alert('Chức năng quay lại danh sách!');
+                // window.history.back() hoặc window.location.href = '/danh-sach'
+            });
+
+            // --- LOGIC XỬ LÝ ẢNH ---
+            const photoUpload = document.getElementById('photoUpload');
+            const photoPreviewWrapper = document.getElementById('photo-preview-wrapper');
+            const photoPlaceholder = document.getElementById('photo-placeholder');
+            const photoPreview = document.getElementById('photo-preview');
+            
+            function setPhotoPreview(url) {
+                currentPhotoUrl = url;
+                photoPreview.src = url;
+                photoPlaceholder.classList.add('hidden');
+                photoPreviewWrapper.classList.remove('hidden');
+            }
+
+            photoUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn file ảnh (JPEG, PNG, etc.)');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Kích thước file quá lớn. Vui lòng chọn ảnh dưới 5MB.');
+                    return;
+                }
+
+                currentFile = file;
+                const reader = new FileReader();
+                reader.onload = (event) => setPhotoPreview(event.target.result);
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('btn-remove-photo').addEventListener('click', () => {
+                currentFile = null;
+                currentPhotoUrl = '';
+                photoUpload.value = '';
+                photoPreview.src = '';
+                photoPreviewWrapper.classList.add('hidden');
+                photoPlaceholder.classList.remove('hidden');
+            });
+
+            // --- LOGIC SUBMIT FORM ---
+            document.getElementById('interviewForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btnSubmit = document.getElementById('btn-submit');
+                
+                // UI Loading state cho nút
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = `<i data-lucide="loader" class="animate-spin w-5 h-5 mr-2"></i> <span>Đang lưu...</span>`;
+                lucide.createIcons();
+
+                try {
+                    // MOCK Xử lý Upload Firebase
+                    let finalPhotoUrl = currentPhotoUrl;
+                    if (currentFile) {
+                        // TODO: Thay bằng hàm uploadFirebase thực tế
+                        // finalPhotoUrl = await uploadImageToFirebase(currentFile);
+                        console.log("Đang giả lập upload ảnh...");
+                        finalPhotoUrl = currentPhotoUrl; // Tạm dùng base64 trong demo
+                    }
+
+                    // Thu thập Data
+                    const formData = {
+                        status: document.getElementById('form-status').value,
+                        address: document.getElementById('form-address').value,
+                        school: document.getElementById('form-school').value,
+                        major: document.getElementById('form-major').value,
+                        degree: document.getElementById('form-degree').value,
+                        engCert: document.getElementById('form-engCert').value,
+                        tesol: document.getElementById('form-tesol').value,
+                        pedagogy: document.getElementById('form-pedagogy').value,
+                        engLevel: document.getElementById('form-engLevel').value,
+                        engNote: document.getElementById('form-engNote').value,
+                        appearance: document.getElementById('form-appearance').value,
+                        experience: document.getElementById('form-experience').value,
+                        note: document.getElementById('form-note').value,
+                        salaryWant: document.getElementById('form-salaryWant').value,
+                        salaryOk: document.getElementById('form-salaryOk').value,
+                        salaryProb: document.getElementById('form-salaryProb').value,
+                        timeProb: document.getElementById('form-timeProb').value,
+                        interviewer: document.getElementById('form-interviewer').value,
+                        photoUrl: finalPhotoUrl,
+                        branch: userBranch
+                    };
+
+                    const payload = { ...currentCandidate, ...formData };
+                    
+                    // Gửi API
+                    await saveInterviewResult(payload);
+                    
+                    // Cập nhật state nội bộ & hiện thông báo
+                    currentCandidate = payload;
+                    const msgBox = document.getElementById('save-message');
+                    msgBox.classList.remove('hidden');
+                    setTimeout(() => msgBox.classList.add('hidden'), 5000);
+
+                } catch (error) {
+                    alert('Lưu kết quả thất bại: ' + error.message);
+                } finally {
+                    // Khôi phục UI nút
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> <span>LƯU KẾT QUẢ PHỎNG VẤN</span>`;
+                    lucide.createIcons();
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

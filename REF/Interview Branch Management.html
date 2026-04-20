@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Interview Branch Management | Recruitment Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-dim": "#d8dadc",
+                "on-surface": "#191c1e",
+                "on-primary-container": "#a8b8ff",
+                "on-primary": "#ffffff",
+                "surface-container-highest": "#e0e3e5",
+                "surface-container-low": "#f2f4f6",
+                "on-error": "#ffffff",
+                "primary-fixed": "#dde1ff",
+                "on-tertiary": "#ffffff",
+                "inverse-primary": "#b8c4ff",
+                "error-container": "#ffdad6",
+                "surface-container-high": "#e6e8ea",
+                "secondary-container": "#d0e1fb",
+                "on-error-container": "#93000a",
+                "on-secondary": "#ffffff",
+                "inverse-on-surface": "#eff1f3",
+                "tertiary-fixed-dim": "#ffb59a",
+                "surface-tint": "#3755c3",
+                "primary-container": "#1e40af",
+                "tertiary-container": "#872d00",
+                "outline-variant": "#c4c5d5",
+                "on-secondary-container": "#54647a",
+                "surface-container": "#eceef0",
+                "primary-fixed-dim": "#b8c4ff",
+                "outline": "#757684",
+                "on-tertiary-fixed": "#380d00",
+                "on-surface-variant": "#444653",
+                "surface-variant": "#e0e3e5",
+                "on-tertiary-container": "#ffa583",
+                "inverse-surface": "#2d3133",
+                "background": "#f7f9fb",
+                "on-secondary-fixed-variant": "#38485d",
+                "on-primary-fixed": "#001453",
+                "on-secondary-fixed": "#0b1c30",
+                "tertiary-fixed": "#ffdbce",
+                "surface-bright": "#f7f9fb",
+                "primary": "#00288e",
+                "on-primary-fixed-variant": "#173bab",
+                "error": "#ba1a1a",
+                "surface-container-lowest": "#ffffff",
+                "secondary": "#505f76",
+                "on-background": "#191c1e",
+                "surface": "#f7f9fb",
+                "secondary-fixed-dim": "#b7c8e1",
+                "secondary-fixed": "#d3e4fe",
+                "tertiary": "#611e00",
+                "on-tertiary-fixed-variant": "#802a00"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "fontFamily": {
+                "headline": ["Manrope"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Manrope', sans-serif; }
+        .glass-header {
+            background: rgba(247, 249, 251, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-4 gap-2 bg-[#f2f4f6] dark:bg-slate-900 h-screen w-64 border-r-0 rounded-none z-40">
+<div class="mb-8 px-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+</div>
+<div>
+<h1 class="font-['Manrope'] font-black text-[#1E40AF] text-lg leading-none">Enterprise</h1>
+<p class="text-[10px] uppercase tracking-wider text-outline font-bold">Multi-Branch Console</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:translate-x-1 transition-transform duration-200 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+                Candidates
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:translate-x-1 transition-transform duration-200 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="work">work</span>
+                Job Postings
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:translate-x-1 transition-transform duration-200 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+                Interview History
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:translate-x-1 transition-transform duration-200 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+                Reports
+            </a>
+<!-- Active Tab: Interview Branch -->
+<a class="flex items-center gap-3 px-4 py-3 bg-[#ffffff] dark:bg-slate-800 text-[#1E40AF] dark:text-blue-300 rounded-lg shadow-sm font-semibold hover:translate-x-1 transition-transform duration-200 font-['Inter'] text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+                Interview Branch
+            </a>
+</nav>
+<div class="mt-auto pt-4 border-t border-outline-variant/20 flex flex-col gap-1">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 mb-4 shadow-lg shadow-primary/10 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                Add Candidate
+            </button>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-error/80 hover:bg-error-container/20 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Sign Out
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 flex flex-col min-w-0">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 glass-header flex justify-between items-center w-full px-8 py-4">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-extrabold font-['Manrope'] text-[#1E40AF] dark:text-blue-500">Recruitment Hub</h2>
+<div class="h-6 w-[2px] bg-outline-variant/30"></div>
+<nav class="hidden md:flex gap-6">
+<a class="text-[#1E40AF] border-b-2 border-[#1E40AF] font-bold py-1 text-sm" href="#">Dashboard</a>
+<a class="text-slate-500 hover:text-slate-800 transition-colors py-1 text-sm" href="#">Talent Pool</a>
+<a class="text-slate-500 hover:text-slate-800 transition-colors py-1 text-sm" href="#">Calendar</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-outline">
+<span class="material-symbols-outlined text-xl" data-icon="search">search</span>
+</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-64 transition-all" placeholder="Search across branches..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-slate-200/50 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-200/50 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-200/50 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="Executive Profile" data-alt="Corporate headshot of a recruitment executive in a blue business suit, clean professional studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyLOKiWWaB4QewO_DuabpDRnwqqkS9BdiNT0ycQnGiZLWhLhHv4jEW2rxy1PYPypynLZDGaCq71XWW-oVe5kE7IxC6svDrFTHjMth3V7IiYjfI0z9GepXJaCli4VSA_Fco1L4bgn9szpKNQ6jnCtcHeykjIGFtDidypOSZZ6eLeCFhyykr5WLjwILd-JwmoXibHvQ9rEtQRo7Rekhi600QdV8vPd2bl-rxioxoLHYUOxJD7m6zD6XkSSf3dzVFFm_J6bcZNMg-hiY"/>
+</div>
+</div>
+</header>
+<!-- Screen Content -->
+<div class="p-8 max-w-[1600px] w-full mx-auto space-y-8">
+<!-- Page Header & Main CTA -->
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-3xl font-['Manrope'] font-extrabold text-on-surface tracking-tight">Interview Branch Management</h1>
+<p class="text-on-surface-variant mt-1">Directly assign and monitor candidates across regional offices.</p>
+</div>
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+                    Send to Branch
+                </button>
+</div>
+<!-- Bento Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-container"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-md font-bold text-outline tracking-wider uppercase text-[10px]">Total Sent to Branches</p>
+<h3 class="text-3xl font-black mt-2 text-on-surface">1,284</h3>
+</div>
+<div class="bg-primary/5 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</div>
+</div>
+<p class="text-xs text-green-600 mt-4 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+                        +12% from last month
+                    </p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-tertiary-container"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-md font-bold text-outline tracking-wider uppercase text-[10px]">Pending Branch Review</p>
+<h3 class="text-3xl font-black mt-2 text-on-surface">42</h3>
+</div>
+<div class="bg-tertiary-fixed/30 p-2 rounded-lg text-tertiary">
+<span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant mt-4 font-medium">Avg. response time: 2.4 days</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-md font-bold text-outline tracking-wider uppercase text-[10px]">Interviews Scheduled</p>
+<h3 class="text-3xl font-black mt-2 text-on-surface">156</h3>
+</div>
+<div class="bg-secondary-container p-2 rounded-lg text-secondary">
+<span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+</div>
+</div>
+<p class="text-xs text-primary mt-4 font-medium">8 Scheduled for tomorrow</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-success-600 bg-green-600"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-md font-bold text-outline tracking-wider uppercase text-[10px]">Branch Feedback Rate</p>
+<h3 class="text-3xl font-black mt-2 text-on-surface">94.2%</h3>
+</div>
+<div class="bg-green-100 p-2 rounded-lg text-green-700">
+<span class="material-symbols-outlined" data-icon="reviews">reviews</span>
+</div>
+</div>
+<p class="text-xs text-green-600 mt-4 font-medium">Optimal performance range</p>
+</div>
+</div>
+<!-- Filters & Management Table -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-outline-variant/10">
+<!-- Toolbar -->
+<div class="px-8 py-5 flex flex-wrap items-center justify-between gap-4 border-b border-surface-container-low">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-outline uppercase tracking-widest">Filter by Branch:</span>
+<div class="relative">
+<select class="appearance-none bg-surface-container-low text-on-surface-variant text-sm font-semibold py-2 pl-4 pr-10 rounded-lg focus:ring-0 border-none cursor-pointer">
+<option>All Branches</option>
+<option>HQ Office</option>
+<option>North Campus</option>
+<option>West Industrial</option>
+<option>East Distribution Hub</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-outline uppercase tracking-widest">Status:</span>
+<div class="flex bg-surface-container-low p-1 rounded-lg">
+<button class="px-3 py-1.5 text-xs font-bold rounded-md bg-white shadow-sm text-primary">All</button>
+<button class="px-3 py-1.5 text-xs font-bold rounded-md text-outline hover:text-on-surface transition-colors">Active</button>
+<button class="px-3 py-1.5 text-xs font-bold rounded-md text-outline hover:text-on-surface transition-colors">Completed</button>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-container-high transition-colors text-sm font-semibold text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="file_download">file_download</span>
+                            Export
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-container-high transition-colors text-sm font-semibold text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="tune">tune</span>
+                            Columns
+                        </button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/30">
+<th class="px-8 py-4 label-md text-outline uppercase tracking-[1.2px] font-bold text-[10px]">Candidate Name</th>
+<th class="px-8 py-4 label-md text-outline uppercase tracking-[1.2px] font-bold text-[10px]">Applied Position</th>
+<th class="px-8 py-4 label-md text-outline uppercase tracking-[1.2px] font-bold text-[10px]">Target Branch</th>
+<th class="px-8 py-4 label-md text-outline uppercase tracking-[1.2px] font-bold text-[10px]">Date Sent</th>
+<th class="px-8 py-4 label-md text-outline uppercase tracking-[1.2px] font-bold text-[10px]">Branch Recruiter</th>
+<th class="px-8 py-4 label-md text-outline uppercase tracking-[1.2px] font-bold text-[10px]">Branch Status</th>
+<th class="px-8 py-4 label-md text-outline uppercase tracking-[1.2px] font-bold text-[10px]">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Candidate Avatar" data-alt="Portrait of a young male professional with glasses, smiling warmly against a blurred urban office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHYtI_TrqSd5Yl1KRCMuo8WASuoILGWZWsaQZGl3AlgO0IQaj0dzItjAtkPB0wJo_3JUdgNi-_keh9ip4U9Bokei3TJcbFiB9TmebsnnKi3zHLycs_SuRJ4beCSvwdSV_6YIWaS0ZUrDUpAarJpQuumqsfe2KlxXgU65_fudvz3cY9lSANm-VzPXgxVCqH-bS5PjwejwEsNboebsZyGztcPQ13k50guEZ4jMaA58PPapdWs_mHDg2bnoInHaFDWDpoF_ikHkGch20"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Marcus Chen</p>
+<p class="text-[11px] text-outline">marcus.c@example.com</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-5 text-sm font-medium text-on-surface-variant">Senior Cloud Architect</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="location_on">location_on</span>
+<span class="text-sm font-semibold text-on-surface">North Campus</span>
+</div>
+</td>
+<td class="px-8 py-5 text-sm text-outline">Oct 24, 2023</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-secondary">SD</div>
+<span class="text-sm text-on-surface-variant">Sarah Jenkins</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="px-3 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 uppercase tracking-wide">Under Review</span>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-primary" title="View Profile">
+<span class="material-symbols-outlined text-lg" data-icon="visibility">visibility</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-on-surface-variant" title="Message Recruiter">
+<span class="material-symbols-outlined text-lg" data-icon="chat_bubble">chat_bubble</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-on-surface-variant" title="Options">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Candidate Avatar" data-alt="Close up portrait of a professional woman with a confident smile, bright natural lighting, soft office environment background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0Ywny2a1PWiGVTO-EGugkJ0D_O54jhuZquqWIgufySufnzP_kkPtpKhdtwKE7s6HilHI2yRYP2oL36V4B6gPBLMB4dt__EcO7tllyAeXQ3ElQBEoYpPJPowp5TVTtoq-ZCgRix66EXq3OYPO04lwyEKAB0JV1Pw8YN0H8v9BRnRXEBWvcKr_rR_D_GJKAYuX9-QLvBLfCMDbhaDifOapO6WPg2VXqytvR_GjiyQvrZv6Tw4MQesqI0w5fLG8HOE-HCAjPPkD2kkY"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Elena Rodriguez</p>
+<p class="text-[11px] text-outline">elena.rod@example.com</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-5 text-sm font-medium text-on-surface-variant">Logistics Manager</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="location_on">location_on</span>
+<span class="text-sm font-semibold text-on-surface">West Industrial</span>
+</div>
+</td>
+<td class="px-8 py-5 text-sm text-outline">Oct 26, 2023</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-[10px] font-bold text-primary">MW</div>
+<span class="text-sm text-on-surface-variant">Michael Wong</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="px-3 py-1 rounded-full text-[11px] font-bold bg-green-100 text-green-700 uppercase tracking-wide">Scheduled</span>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-primary">
+<span class="material-symbols-outlined text-lg" data-icon="visibility">visibility</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="chat_bubble">chat_bubble</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Candidate Avatar" data-alt="Portrait of a male engineer in a light blue shirt, looking directly at camera with a slight smile, clean grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb-jMlAiJp5gMxRDJiTCZ2klm9buG0vQUmjHRZj3-acXxj7GnqrTJc7_W4AhfaPJ3R5_GgFn0XDBkiWrTGYPSNmvySEhKey2-6SMMKOlTD9SzfQAojjjNhpOD9uVCEDWXtHoN3kgAUVsVjUwjU7g_OI2AB1zZfMZ1PYK2bJ05WhQXzBP_uXu0lqjEaYpT7vjo2i7FtBWsOdM0_GFUtJ_2wXGw21cHlJmh3Kp7V1cUOHZcbhLnq5KL-HooWDRmsOZ11mFxLuySt1cM"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Julian Barnes</p>
+<p class="text-[11px] text-outline">j.barnes@tech.co</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-5 text-sm font-medium text-on-surface-variant">Site Lead Engineer</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="location_on">location_on</span>
+<span class="text-sm font-semibold text-on-surface">HQ Office</span>
+</div>
+</td>
+<td class="px-8 py-5 text-sm text-outline">Oct 28, 2023</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<img alt="Reviewer" class="w-6 h-6 rounded-full" data-alt="Portrait of a female HR professional, smiling, modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZg_tz1xzgU-kt3E9AHeAv17fFCKOVPcF0aZUQg7-3eKSUCjoyl20S3O3c9JgyQ7EbdfRWTBGhN9VsbwINlIVcs8xIwWRGMeD3Jlw4Y_Qy1kZZtXyXUMRJFUv77vqsB-r00M89Dx09_HXzUqPuGX5jD_NtghD2EkQpeeTK1QC4phdRTbGrbpT4TCrEjWcHiuhc9MGsmgwjU083Tyxr3o-I6HK1zI01YuuE2PX9XC6nup572SQjMJYOlaJIWMqvbS_3Mg-HANhXG10"/>
+<span class="text-sm text-on-surface-variant">Amanda Lee</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wide">Feedback Provided</span>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-primary">
+<span class="material-symbols-outlined text-lg" data-icon="visibility">visibility</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="chat_bubble">chat_bubble</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Candidate Avatar" data-alt="Professional headshot of a woman with dark hair, smiling confidently, soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCw52GRQzx56HW6uoCZdCPUtcG9NjMWYbACzfbIS_JdjTQXAV0sljRYoMg8HjmvAD4YimBG06BDGenlXcFbIKybD32-CBinx5nYR_fr5GKf5-6rkYyvgOmY-QpfP_m51IRNRLa8-oLeDaRd2G-bIWiIuZ39RkIR7wb_h__DJLpLR0FCsk8S9HWlfwlxccB9s5aD1031JHhLUzEtpSYrVNpOtZ8SUSPM7p3Feduh3dh28pXr2YRqZftFXvF2qkbEK_AtOpMvjfSAz-c"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Sophia Martinez</p>
+<p class="text-[11px] text-outline">sophia.m@global.net</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-5 text-sm font-medium text-on-surface-variant">Operations Analyst</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="location_on">location_on</span>
+<span class="text-sm font-semibold text-on-surface">East Distribution</span>
+</div>
+</td>
+<td class="px-8 py-5 text-sm text-outline">Oct 30, 2023</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-[10px] font-bold text-on-surface-variant">TB</div>
+<span class="text-sm text-on-surface-variant">Tyler Bennett</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="px-3 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-700 uppercase tracking-wide">Rejected by Branch</span>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-primary">
+<span class="material-symbols-outlined text-lg" data-icon="visibility">visibility</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="chat_bubble">chat_bubble</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg shadow-sm border border-outline-variant/10 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Footer / Pagination -->
+<div class="px-8 py-4 bg-surface-container-low/20 flex items-center justify-between border-t border-surface-container-low">
+<p class="text-xs font-medium text-outline">Showing <span class="text-on-surface">1-4</span> of <span class="text-on-surface">1,284</span> candidates</p>
+<div class="flex items-center gap-2">
+<button class="p-1.5 rounded-lg border border-outline-variant/30 hover:bg-white transition-all disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined text-lg" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary text-xs font-bold flex items-center justify-center shadow-md shadow-primary/20">1</button>
+<button class="w-8 h-8 rounded-lg hover:bg-white border border-transparent hover:border-outline-variant/30 text-xs font-bold transition-all">2</button>
+<button class="w-8 h-8 rounded-lg hover:bg-white border border-transparent hover:border-outline-variant/30 text-xs font-bold transition-all">3</button>
+<span class="px-2 text-outline">...</span>
+<button class="w-8 h-8 rounded-lg hover:bg-white border border-transparent hover:border-outline-variant/30 text-xs font-bold transition-all">32</button>
+<button class="p-1.5 rounded-lg border border-outline-variant/30 hover:bg-white transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Branch Details & Map Asymmetric Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Branch Performance Cards -->
+<div class="lg:col-span-2 space-y-6">
+<h3 class="text-xl font-bold font-['Manrope']">Branch Performance Comparison</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-sm">North Campus</span>
+<span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded">High Traffic</span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-xs">
+<span class="text-outline">Conversion Rate</span>
+<span class="font-bold">68%</span>
+</div>
+<div class="w-full h-1.5 bg-white rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 68%"></div>
+</div>
+<div class="flex justify-between items-center text-xs">
+<span class="text-outline">Avg. Days to Hire</span>
+<span class="font-bold">14 days</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
+<div class="flex items-center justify-between mb-4">
+<span class="font-bold text-sm">West Industrial</span>
+<span class="text-xs font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">Steady</span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-xs">
+<span class="text-outline">Conversion Rate</span>
+<span class="font-bold">42%</span>
+</div>
+<div class="w-full h-1.5 bg-white rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 42%"></div>
+</div>
+<div class="flex justify-between items-center text-xs">
+<span class="text-outline">Avg. Days to Hire</span>
+<span class="font-bold">22 days</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Branch Geo Location (Placeholder / Card) -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/10 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h3 class="font-bold text-sm uppercase tracking-widest text-outline">Regional Distribution</h3>
+<span class="material-symbols-outlined text-primary" data-icon="map">map</span>
+</div>
+<div class="relative h-48 w-full rounded-xl overflow-hidden bg-surface-container-high">
+<img alt="Branch Map" class="w-full h-full object-cover grayscale opacity-50 contrast-125" data-alt="Abstract aerial satellite map visualization of a city with blue and slate color grading, minimal and professional data aesthetic" data-location="Chicago" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRCe3vc47ZRDY9wCaJB7BpISzC4DMFXCjJNlDLCnVpvW_TZNrQO7X9yHfu7kmsizZWTNxGDOu_mEM7ig8drfYLTtkk7rLSst9Q9HkT6epvrpMXeIHqtBXDjeMJe8_3OlJZ7H7MO4vWae9Tof2pZtOsU4ro3GgEoU0FVtwVZUlyry_BM20rodS70J_GjIgWlXbc7S5E6ubuqp2IyXOBSQ_bicVvXtFrSrQfy76TNWDEVOKhst73uOuORr8l2yY3898_tQVQl6a9YtI"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent"></div>
+<!-- Decorative Map Markers -->
+<div class="absolute top-1/4 left-1/3 w-3 h-3 bg-primary rounded-full border-2 border-white shadow-lg animate-pulse"></div>
+<div class="absolute top-2/3 left-1/2 w-3 h-3 bg-primary rounded-full border-2 border-white shadow-lg"></div>
+<div class="absolute top-1/2 right-1/4 w-3 h-3 bg-primary rounded-full border-2 border-white shadow-lg"></div>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between py-2 border-b border-surface-container-low">
+<span class="text-xs font-medium text-outline">Central Region</span>
+<span class="text-xs font-bold">12 Branches</span>
+</div>
+<div class="flex items-center justify-between py-2">
+<span class="text-xs font-medium text-outline">Pacific Northwest</span>
+<span class="text-xs font-bold">5 Branches</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (FAB) - Suppressed per rules on this management screen unless contextual -->
+<!-- Determined not to render as primary 'Send to Branch' is already in the main header/content -->
+</body></html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { background-color: #fdf6f0; font-family: Arial, sans-serif; margin: 0; }
+    .login-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #fdf6f0;}
+    .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); width: 400px; position: relative; }
+    .login-logo { text-align: center; margin-bottom: 20px; }
+    .login-logo img { height: 50px; }
+    .login-card h4 { color: #333; font-weight: bold; margin-bottom: 5px; font-size: 20px;}
+    .login-card p { color: #777; font-size: 13px; margin-bottom: 25px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 11px; font-weight: bold; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;}
+    .form-control-custom { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 12px; outline: none; font-size: 15px;}
+    .form-control-custom:focus { border-color: #e3242b; }
+    .btn-red { background-color: #e3242b; color: white; border-radius: 12px; padding: 14px; font-weight: bold; width: 100%; border: none; font-size: 16px; cursor: pointer; transition: 0.3s;}
+    .btn-red:hover { background-color: #c01b20; }
+
+    .app-wrapper { display: none; }
+    .header-bar { background: #004a99; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .header-bar span { font-weight: bold; }
+    .btn-logout { background: transparent; border: 1px solid white; color: white; border-radius: 5px; padding: 5px 15px; font-size: 12px;}
+    .search-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 20px auto; max-width: 900px;}
+    .split-container { display: flex; gap: 15px; height: 75vh; display: none; margin: 0 20px;}
+    .panel-left { flex: 1; background: white; border-radius: 8px; padding: 25px; overflow-y: auto; border: 1px solid #ccc;}
+    .panel-right { flex: 1.2; background: white; border-radius: 8px; overflow-y: auto; border: 1px solid #ccc; padding: 15px;}
+    
+    .cv-box { background: #f8f9fa; border: 2px dashed #004a99; border-radius: 8px; padding: 20px; margin-top: 25px; }
+    .info-line { font-size: 14px; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 8px;}
+    .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: bold; margin-top: 20px; margin-bottom: 10px;}
+    
+    .custom-form-container { font-size: 13px; }
+    .form-title { color: red; font-weight: bold; text-align: center; padding-bottom: 10px; border-bottom: 2px solid #000; margin-bottom: 15px;}
+    .table-form { width: 100%; border-collapse: collapse; }
+    .table-form td { border: 1px solid #000; padding: 6px; vertical-align: middle; }
+    .bg-yellow { background-color: #fff2cc; font-weight: bold; width: 140px; }
+    .bg-green { background-color: #d9ead3; font-weight: bold; }
+    .bg-blue { background-color: #cfe2f3; font-weight: bold; }
+    .table-form input, .table-form textarea { width: 100%; border: none; background: transparent; outline: none; }
+    .table-form textarea { height: 50px; resize: none;}
+    .loading { display: none; color: #004a99; font-weight: bold; margin-top: 10px; text-align: center;}
+  </style>
+</head>
+<body>
+
+  <div id="loginScreen" class="login-wrapper">
+    <div class="login-card">
+      <div class="login-logo"><h2 style="color:#e3242b; font-weight:900; margin:0;">ACE HRM</h2></div>
+      <h4>Đăng nhập hệ thống</h4><p>Quản lý nhân sự • công việc • báo cáo</p>
+      <div class="form-group"><label>TÀI KHOẢN (CHI NHÁNH)</label><select id="loginBranch" class="form-control-custom"><option value="">Đang tải...</option></select></div>
+      <div class="form-group"><label>MẬT KHẨU</label><input type="password" id="loginPassword" class="form-control-custom" placeholder="Nhập mật khẩu"></div>
+      <button id="btnLogin" class="btn-red" onclick="doLogin()">Đăng nhập →</button>
+      <div id="loginError" class="text-danger mt-2 text-center fw-bold" style="font-size:12px;"></div>
+    </div>
+  </div>
+
+  <div id="appScreen" class="app-wrapper">
+    <div class="header-bar">
+      <span>HỆ THỐNG PHỎNG VẤN ACE-PNS</span>
+      <div><span id="displayBranchName" class="me-3"></span><button class="btn-logout" onclick="doLogout()">Đăng xuất</button></div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="search-section">
+        <div class="row align-items-end">
+          <div class="col-md-9">
+            <label class="form-label fw-bold">Danh sách Hồ sơ chờ Phỏng vấn</label>
+            <select id="candidateList" class="form-control-custom" style="padding: 10px;"><option value="">-- Đang tải dữ liệu... --</option></select>
+          </div>
+          <div class="col-md-3">
+            <button onclick="doSearch()" id="btnSearch" class="btn btn-primary w-100 fw-bold" style="padding:10px;">XEM HỒ SƠ</button>
+          </div>
+        </div>
+        <div id="loading" class="loading">Đang tải dữ liệu...</div>
+      </div>
+
+      <div id="mainView" class="split-container">
+        <div class="panel-left">
+          <h5 class="text-primary fw-bold border-bottom pb-2 mb-3">CHI TIẾT HỒ SƠ ỨNG VIÊN</h5>
+          
+          <div class="section-title">1. Thông tin cá nhân</div>
+          <div class="info-line"><strong>Họ và tên:</strong> <span id="lbl_name" class="text-danger fw-bold fs-5"></span></div>
+          <div class="info-line"><strong>Ngày sinh:</strong> <span id="lbl_dob"></span> &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Giới tính:</strong> <span id="lbl_gender"></span></div>
+          <div class="info-line"><strong>Số điện thoại:</strong> <span id="lbl_phone" class="text-primary fw-bold"></span></div>
+          <div class="info-line"><strong>Email:</strong> <span id="lbl_email"></span></div>
+          <div class="info-line"><strong>Địa chỉ:</strong> <span id="lbl_address"></span></div>
+          <div class="info-line"><strong>Loại nhà ở:</strong> <span id="lbl_housing" class="fw-bold text-secondary"></span></div>
+
+          <div class="section-title">2. Chuyên môn & Nhu cầu</div>
+          <div class="info-line"><strong>Vị trí ứng tuyển:</strong> <span id="lbl_position" class="text-success fw-bold"></span></div>
+          <div class="info-line"><strong>Trường tốt nghiệp:</strong> <span id="lbl_uni"></span></div>
+          <div class="info-line"><strong>Chuyên ngành:</strong> <span id="lbl_major"></span></div>
+          <div class="info-line"><strong>Kinh nghiệm:</strong> <span id="lbl_exp"></span></div>
+          <div class="info-line"><strong>Nơi làm việc cũ:</strong> <span id="lbl_oldCompany"></span></div>
+          <div class="info-line"><strong>Lý do nghỉ việc:</strong> <span id="lbl_reason" class="fst-italic text-danger"></span></div>
+          <div class="info-line"><strong>Miêu tả bản thân:</strong> <br><span id="lbl_describe" class="fst-italic" style="display:inline-block; margin-top:5px; white-space: pre-wrap; color: #555;"></span></div>
+          <div class="info-line"><strong>Mong muốn/Đề xuất:</strong> <span id="lbl_expect" class="fst-italic text-success"></span></div>
+          
+          <div class="info-line"><strong>Thời gian làm việc:</strong> <br><span id="lbl_time" style="color:#e67e22; white-space: pre-wrap; display: inline-block; margin-top:5px;"></span></div>
+          <div class="info-line"><strong>Mức lương mong muốn:</strong> <br><span id="lbl_salaryWant" class="fw-bold" style="white-space: pre-wrap; display: inline-block; margin-top:5px;"></span></div>
+
+          <div class="cv-box">
+              <h6 class="mb-3 text-primary text-center fw-bold">TÀI LIỆU ĐÍNH KÈM</h6>
+              
+              <div class="mb-3">
+                <strong>1. CV Ứng viên:</strong><br>
+                <a id="btnOpenCv" href="#" target="_blank" class="btn btn-primary btn-sm mt-1 fw-bold w-100" style="display:none; padding: 10px;">MỞ XEM CV</a>
+                <span id="noCvText" class="text-danger fst-italic" style="display:inline-block; margin-top:5px;">(Không có thông tin này)</span>
+              </div>
+
+              <div>
+                <strong>2. Video Giới thiệu:</strong><br>
+                <a id="btnOpenVideo" href="#" target="_blank" class="btn btn-success btn-sm mt-1 fw-bold w-100" style="display:none; padding: 10px;">MỞ XEM VIDEO</a>
+                <span id="noVideoText" class="text-danger fst-italic" style="display:inline-block; margin-top:5px;">(Không có thông tin này)</span>
+              </div>
+          </div>
+        </div>
+
+        <div class="panel-right custom-form-container">
+          <div class="form-title">FORM DÀNH CHO NGƯỜI PHỎNG VẤN (FORM FOR INTERVIEWER)</div>
+          <table class="table-form">
+            <tr>
+              <td class="bg-yellow">Họ và Tên</td>
+              <td><input type="text" id="f_name" readonly style="font-weight:bold; color:blue;"></td>
+              <td rowspan="3" style="text-align:center; color:#999; width: 120px;"><i>Ảnh chụp<br>ứng viên</i></td>
+            </tr>
+            <tr>
+              <td class="bg-yellow">Vị trí ứng tuyển:</td>
+              <td><input type="text" id="f_position" readonly></td>
+            </tr>
+            <tr>
+              <td class="bg-yellow">Số điện thoại:</td>
+              <td><input type="text" id="f_phone" readonly></td>
+            </tr>
+            <tr>
+              <td class="bg-yellow">Nơi ở hiện tại:</td>
+              <td colspan="2"><input type="text" id="f_address"></td>
+            </tr>
+            <tr>
+              <td class="bg-yellow">Loại nhà ở:</td>
+              <td colspan="2"><input type="text" id="f_housing" readonly style="color:#555; background:#f9f9f9; font-style:italic;"></td>
+            </tr>
+            <tr>
+              <td class="bg-yellow">Lý do nghỉ việc:</td>
+              <td colspan="2"><input type="text" id="f_reason" readonly style="color:#555; background:#f9f9f9; font-style:italic;"></td>
+            </tr>
+            <tr>
+              <td class="bg-yellow">Tốt nghiệp trường:</td>
+              <td><input type="text" id="f_school"></td>
+              <td class="bg-yellow" style="width: auto;">Chuyên ngành: <input type="text" id="f_major" style="width:100px; border-bottom:1px solid #ccc;"></td>
+            </tr>
+            <tr>
+              <td class="bg-yellow" rowspan="2">Bằng cấp liên quan:</td>
+              <td>Bằng TN: <input type="text" id="f_degree" style="width:70%; border-bottom:1px solid #ccc;"></td>
+              <td class="bg-yellow">IELTS/TOEIC: <input type="text" id="f_engCert" style="border-bottom:1px solid #000;"></td>
+            </tr>
+            <tr>
+              <td>TESOL: <input type="text" id="f_tesol" style="width:70%; border-bottom:1px solid #ccc;"></td>
+              <td class="bg-yellow">NV Sư phạm: <input type="text" id="f_pedagogy" style="border-bottom:1px solid #000;"></td>
+            </tr>
+            <tr>
+              <td class="bg-yellow" rowspan="4">Nhận xét chi tiết:</td>
+              <td colspan="2">Trình độ Tiếng Anh: <input type="text" id="f_engLevel" style="width:40px; border-bottom:1px solid #ccc; text-align:center;"> /10. Ghi chú: <input type="text" id="f_engNote" style="width: 50%; border-bottom:1px solid #ccc;"></td>
+            </tr>
+            <tr>
+              <td colspan="2">Ngoại hình: <input type="text" id="f_appearance" style="border-bottom:1px solid #ccc;"></td>
+            </tr>
+            <tr>
+              <td colspan="2">Kinh nghiệm: <textarea id="f_experience"></textarea></td>
+            </tr>
+            <tr>
+              <td colspan="2">Ghi chú thêm: <textarea id="f_note"></textarea></td>
+            </tr>
+            <tr>
+              <td class="bg-green">Mức lương mong muốn:</td>
+              <td><input type="text" id="f_salaryWant"></td>
+              <td class="bg-green">Lương thỏa thuận: <input type="text" id="f_salaryOk" style="border-bottom:1px solid #000;"></td>
+            </tr>
+            <tr>
+              <td class="bg-blue">Mức lương thử việc:</td>
+              <td><input type="text" id="f_salaryProb"></td>
+              <td class="bg-blue">Thời gian thử việc: <input type="text" id="f_timeProb" style="border-bottom:1px solid #000;"></td>
+            </tr>
+          </table>
+          <input type="text" id="f_interviewer" class="form-control mt-3" placeholder="Nhập tên người phỏng vấn..." style="border: 1px solid #ccc; padding: 8px;">
+          <button class="btn-red mt-3" id="btnSubmit" onclick="submitInterview()">LƯU KẾT QUẢ PHỎNG VẤN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let loggedInBranch = "";
+
+    window.onload = function() {
+      google.script.run.withSuccessHandler(function(list) {
+        let select = document.getElementById('loginBranch');
+        select.innerHTML = '<option value="">-- Chọn chi nhánh của bạn --</option>';
+        list.forEach(item => select.innerHTML += `<option value="${item}">${item}</option>`);
+      }).getBranches();
+    };
+
+    function doLogin() {
+      const branch = document.getElementById('loginBranch').value;
+      const pass = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('btnLogin');
+      const err = document.getElementById('loginError');
+
+      if(!branch || !pass) { err.innerText = "Vui lòng nhập đủ thông tin!"; return; }
+      btn.innerText = "Đang kiểm tra...";
+      btn.disabled = true;
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.innerText = "Đăng nhập →";
+        btn.disabled = false;
+        if(res.success) {
+          loggedInBranch = branch;
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('appScreen').style.display = 'block';
+          document.getElementById('displayBranchName').innerText = "Chi nhánh: " + branch;
+          loadUninterviewedCandidates(); 
+        } else {
+          err.innerText = res.message;
+        }
+      }).verifyLogin(branch, pass);
+    }
+
+    function doLogout() {
+      loggedInBranch = "";
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('appScreen').style.display = 'none';
+      document.getElementById('mainView').style.display = 'none';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function loadUninterviewedCandidates() {
+      const candidateSelect = document.getElementById('candidateList');
+      const btnSearch = document.getElementById('btnSearch');
+      const loading = document.getElementById('loading');
+
+      candidateSelect.innerHTML = '<option value="">-- Đang tải dữ liệu... --</option>';
+      candidateSelect.disabled = true;
+      btnSearch.disabled = true;
+      loading.style.display = 'block';
+
+      google.script.run.withSuccessHandler(function(list) {
+        loading.style.display = 'none';
+        if (list.length === 0) {
+          candidateSelect.innerHTML = '<option value="">(Tuyệt vời! Không còn hồ sơ nào chờ phỏng vấn)</option>';
+        } else {
+          candidateSelect.innerHTML = '<option value="">-- Chọn ứng viên cần xem --</option>';
+          list.forEach(item => {
+            candidateSelect.innerHTML += `<option value="${item.rowIndex}">${item.name} - ${item.position}</option>`;
+          });
+          candidateSelect.disabled = false;
+          btnSearch.disabled = false;
+        }
+      }).getCandidatesByBranch(loggedInBranch);
+    }
+
+    function doSearch() {
+      const rowIndex = document.getElementById('candidateList').value;
+      if(!rowIndex) return alert("Vui lòng chọn 1 ứng viên!");
+      
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('mainView').style.display = 'none';
+
+      google.script.run.withSuccessHandler(function(data) {
+        document.getElementById('loading').style.display = 'none';
+        if (data) {
+          document.getElementById('f_name').value = data["Họ và tên ứng viên"] || "";
+          document.getElementById('f_position').value = data["Vị trí ứng tuyển"] || "";
+          document.getElementById('f_phone').value = data["Số điện thoại"] || "";
+          document.getElementById('f_address').value = data["Địa chỉ"] || "";
+          document.getElementById('f_school').value = data["Trường"] || "";
+          document.getElementById('f_major').value = data["Chuyên ngành"] || "";
+          document.getElementById('f_housing').value = data["Loại nhà ở"] || "";
+          document.getElementById('f_reason').value = data["Lý do nghỉ việc"] || "";
+          
+          document.getElementById('lbl_name').innerText = data["Họ và tên ứng viên"] || "---";
+          document.getElementById('lbl_dob').innerText = data["Ngày sinh"] || "---";
+          document.getElementById('lbl_gender').innerText = data["Giới tính"] || "---";
+          document.getElementById('lbl_position').innerText = data["Vị trí ứng tuyển"] || "---";
+          document.getElementById('lbl_phone').innerText = data["Số điện thoại"] || "---";
+          document.getElementById('lbl_address').innerText = data["Địa chỉ"] || "---";
+          document.getElementById('lbl_uni').innerText = data["Trường"] || "---";
+          document.getElementById('lbl_major').innerText = data["Chuyên ngành"] || "---";
+          document.getElementById('lbl_exp').innerText = data["Kinh nghiệm"] || "---";
+          
+          document.getElementById('lbl_email').innerText = data["Email"] || "---";
+          document.getElementById('lbl_oldCompany').innerText = data["Công ty cũ"] || "---";
+          document.getElementById('lbl_describe').innerText = data["Miêu tả bản thân"] || "---";
+
+          document.getElementById('lbl_time').innerText = data["Thời gian rảnh"] || "---";
+          document.getElementById('lbl_salaryWant').innerText = data["Lương mong muốn"] || "---";
+          document.getElementById('lbl_housing').innerText = data["Loại nhà ở"] || "---";
+          document.getElementById('lbl_reason').innerText = data["Lý do nghỉ việc"] || "---";
+          document.getElementById('lbl_expect').innerText = data["Mong muốn/Đề xuất"] || "---";
+
+          // Xử lý nút CV
+          const cvUrl = data["Link CV"];
+          if(cvUrl && cvUrl.toString().trim() !== "") {
+             document.getElementById('btnOpenCv').href = cvUrl;
+             document.getElementById('btnOpenCv').style.display = 'inline-block';
+             document.getElementById('noCvText').style.display = 'none';
+          } else {
+             document.getElementById('btnOpenCv').style.display = 'none';
+             document.getElementById('noCvText').style.display = 'inline-block';
+          }
+
+          // Xử lý nút Video
+          const videoUrl = data["Link Video"];
+          if(videoUrl && videoUrl.toString().trim() !== "") {
+             document.getElementById('btnOpenVideo').href = videoUrl;
+             document.getElementById('btnOpenVideo').style.display = 'inline-block';
+             document.getElementById('noVideoText').style.display = 'none';
+          } else {
+             document.getElementById('btnOpenVideo').style.display = 'none';
+             document.getElementById('noVideoText').style.display = 'inline-block';
+          }
+
+          document.getElementById('mainView').style.display = 'flex';
+        }
+      }).getCandidateDetails(rowIndex);
+    }
+
+    function submitInterview() {
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.innerText = "Đang lưu dữ liệu...";
+
+      const formData = {
+        branch: loggedInBranch,
+        name: document.getElementById('f_name').value,
+        position: document.getElementById('f_position').value,
+        phone: document.getElementById('f_phone').value,
+        address: document.getElementById('f_address').value,
+        school: document.getElementById('f_school').value,
+        major: document.getElementById('f_major').value,
+        degree: document.getElementById('f_degree').value,
+        engCert: document.getElementById('f_engCert').value,
+        tesol: document.getElementById('f_tesol').value,
+        pedagogy: document.getElementById('f_pedagogy').value,
+        engLevel: document.getElementById('f_engLevel').value + " - " + document.getElementById('f_engNote').value,
+        appearance: document.getElementById('f_appearance').value,
+        experience: document.getElementById('f_experience').value,
+        note: document.getElementById('f_note').value,
+        salaryWant: document.getElementById('f_salaryWant').value,
+        salaryOk: document.getElementById('f_salaryOk').value,
+        salaryProb: document.getElementById('f_salaryProb').value,
+        timeProb: document.getElementById('f_timeProb').value,
+        interviewer: document.getElementById('f_interviewer').value
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        alert(res);
+        btn.disabled = false;
+        btn.innerText = "LƯU KẾT QUẢ PHỎNG VẤN";
+        if(res.includes("thành công")) {
+           document.querySelectorAll('.table-form input:not([readonly]), .table-form textarea').forEach(el => el.value = '');
+           document.getElementById('f_interviewer').value = '';
+           document.getElementById('mainView').style.display = 'none';
+           loadUninterviewedCandidates(); 
+        }
+      }).saveInterviewResult(formData);
+    }
+  </script>
+</body>
+</html>

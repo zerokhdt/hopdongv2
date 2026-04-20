@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #f9fafb; padding: 25px; border-radius: 0 0 8px 8px; }
+    .info-row { margin-bottom: 12px; }
+    .label { font-weight: bold; color: #4b5563; min-width: 140px; display: inline-block; }
+    .action-btn { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; 
+      text-decoration: none; border-radius: 6px; margin-top: 20px; font-weight: bold; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>ACE HRM - Thông báo ứng viên mới</h2>
+    </div>
+    <div class="content">
+      <p>Xin chào Chi nhánh <strong>{{branch_name}}</strong>,</p>
+      <p>Hệ thống ACE HRM vừa nhận được hồ sơ ứng viên mới cần bạn review:</p>
+      
+      <div style="background: white; padding: 18px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2563eb;">
+        <div class="info-row"><span class="label">Họ và tên:</span> {{candidate_name}}</div>
+        <div class="info-row"><span class="label">Vị trí ứng tuyển:</span> {{position}}</div>
+        <div class="info-row"><span class="label">Số điện thoại:</span> {{phone}}</div>
+        <div class="info-row"><span class="label">Email:</span> {{email}}</div>
+        <div class="info-row"><span class="label">Thời gian apply:</span> {{applied_at}}</div>
+      </div>
+
+      <p><strong>📋 Hồ sơ đính kèm:</strong></p>
+      <ul>
+        <li><a href="{{cv_url}}">Xem CV của ứng viên</a></li>
+        {{#if video_url}}<li><a href="{{video_url}}">Xem video giới thiệu</a></li>{{/if}}
+      </ul>
+
+      <p>Vui lòng review hồ sơ và cập nhật trạng thái trong hệ thống ACE HRM:</p>
+      <a href="https://script.google.com/macros/s/{{script_id}}/exec?branch={{branch_name}}" 
+         class="action-btn" target="_blank">
+        🔍 Truy cập hệ thống
+      </a>
+
+      <div class="footer">
+        <p>Đây là email tự động từ hệ thống ACE HRM. Vui lòng không reply email này.</p>
+        <p>📞 Hotline hỗ trợ: 0988 888 888 | ✉️ Email: ace.hrm@gmail.com</p>
+        <div style="font-size: 11px; color: #cbd5e1; text-align: center; margin-top: 10px;">
+          [Ref: CID-{{candidate_id}}]
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

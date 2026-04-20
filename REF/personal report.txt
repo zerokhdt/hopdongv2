@@ -1,0 +1,748 @@
+import React, { useMemo, useState } from 'react';
+import { Printer, Eye, X, FileText, BarChart3, Users, Briefcase, GraduationCap, CalendarClock, AlertTriangle, RefreshCw, Filter } from 'lucide-react';
+import {
+  differenceInMonths,
+  differenceInDays,
+  endOfMonth,
+  format,
+  isValid,
+  parseISO,
+  startOfMonth,
+} from 'date-fns';
+
+// Mock component RCC để code có thể chạy độc lập. 
+// Trong dự án thật, bạn có thể uncomment dòng import bên dưới và xóa mock này.
+// import RCC from './report/RCC';
+const RCC = ({ employees, initialBranch }) => (
+  <div className="p-8 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-[24px] bg-slate-50/50 mt-4">
+    <BarChart3 size={36} className="mx-auto mb-3 opacity-30" />
+    <h3 className="font-black text-lg uppercase tracking-widest text-slate-500 mb-1">Báo cáo RCC</h3>
+    <p className="font-bold text-xs">Module Trung tâm điều hành tái ký sẽ được hiển thị tại đây.</p>
+  </div>
+);
+
+const REPORTS = [
+  { id: 'RCC', label: 'Trung tâm điều hành tái ký', icon: <RefreshCw size={16} /> },
+  { id: 'BRANCH', label: 'Báo cáo nhân sự chi nhánh', icon: <Users size={16} /> },
+  { id: 'POSITION', label: 'Báo cáo theo chức vụ', icon: <Briefcase size={16} /> },
+  { id: 'SENIORITY', label: 'Báo cáo theo thâm niên', icon: <BarChart3 size={16} /> },
+  { id: 'EDUCATION', label: 'Báo cáo theo bằng cấp', icon: <GraduationCap size={16} /> },
+  { id: 'CONTRACT_EXPIRING', label: 'HĐ sắp tới hạn trong tháng', icon: <CalendarClock size={16} /> },
+  { id: 'GAP_ANALYSIS', label: 'Danh sách hồ sơ thiếu', icon: <AlertTriangle size={16} /> },
+  { id: 'TURNOVER_RATE', label: 'Chỉ số Biến động (Turnover)', icon: <BarChart3 size={16} /> }
+];
+
+function parseDate(dateStr) {
+  if (!dateStr || typeof dateStr !== 'string') return null;
+  const d = parseISO(dateStr);
+  if (!isValid(d)) return null;
+  return d;
+}
+
+function getSeniorityMonths(startDate) {
+  const start = parseDate(startDate);
+  if (!start) return null;
+  const months = differenceInMonths(new Date(), start);
+  return Number.isFinite(months) ? Math.max(0, months) : null;
+}
+
+function formatSeniority(startDate) {
+  const months = getSeniorityMonths(startDate);
+  if (months === null) return '---';
+  const years = Math.floor(months / 12);
+  const remain = months % 12;
+  if (years === 0) return `${remain} tháng`;
+  if (remain === 0) return `${years} năm`;
+  return `${years} năm ${remain} tháng`;
+}
+
+function seniorityBucket(months) {
+  if (months === null) return 'Chưa có ngày vào';
+  if (months < 6) return 'Dưới 6 tháng';
+  if (months < 12) return '6–12 tháng';
+  if (months < 36) return '1–3 năm';
+  if (months < 60) return '3–5 năm';
+  return 'Trên 5 năm';
+}
+
+function normalizeText(v) {
+  return String(v || '').trim();
+}
+
+function canonicalPositionKey(v) {
+  const t = normalizeText(v)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!t) return '';
+  if (t.includes('fulltime') || t.includes('full time')) return 'fulltime';
+  if (t.includes('thinh gian') || t.includes('thinh giang')) return 'thinh giang';
+  return t;
+}
+
+function canonicalPositionLabel(v) {
+  const key = canonicalPositionKey(v);
+  if (key === 'fulltime') return 'Fulltime';
+  if (key === 'thinh giang') return 'Thỉnh giảng';
+  return normalizeText(v) || 'Chưa cập nhật';
+}
+
+function normalizeEducation(v) {
+  const t = normalizeText(v);
+  if (!t) return 'Chưa cập nhật';
+  return t
+    .replace(/\s+/g, ' ')
+    .replace(/\u00A0/g, ' ')
+    .toUpperCase();
+}
+
+function normalizeGender(v) {
+  const t = normalizeText(v).toLowerCase();
+  if (!t) return '---';
+  if (/(^|\b)(mr|nam)\b/.test(t)) return 'Nam';
+  if (/(^|\b)(ms|mrs|nữ|nu)\b/.test(t)) return 'Nữ';
+  return normalizeText(v);
+}
+
+export default function PersonnelReportView({ employees = [], branches = [] }) {
+  const [reportId, setReportId] = useState('BRANCH');
+  const [branch, setBranch] = useState('ALL');
+  const [q, setQ] = useState('');
+
+  const [positionFilter, setPositionFilter] = useState('ALL');
+  const [educationFilter, setEducationFilter] = useState('ALL');
+  const [seniorityFilter, setSeniorityFilter] = useState('ALL');
+  const [contractMonth, setContractMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
+
+  const filtered = useMemo(() => {
+    let list = employees;
+    if (branch !== 'ALL') {
+      list = list.filter(e => e.department === branch);
+    }
+    if (q.trim()) {
+      const s = q.trim().toLowerCase();
+      list = list.filter(e =>
+        (e.name || '').toLowerCase().includes(s) ||
+        (e.position || '').toLowerCase().includes(s) ||
+        (e.department || '').toLowerCase().includes(s)
+      );
+    }
+    if (positionFilter !== 'ALL') {
+      list = list.filter(e => canonicalPositionKey(e.position) === positionFilter);
+    }
+    if (educationFilter !== 'ALL') {
+      list = list.filter(e => normalizeEducation(e.education) === educationFilter);
+    }
+    if (seniorityFilter !== 'ALL') {
+      list = list.filter(e => seniorityBucket(getSeniorityMonths(e.startDate)) === seniorityFilter);
+    }
+    return list;
+  }, [employees, branch, q, positionFilter, educationFilter, seniorityFilter]);
+
+  const positionOptions = useMemo(() => {
+    const map = new Map();
+    employees.forEach(e => {
+      const key = canonicalPositionKey(e.position);
+      if (!key) return;
+      if (!map.has(key)) map.set(key, canonicalPositionLabel(e.position));
+    });
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [employees]);
+
+  const educationOptions = useMemo(() => {
+    const set = new Set();
+    employees.forEach(e => {
+      set.add(normalizeEducation(e.education));
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [employees]);
+
+  const seniorityOptions = useMemo(() => {
+    const buckets = new Set();
+    employees.forEach(e => buckets.add(seniorityBucket(getSeniorityMonths(e.startDate))));
+    const order = ['Dưới 6 tháng', '6–12 tháng', '1–3 năm', '3–5 năm', 'Trên 5 năm', 'Chưa có ngày vào'];
+    return Array.from(buckets).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  }, [employees]);
+
+  const contractExpiringList = useMemo(() => {
+    const [y, m] = contractMonth.split('-').map(Number);
+    if (!y || !m) return [];
+    const start = startOfMonth(new Date(y, m - 1, 1));
+    const end = endOfMonth(start);
+
+    return filtered
+      .map(e => {
+        const renew = parseDate(e.renewDate);
+        return { e, renew };
+      })
+      .filter(x => x.renew && x.renew >= start && x.renew <= end)
+      .sort((a, b) => a.renew - b.renew);
+  }, [filtered, contractMonth]);
+
+  const positionSummary = useMemo(() => {
+    const map = new Map();
+    filtered.forEach(e => {
+      const key = canonicalPositionLabel(e.position);
+      map.set(key, (map.get(key) || 0) + 1);
+    });
+    return Array.from(map.entries())
+      .map(([k, v]) => ({ key: k, count: v }))
+      .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+  }, [filtered]);
+
+  const senioritySummary = useMemo(() => {
+    const map = new Map();
+    filtered.forEach(e => {
+      const key = seniorityBucket(getSeniorityMonths(e.startDate));
+      map.set(key, (map.get(key) || 0) + 1);
+    });
+    const order = ['Dưới 6 tháng', '6–12 tháng', '1–3 năm', '3–5 năm', 'Trên 5 năm', 'Chưa có ngày vào'];
+    return Array.from(map.entries())
+      .map(([k, v]) => ({ key: k, count: v }))
+      .sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+  }, [filtered]);
+
+  const gapAnalysisList = useMemo(() => {
+    return filtered.filter(e => {
+      return e.checklist_status === false || e.checklist_status === 'FALSE' || !e.pdf_url || e.document_status === 'MISSING';
+    }).map(e => ({
+      ...e,
+      missingReason: (!e.pdf_url) ? 'Thiếu Scan PDF' : 'Thiếu Checklist Gốc'
+    }));
+  }, [filtered]);
+
+  const turnoverStats = useMemo(() => {
+    const resigned = employees.filter(e => e.status === 'RESIGNED' || e.status === 'APPROVED_RESIGNED' || e.resignedDate);
+    const active = employees.length - resigned.length;
+    const avg = active > 0 ? active : 1;
+    const rate = ((resigned.length / avg) * 100).toFixed(1);
+
+    const branchResignMap = new Map();
+    resigned.forEach(e => {
+      const b = e.department || 'Unknown';
+      branchResignMap.set(b, (branchResignMap.get(b) || 0) + 1);
+    });
+
+    return {
+      rate,
+      totalResigned: resigned.length,
+      byBranch: Array.from(branchResignMap.entries())
+        .map(([k, v]) => ({ branch: k, count: v }))
+        .sort((a, b) => b.count - a.count)
+    };
+  }, [employees]);
+
+  const educationSummary = useMemo(() => {
+    const map = new Map();
+    filtered.forEach(e => {
+      const key = normalizeEducation(e.education);
+      map.set(key, (map.get(key) || 0) + 1);
+    });
+    return Array.from(map.entries())
+      .map(([k, v]) => ({ key: k, count: v }))
+      .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+  }, [filtered]);
+
+  const groupedByPosition = useMemo(() => {
+    const map = new Map();
+    filtered.forEach(e => {
+      const key = canonicalPositionLabel(e.position);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(e);
+    });
+    return Array.from(map.entries())
+      .map(([key, list]) => ({
+        position: key,
+        employees: list
+          .slice()
+          .sort((a, b) => (a.department || '').localeCompare(b.department || '') || (a.name || '').localeCompare(b.name || '')),
+      }))
+      .sort((a, b) => b.employees.length - a.employees.length || a.position.localeCompare(b.position));
+  }, [filtered]);
+
+  const reportTitle = useMemo(() => {
+    const base = REPORTS.find(r => r.id === reportId)?.label || 'Báo cáo nhân sự';
+    if (branch === 'ALL') return base;
+    return `${base} - ${branch}`;
+  }, [reportId, branch]);
+
+  const handlePrint = () => window.print();
+
+  // ---------------- REPORT BODY (THE PRINTABLE AREA) ----------------
+  const reportBody = (
+    <div className="p-6 lg:p-10 min-w-[800px] max-w-5xl mx-auto bg-white print:p-0 print:shadow-none print:bg-transparent">
+      
+      {/* Report Header Reduced Size (Tiêu đề đã được thu nhỏ) */}
+      <div className="flex justify-between items-start mb-6 border-b-2 border-slate-900 pb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-[12px] bg-slate-900 flex items-center justify-center shadow-md shadow-slate-200">
+            <BarChart3 size={20} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg lg:text-xl font-black tracking-tighter uppercase text-slate-900 leading-none">{reportTitle}</h1>
+            <p className="text-[10px] font-black text-[#E11920] tracking-[0.3em] uppercase mt-1.5">ACE HRM SYSTEM</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Ngày lập báo cáo</p>
+          <p className="text-sm font-black text-slate-900">{format(new Date(), 'dd/MM/yyyy')}</p>
+          <div className="mt-1.5 inline-block px-3 py-1 bg-slate-100 rounded-md border border-slate-200">
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Tổng NV: <span className="text-indigo-600 text-[11px] ml-1">{filtered.length}</span></p>
+          </div>
+        </div>
+      </div>
+
+      {reportId === 'RCC' && (
+        <RCC employees={employees} initialBranch={branch} />
+      )}
+
+      {reportId === 'BRANCH' && (
+        <div className="bg-white rounded-[16px] border-2 border-slate-100 overflow-hidden print:border-slate-300 print:rounded-none">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b-2 border-slate-100 print:bg-slate-100 print:border-slate-300">
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4 w-12 text-center">STT</th>
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Họ và Tên</th>
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Chức vụ</th>
+                {branch === 'ALL' && <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Chi nhánh</th>}
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Ngày vào</th>
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Thâm niên</th>
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Bằng cấp</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50 print:divide-slate-200">
+              {filtered.map((emp, idx) => (
+                <tr key={emp.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 px-4 text-xs font-black text-slate-400 text-center">{idx + 1}</td>
+                  <td className="py-3 px-4 text-xs font-black text-slate-800">{emp.name}</td>
+                  <td className="py-3 px-4 text-[11px] font-bold text-indigo-600 uppercase tracking-wider">{emp.position || '---'}</td>
+                  {branch === 'ALL' && <td className="py-3 px-4 text-[11px] font-black text-slate-600 uppercase tracking-wider">{emp.department || '---'}</td>}
+                  <td className="py-3 px-4 text-xs font-bold text-slate-600">{emp.startDate || '---'}</td>
+                  <td className="py-3 px-4 text-xs font-black text-emerald-600">{formatSeniority(emp.startDate)}</td>
+                  <td className="py-3 px-4 text-[11px] font-bold text-slate-600">{normalizeEducation(emp.education)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {(reportId === 'POSITION' || reportId === 'SENIORITY' || reportId === 'EDUCATION') && (() => {
+        let summaryData = [];
+        let labelCol = "";
+        if (reportId === 'POSITION') { summaryData = positionSummary; labelCol = "CHỨC VỤ"; }
+        if (reportId === 'SENIORITY') { summaryData = senioritySummary; labelCol = "NHÓM THÂM NIÊN"; }
+        if (reportId === 'EDUCATION') { summaryData = educationSummary; labelCol = "TRÌNH ĐỘ HỌC VẤN"; }
+
+        return (
+          <div className="bg-white rounded-[16px] border-2 border-slate-100 overflow-hidden print:border-slate-300 print:rounded-none w-full max-w-3xl mx-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b-2 border-slate-100 print:bg-slate-100 print:border-slate-300">
+                  <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-6 w-16 text-center">STT</th>
+                  <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-6">{labelCol}</th>
+                  <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-6 w-32 text-center">SỐ LƯỢNG</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 print:divide-slate-200">
+                {summaryData.map((row, idx) => (
+                  <tr key={row.key} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-6 text-xs font-black text-slate-400 text-center">{idx + 1}</td>
+                    <td className="py-3 px-6 text-xs font-black text-slate-800 uppercase">{row.key}</td>
+                    <td className="py-3 px-6 text-sm font-black text-indigo-600 text-center">{row.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })()}
+
+      {reportId === 'CONTRACT_EXPIRING' && (
+        <div className="bg-white rounded-[16px] border-2 border-slate-100 overflow-hidden print:border-slate-300 print:rounded-none">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b-2 border-slate-100 print:bg-slate-100 print:border-slate-300">
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4 w-12 text-center">STT</th>
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Họ và Tên</th>
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Chức vụ</th>
+                {branch === 'ALL' && <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Chi nhánh</th>}
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Ngày tái ký</th>
+                <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Ngày ký HĐ</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50 print:divide-slate-200">
+              {contractExpiringList.map((row, idx) => (
+                <tr key={row.e.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 px-4 text-xs font-black text-slate-400 text-center">{idx + 1}</td>
+                  <td className="py-3 px-4 text-xs font-black text-slate-800">{row.e.name}</td>
+                  <td className="py-3 px-4 text-[11px] font-bold text-indigo-600 uppercase tracking-wider">{row.e.position || '---'}</td>
+                  {branch === 'ALL' && <td className="py-3 px-4 text-[11px] font-black text-slate-600 uppercase tracking-wider">{row.e.department || '---'}</td>}
+                  <td className="py-3 px-4 text-xs font-black text-rose-600">{row.e.renewDate || '---'}</td>
+                  <td className="py-3 px-4 text-xs font-bold text-slate-500">{row.e.contractDate || '---'}</td>
+                </tr>
+              ))}
+              {contractExpiringList.length === 0 && (
+                <tr>
+                  <td colSpan={branch === 'ALL' ? 6 : 5} className="py-12 px-6 text-center">
+                    <CalendarClock size={32} className="mx-auto text-slate-300 mb-3" />
+                    <p className="text-slate-500 font-black uppercase tracking-widest text-xs">Không có hợp đồng tới hạn tháng {contractMonth}</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {reportId === 'GAP_ANALYSIS' && (
+        <div className="space-y-4">
+          <div className="inline-flex items-center gap-3 bg-rose-50 border border-rose-100 rounded-xl px-4 py-3">
+            <AlertTriangle size={20} className="text-rose-600" />
+            <div className="text-xs font-black text-slate-800 uppercase tracking-widest">
+              Thiếu hồ sơ gốc / PDF: <span className="text-rose-600 text-base ml-1">{gapAnalysisList.length}</span>
+            </div>
+          </div>
+          <div className="bg-white rounded-[16px] border-2 border-slate-100 overflow-hidden print:border-slate-300 print:rounded-none">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b-2 border-slate-100 print:bg-slate-100 print:border-slate-300">
+                  <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4 w-12 text-center">STT</th>
+                  <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Họ và Tên</th>
+                  <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Chi nhánh</th>
+                  <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-4">Chi tiết thiếu</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 print:divide-slate-200">
+                {gapAnalysisList.map((row, idx) => (
+                  <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 text-xs font-black text-slate-400 text-center">{idx + 1}</td>
+                    <td className="py-3 px-4 text-xs font-black text-slate-800">{row.name}</td>
+                    <td className="py-3 px-4 text-[11px] font-black text-slate-600 uppercase tracking-wider">{row.department || '---'}</td>
+                    <td className="py-3 px-4 text-xs font-black text-rose-600">
+                      {row.missingReason} {row.missingDocTypes && <span className="text-rose-400 ml-1">({row.missingDocTypes})</span>}
+                    </td>
+                  </tr>
+                ))}
+                {gapAnalysisList.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="py-12 px-6 text-center">
+                       <CheckCircle2 size={32} className="mx-auto text-emerald-400 mb-3" />
+                       <p className="text-emerald-600 font-black uppercase tracking-widest text-xs">Tuân thủ 100% hồ sơ gốc!</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {reportId === 'TURNOVER_RATE' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-6 bg-white border-2 border-slate-100 rounded-[24px] shadow-sm flex flex-col items-center justify-center">
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Tỷ lệ biến động (Turnover)</div>
+              <div className="text-4xl font-black text-rose-600 tracking-tighter">{turnoverStats.rate}%</div>
+            </div>
+            <div className="p-6 bg-white border-2 border-slate-100 rounded-[24px] shadow-sm flex flex-col items-center justify-center">
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Tổng nhân sự nghỉ</div>
+              <div className="text-4xl font-black text-slate-800 tracking-tighter">{turnoverStats.totalResigned}</div>
+            </div>
+          </div>
+          
+          <div>
+            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Phân bổ chi nhánh (Hotspots)</div>
+            <div className="bg-white rounded-[16px] border-2 border-slate-100 overflow-hidden print:border-slate-300 print:rounded-none">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b-2 border-slate-100 print:bg-slate-100 print:border-slate-300">
+                    <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-6 w-16 text-center">Hạng</th>
+                    <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-6">Chi nhánh / Vùng</th>
+                    <th className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em] py-3 px-6 w-32 text-center">Rời đi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 print:divide-slate-200">
+                  {turnoverStats.byBranch.map((b, idx) => (
+                    <tr key={b.branch} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-6 text-xs font-black text-slate-400 text-center">#{idx + 1}</td>
+                      <td className="py-3 px-6 text-xs font-black text-slate-800">{b.branch}</td>
+                      <td className="py-3 px-6 text-sm font-black text-rose-600 text-center">{b.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DETAILED LIST BY POSITION (Shown for all except RCC) */}
+      {reportId !== 'RCC' && (
+        <div className="mt-10 print:mt-8">
+          <div className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
+             <span className="w-6 h-1 bg-slate-200 rounded-full"></span> 
+             Danh sách chi tiết theo nhóm 
+             <span className="w-6 h-1 bg-slate-200 rounded-full"></span>
+          </div>
+          
+          <div className="space-y-4">
+            {groupedByPosition.map(group => (
+              <div key={group.position} className="bg-white rounded-[16px] border-2 border-slate-100 overflow-hidden shadow-sm print:border-slate-300 print:rounded-none">
+                <div className="bg-slate-50 px-5 py-3 flex items-center justify-between border-b-2 border-slate-100">
+                  <div className="text-xs font-black text-slate-800 uppercase tracking-widest">{group.position}</div>
+                  <div className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{group.employees.length} NS</div>
+                </div>
+                <div className="px-5 py-3 bg-white">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                    {group.employees.map(e => (
+                      <div key={e.id} className="flex flex-wrap items-center gap-x-2 text-xs">
+                        <span className="font-black text-slate-800 min-w-[100px]">{e.name || '---'}</span>
+                        <span className="text-slate-300">•</span>
+                        <span className="font-black text-indigo-500 uppercase text-[9px] tracking-widest">{e.department || '---'}</span>
+                        <span className="text-slate-300">•</span>
+                        <span className="font-bold text-slate-500 text-[11px]">{normalizeGender(e.title)}</span>
+                        <span className="text-slate-300">•</span>
+                        <span className="font-bold text-emerald-600 text-[11px]">{formatSeniority(e.startDate)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {groupedByPosition.length === 0 && (
+              <div className="px-6 py-8 text-center text-slate-400 font-black text-xs uppercase tracking-widest border-2 border-dashed border-slate-200 rounded-[16px]">
+                Không có dữ liệu
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-12 text-center text-[9px] text-slate-300 font-black uppercase tracking-[0.5em] border-t-2 border-slate-50 pt-6 pb-2 print:border-slate-200">
+        ACE HUMAN RESOURCES MANAGEMENT
+      </div>
+    </div>
+  );
+
+  const openReview = () => setIsReviewOpen(true);
+  const closeReview = () => setIsReviewOpen(false);
+
+  return (
+    <div className="h-full flex flex-col lg:flex-row bg-[#F2F4F7] p-4 lg:p-6 gap-4 lg:gap-6 overflow-hidden uppercase-none">
+      
+      {/* KHU VỰC ĐIỀU KHIỂN BỘ LỌC (SIDEBAR - 1/3) */}
+      {showFilters && (
+        <div className="w-full lg:w-[320px] xl:w-[340px] bg-white rounded-[24px] shadow-sm border border-slate-200 p-5 flex flex-col gap-5 overflow-y-auto custom-scrollbar print:hidden flex-shrink-0 relative transition-all">
+          
+          {/* Nút ẩn Sidebar */}
+          <button
+            onClick={() => setShowFilters(false)}
+            className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-red-50 hover:text-red-500 rounded-lg text-slate-400 transition-colors"
+            title="Ẩn bộ lọc"
+          >
+            <X size={16} />
+          </button>
+
+          {/* Header Sidebar */}
+          <div className="border-b-2 border-slate-50 pb-4 pr-10">
+            <h2 className="text-xl font-black text-slate-800 tracking-tight leading-none">Báo Cáo HRM</h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Truy xuất dữ liệu nhân sự</p>
+          </div>
+
+          {/* Nút thao tác nhanh */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={openReview}
+              className="flex-1 bg-white border-2 border-slate-100 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm py-2.5 flex justify-center items-center gap-2 font-black text-[10px] uppercase tracking-widest"
+            >
+              <Eye size={14} /> Preview
+            </button>
+            <button
+              onClick={handlePrint}
+              className="flex-1 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 py-2.5 flex justify-center items-center gap-2 font-black text-[10px] uppercase tracking-widest"
+            >
+              <Printer size={14} /> In PDF
+            </button>
+          </div>
+
+          {/* Cụm Bộ Lọc */}
+          <div className="flex flex-col gap-4 mt-1">
+            <div>
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-1 mb-1.5">Loại báo cáo</label>
+              <select
+                value={reportId}
+                onChange={e => setReportId(e.target.value)}
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:bg-white transition-all outline-none"
+              >
+                {REPORTS.map(r => (
+                  <option key={r.id} value={r.id}>{r.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-1 mb-1.5">Chi nhánh</label>
+              <select
+                value={branch}
+                onChange={e => setBranch(e.target.value)}
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:bg-white transition-all outline-none"
+              >
+                <option value="ALL">Tất cả CN</option>
+                {branches.map(b => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-1 mb-1.5">Tìm nhanh</label>
+              <input
+                value={q}
+                onChange={e => setQ(e.target.value)}
+                placeholder="Tên, chức vụ..."
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:bg-white transition-all outline-none placeholder:text-slate-400"
+              />
+            </div>
+
+            <div>
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-1 mb-1.5">Tháng Hợp Đồng</label>
+              <input
+                type="month"
+                value={contractMonth}
+                onChange={e => setContractMonth(e.target.value)}
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:bg-white transition-all outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-1 mb-1.5">Chức vụ</label>
+              <select
+                value={positionFilter}
+                onChange={e => setPositionFilter(e.target.value)}
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:bg-white transition-all outline-none"
+              >
+                <option value="ALL">Tất cả CV</option>
+                {positionOptions.map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-1 mb-1.5">Thâm niên</label>
+              <select
+                value={seniorityFilter}
+                onChange={e => setSeniorityFilter(e.target.value)}
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:bg-white transition-all outline-none"
+              >
+                <option value="ALL">Tất cả TN</option>
+                {seniorityOptions.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-1 mb-1.5">Bằng cấp</label>
+              <select
+                value={educationFilter}
+                onChange={e => setEducationFilter(e.target.value)}
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:bg-white transition-all outline-none"
+              >
+                <option value="ALL">Tất cả Bằng</option>
+                {educationOptions.map(ed => (
+                  <option key={ed} value={ed}>{ed}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* KHU VỰC HIỂN THỊ BÁO CÁO (MAIN REPORT AREA - 2/3) */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden gap-4 transition-all">
+        
+        {/* Top Bar (Chỉ hiển thị khi Sidebar bị ẩn) */}
+        {!showFilters && (
+          <div className="flex items-center justify-between print:hidden bg-white p-3 px-5 rounded-[20px] shadow-sm border border-slate-200 shrink-0">
+            <button
+              onClick={() => setShowFilters(true)}
+              className="flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors font-black text-[11px] uppercase tracking-widest"
+            >
+              <Filter size={16} /> Hiện bộ lọc
+            </button>
+            
+            <div className="flex items-center gap-3">
+              <button
+                onClick={openReview}
+                className="bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl px-4 py-2 transition-all shadow-sm flex justify-center items-center gap-2 font-black text-[10px] uppercase tracking-widest"
+              >
+                <Eye size={14} /> Preview
+              </button>
+              <button
+                onClick={handlePrint}
+                className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl px-4 py-2 transition-all shadow-md shadow-indigo-200 flex justify-center items-center gap-2 font-black text-[10px] uppercase tracking-widest"
+              >
+                <Printer size={14} /> In PDF
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 bg-white rounded-[24px] shadow-md border border-slate-200 overflow-auto custom-scrollbar print:border-none print:shadow-none print:bg-white print:overflow-visible">
+          {reportBody}
+        </div>
+      </div>
+
+      {/* MODAL XEM TRƯỚC (PREVIEW OVERLAY) */}
+      {isReviewOpen && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 lg:p-8 print:hidden">
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-[1000px] h-full max-h-[90vh] overflow-hidden flex flex-col border border-white/20">
+            
+            {/* Header Modal */}
+            <div className="px-6 py-4 border-b-2 border-slate-50 flex items-center justify-between bg-white">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center shadow-inner">
+                   <FileText size={20} className="text-slate-400" />
+                </div>
+                <div>
+                  <div className="text-base font-black text-slate-900 leading-tight">Xem trước Bản in</div>
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5">{reportTitle}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handlePrint}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all font-black text-[11px] uppercase tracking-widest shadow-md shadow-indigo-200"
+                >
+                  <Printer size={16} /> Xác nhận In
+                </button>
+                <button
+                  onClick={closeReview}
+                  className="w-10 h-10 bg-slate-100 rounded-xl hover:bg-red-50 hover:text-red-500 transition-colors flex items-center justify-center text-slate-400"
+                  title="Đóng"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+            
+            {/* Nội dung báo cáo trong Modal */}
+            <div className="flex-1 overflow-auto bg-slate-100 custom-scrollbar p-4 lg:p-6">
+               <div className="shadow-lg shadow-slate-300 rounded-[24px] overflow-hidden">
+                  {reportBody}
+               </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

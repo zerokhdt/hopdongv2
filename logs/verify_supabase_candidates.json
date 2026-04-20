@@ -1,0 +1,36 @@
+{
+  "ok": true,
+  "supabaseUrl": "https://pybdidevdmrxnvpdtkyy.supabase.co",
+  "candidatesCount": 3,
+  "sample": [
+    {
+      "id": 3,
+      "row_index": 2,
+      "full_name": "Islam allouche",
+      "email": "Islamallouche666@gmail.com",
+      "workflow_status": "NEW",
+      "branch_assigned": null,
+      "created_at": "2026-04-16T08:44:09.650502+00:00"
+    },
+    {
+      "id": 4,
+      "row_index": 3,
+      "full_name": "Konstantin Sokolov",
+      "email": "sokol.kostya@yahoo.com",
+      "workflow_status": "NEW",
+      "branch_assigned": null,
+      "created_at": "2026-04-16T08:44:09.650502+00:00"
+    },
+    {
+      "id": 2,
+      "row_index": 987654,
+      "full_name": "Test Candidate",
+      "email": "test@example.com",
+      "workflow_status": "NEW",
+      "branch_assigned": null,
+      "created_at": "2026-04-16T08:38:19.738448+00:00"
+    }
+  ],
+  "error": null,
+  "generatedAt": "2026-04-16T08:50:36.196Z"
+}

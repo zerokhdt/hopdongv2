@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: 'Times New Roman', serif; line-height: 1.8; color: #1f2937; }
+    .container { max-width: 700px; margin: 0 auto; padding: 30px; border: 2px solid #1e40af; border-radius: 12px; }
+    .letterhead { text-align: center; border-bottom: 3px double #1e40af; padding-bottom: 20px; margin-bottom: 30px; }
+    .company-name { color: #1e40af; font-size: 28px; font-weight: bold; letter-spacing: 2px; }
+    .offer-title { color: #dc2626; font-size: 24px; margin: 25px 0; text-align: center; }
+    .offer-details { background: #f8fafc; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 5px solid #1e40af; }
+    .signature-area { margin-top: 60px; text-align: right; }
+    .accept-btn { display: inline-block; background: #059669; color: white; padding: 15px 40px; 
+      text-decoration: none; border-radius: 8px; margin-top: 30px; font-size: 18px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="letterhead">
+      <div class="company-name">ACE CORPORATION</div>
+      <div style="color: #4b5563; margin-top: 5px;">Innovating Tomorrow, Today</div>
+    </div>
+    
+    <div class="offer-title">JOB OFFER LETTER</div>
+    
+    <p><strong>To: Mr./Ms. {{candidate_name}}</strong></p>
+    <p>On behalf of ACE Company Management, I am pleased to extend to you a formal job offer for the position of:</p>
+    
+    <div class="offer-details">
+      <p><strong>Position:</strong> {{position}} (Position Code: {{position_code}})</p>
+      <p><strong>Department:</strong> {{department}}</p>
+      <p><strong>Work Location:</strong> {{branch_name}}</p>
+      <p><strong>Start Date:</strong> {{start_date}}</p>
+      <p><strong>Probation Period:</strong> {{probation_period}}</p>
+      <p><strong>Salary:</strong> {{salary}} {{salary_currency}}/month</p>
+      <p><strong>Allowances & Benefits:</strong> {{allowances}}</p>
+      <p><strong>Working Hours:</strong> {{working_hours}}</p>
+      <p><strong>Direct Manager:</strong> {{manager_name}} ({{manager_position}})</p>
+    </div>
+    
+    <p><strong>Conditions of Employment:</strong></p>
+    <ol>
+      <li>Submit required documents: ID/Passport, Household Registration, Health Certificate, Relevant Degrees</li>
+      <li>Complete administrative procedures as per company policy</li>
+      <li>Sign Employment Contract and Company Regulations</li>
+    </ol>
+    
+    <p>This offer is valid for <strong>07 days</strong> from {{offer_date}}.</p>
+    
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="{{accept_link}}" class="accept-btn">📝 ACCEPT JOB OFFER</a>
+      <br>
+      <a href="{{decline_link}}" style="color: #dc2626; margin-top: 15px; display: inline-block;">Decline Offer</a>
+    </div>
+    
+    <div class="signature-area">
+      <p><strong>Sincerely,</strong></p>
+      <p><strong>{{hr_director_name}}</strong></p>
+      <p>Human Resources Director</p>
+      <p>ACE Company</p>
+      <p>Date: {{current_date}}</p>
+
+      <div style="font-size: 11px; color: #cbd5e1; text-align: right; margin-top: 30px;">
+        [Ref: CID-{{candidate_id}}]
+      </div>
+    </div>
+  </div>
+</body>
+</html>

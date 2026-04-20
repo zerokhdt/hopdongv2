@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: 'Times New Roman', serif; line-height: 1.8; color: #1f2937; }
+    .container { max-width: 700px; margin: 0 auto; padding: 30px; border: 2px solid #1e40af; border-radius: 12px; }
+    .letterhead { text-align: center; border-bottom: 3px double #1e40af; padding-bottom: 20px; margin-bottom: 30px; }
+    .company-name { color: #1e40af; font-size: 28px; font-weight: bold; letter-spacing: 2px; }
+    .offer-title { color: #dc2626; font-size: 24px; margin: 25px 0; text-align: center; }
+    .offer-details { background: #f8fafc; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 5px solid #1e40af; }
+    .signature-area { margin-top: 60px; text-align: right; }
+    .accept-btn { display: inline-block; background: #059669; color: white; padding: 15px 40px; 
+      text-decoration: none; border-radius: 8px; margin-top: 30px; font-size: 18px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="letterhead">
+      <div class="company-name">ACE CORPORATION</div>
+      <div style="color: #4b5563; margin-top: 5px;">Innovating Tomorrow, Today</div>
+    </div>
+    
+    <div class="offer-title">THƯ MỜI NHẬN VIỆC</div>
+    
+    <p><strong>Kính gửi: Ông/Bà {{candidate_name}}</strong></p>
+    <p>Thay mặt Ban Lãnh đạo Công ty ACE, tôi trân trọng gửi đến Ông/Bà Thư mời nhận việc chính thức cho vị trí:</p>
+    
+    <div class="offer-details">
+      <p><strong>Vị trí công việc:</strong> {{position}} (Mã vị trí: {{position_code}})</p>
+      <p><strong>Bộ phận/Phòng ban:</strong> {{department}}</p>
+      <p><strong>Chi nhánh làm việc:</strong> {{branch_name}}</p>
+      <p><strong>Ngày bắt đầu làm việc:</strong> {{start_date}}</p>
+      <p><strong>Thời gian thử việc:</strong> {{probation_period}}</p>
+      <p><strong>Mức lương:</strong> {{salary}} {{salary_currency}}/tháng</p>
+      <p><strong>Phụ cấp & chế độ:</strong> {{allowances}}</p>
+      <p><strong>Giờ làm việc:</strong> {{working_hours}}</p>
+      <p><strong>Người quản lý trực tiếp:</strong> {{manager_name}} ({{manager_position}})</p>
+    </div>
+    
+    <p><strong>Điều kiện nhận việc:</strong></p>
+    <ol>
+      <li>Xuất trình đầy đủ giấy tờ: CMND/CCCD, Sổ hộ khẩu, Giấy khám sức khỏe, Bằng cấp liên quan</li>
+      <li>Hoàn thành thủ tục hành chính theo quy định công ty</li>
+      <li>Ký kết Hợp đồng lao động và Nội quy công ty</li>
+    </ol>
+    
+    <p>Thư mời nhận việc này có hiệu lực trong vòng <strong>07 ngày</strong> kể từ ngày {{offer_date}}.</p>
+    
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="{{accept_link}}" class="accept-btn">📝 CHẤP NHẬN NHẬN VIỆC</a>
+      <br>
+      <a href="{{decline_link}}" style="color: #dc2626; margin-top: 15px; display: inline-block;">Từ chối nhận việc</a>
+    </div>
+    
+    <div class="signature-area">
+      <p><strong>Trân trọng,</strong></p>
+      <p><strong>{{hr_director_name}}</strong></p>
+      <p>Giám đốc Nhân sự</p>
+      <p>Công ty ACE</p>
+      <p>Ngày: {{current_date}}</p>
+      
+      <div style="font-size: 11px; color: #cbd5e1; text-align: right; margin-top: 30px;">
+        [Ref: CID-{{candidate_id}}]
+      </div>
+    </div>
+  </div>
+</body>
+</html>

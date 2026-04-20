@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Dành Cho Người Phỏng Vấn - ACE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(220, 53, 69, 0.2);
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 40px 30px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        
+        .title-section {
+            text-align: center;
+        }
+        
+        .form-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        
+        .form-subtitle {
+            font-size: 13px;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+        
+        .photo-section {
+            text-align: center;
+        }
+        
+        .photo-placeholder {
+            width: 140px;
+            height: 170px;
+            border: 3px dashed rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0 auto;
+        }
+        
+        .photo-label {
+            font-size: 12px;
+            opacity: 0.8;
+            font-style: italic;
+            font-weight: 500;
+        }
+        
+        /* Content */
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #dc3545;
+            text-transform: capitalize;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #dc3545;
+            display: inline-block;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group.span-2 {
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="number"],
+        textarea,
+        select {
+            padding: 14px 16px;
+            border: 2px solid #f0f0f0;
+            border-radius: 14px;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            font-size: 14px;
+            color: #333;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="date"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #dc3545;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-size: 13px;
+        }
+        
+        /* Row với 3 cột */
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        /* Two column layout */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+            padding: 40px 30px;
+            border-top: 2px solid #dc3545;
+            text-align: right;
+        }
+        
+        .footer-date {
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        .signature-line {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-top: 20px;
+        }
+        
+        /* Separator */
+        .separator {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #f0f0f0, transparent);
+            margin: 30px 0;
+        }
+        
+        /* Date input styling */
+        input[type="text"].date-input {
+            width: 40px;
+            border: none;
+            background: transparent;
+            border-bottom: 2px solid #dc3545;
+            text-align: center;
+            padding: 5px 8px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .form-grid,
+            .form-grid-3,
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .content {
+                padding: 24px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="title-section">
+                <div class="form-title">Form dành cho người phỏng vấn</div>
+                <div class="form-subtitle">Interviewer Evaluation Form</div>
+            </div>
+            <div class="photo-section">
+                <div class="photo-placeholder">
+                    <div class="photo-label">📷 Ảnh chụp<br>ứng viên</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            
+            <!-- SECTION 1: Thông Tin Cá Nhân -->
+            <div class="section">
+                <div class="section-title">📋 Thông tin cá nhân</div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Họ và tên *</label>
+                        <input type="text" placeholder="Nhập họ và tên ứng viên">
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày tháng năm sinh</label>
+                        <input type="date">
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Vị trí ứng tuyển *</label>
+                        <input type="text" placeholder="Nhập vị trí ứng tuyển">
+                    </div>
+                    <div class="form-group">
+                        <label>Chuyên ngành</label>
+                        <input type="text" placeholder="Ví dụ: Tiếng Anh, Marketing...">
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Số điện thoại *</label>
+                        <input type="text" placeholder="+84 123 456 789">
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" placeholder="email@example.com">
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nơi ở hiện tại</label>
+                        <input type="text" placeholder="Địa chỉ hiện tại">
+                    </div>
+                    <div class="form-group">
+                        <label>Đã bổ trí chi nhánh làm việc</label>
+                        <input type="text" placeholder="Ví dụ: Chi nhánh Sài Gòn">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Ngày học việc</label>
+                        <input type="date">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="separator"></div>
+            
+            <!-- SECTION 2: Bằng Cấp & Chứng Chỉ -->
+            <div class="section">
+                <div class="section-title">🎓 Bằng cấp & chứng chỉ</div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tốt nghiệp trường</label>
+                        <input type="text" placeholder="Tên trường đại học">
+                    </div>
+                    <div class="form-group">
+                        <label>Bằng tốt nghiệp</label>
+                        <input type="text" placeholder="Ví dụ: Cơ nhân, Thạc sỹ...">
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Chứng chỉ IELTS/TOEIC</label>
+                        <input type="text" placeholder="Ví dụ: IELTS 6.5, TOEIC 750">
+                    </div>
+                    <div class="form-group">
+                        <label>Chứng chỉ TESOL</label>
+                        <input type="text" placeholder="Có / Không / Đang học">
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group span-2">
+                        <label>Nghiệp vụ sư phạm</label>
+                        <input type="text" placeholder="Có / Không / Đang học">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="separator"></div>
+            
+            <!-- SECTION 3: Nhận Xét Chi Tiết -->
+            <div class="section">
+                <div class="section-title">⭐ Nhận xét chi tiết</div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Trình độ tiếng Anh (điểm /10)</label>
+                        <input type="number" placeholder="0" min="0" max="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Ngoài hình</label>
+                        <input type="text" placeholder="Tốt / Trung bình / Cần cải thiện">
+                    </div>
+                </div>
+                
+                <div class="form-group span-2">
+                    <label>Kinh nghiệm liên quan</label>
+                    <textarea placeholder="Mô tả kinh nghiệm làm việc trước đây, các công việc chính, kỹ năng đạt được..."></textarea>
+                </div>
+                
+                <div class="form-group span-2">
+                    <label>Ghi chú thêm</label>
+                    <textarea placeholder="Các điểm đặc biệt, nhận xét khác..."></textarea>
+                </div>
+            </div>
+            
+            <div class="separator"></div>
+            
+            <!-- SECTION 4: Mức Lương & Thời Gian Làm Việc -->
+            <div class="section">
+                <div class="section-title">💰 Mức lương & thời gian làm việc</div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Mức lương thỏa thuận</label>
+                        <input type="text" placeholder="VND">
+                    </div>
+                    <div class="form-group">
+                        <label>Mức lương thử việc</label>
+                        <input type="text" placeholder="VND">
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Chi nhánh thỏa thuận</label>
+                        <input type="text" placeholder="VND">
+                    </div>
+                    <div class="form-group">
+                        <label>Thời gian thử việc</label>
+                        <input type="text" placeholder="Ví dụ: 2 tháng">
+                    </div>
+                </div>
+                
+                <div class="form-group span-2">
+                    <label>Thời gian làm việc chính thức</label>
+                    <input type="text" placeholder="Ví dụ: 8:00 - 17:00 (Thứ 2 - Thứ 6)">
+                </div>
+            </div>
+            
+            <div class="separator"></div>
+            
+            <!-- SECTION 5: Thời Gian Học Việc -->
+            <div class="section">
+                <div class="section-title">📚 Thời gian học việc</div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Thời gian học việc</label>
+                        <input type="text" placeholder="Ví dụ: 3 tháng">
+                    </div>
+                    <div class="form-group">
+                        <label>Mức lương học việc</label>
+                        <input type="text" placeholder="VND">
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Chi nhánh học việc</label>
+                        <input type="text" placeholder="VND">
+                    </div>
+                    <div class="form-group">
+                        <label>Người hướng dẫn học việc</label>
+                        <input type="text" placeholder="Tên người hướng dẫn">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="separator"></div>
+            
+            <!-- SECTION 6: Thông Tin Người Phỏng Vấn -->
+            <div class="section">
+                <div class="section-title">👤 Thông tin người phỏng vấn</div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Vị trí làm việc</label>
+                        <input type="text" value="QLCN" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Chi nhánh làm việc</label>
+                        <input type="text" value="Trung Mỹ Tây" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-date">
+                Ngày <input type="text" class="date-input" value="" maxlength="2"> 
+                Tháng <input type="text" class="date-input" value="" maxlength="2"> 
+                Năm <input type="text" class="date-input" value="2026" maxlength="4">
+                <br><br>
+                <em>Người phỏng vấn (Kí và ghi rõ họ tên)</em>
+            </div>
+            <div class="signature-line">
+                ___________________________
+            </div>
+            <div class="signature-line" style="font-weight: 400; margin-top: 10px;">
+                Ms. Trần Thị Kim Ngân
+            </div>
+        </div>
+    </div>
+</body>
+</html>

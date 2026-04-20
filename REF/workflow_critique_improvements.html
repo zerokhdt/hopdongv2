@@ -1,0 +1,177 @@
+
+<style>
+*{box-sizing:border-box}
+.w{padding:16px 0;font-family:var(--font-sans)}
+.tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:5px 11px;border-radius:6px;border:1px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:transparent;transition:all .15s}
+.tab.on{color:var(--color-text-primary);border-color:var(--color-border-primary);background:var(--color-background-secondary)}
+.panel{display:none}.panel.on{display:block}
+.score-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.score-box{display:flex;flex-direction:column;align-items:center;justify-content:center;width:52px;height:52px;border-radius:10px;flex-shrink:0}
+.score-num{font-size:22px;font-weight:500;line-height:1}
+.score-lbl{font-size:10px;margin-top:2px;font-weight:500;letter-spacing:.03em}
+.s-red{background:#FCEBEB;color:#A32D2D}.s-amber{background:#FAEEDA;color:#854F0B}.s-green{background:#EAF3DE;color:#3B6D11}
+.score-meta{font-size:13px;color:var(--color-text-secondary);line-height:1.6}
+.score-meta strong{color:var(--color-text-primary);font-weight:500}
+.divider{height:1px;background:var(--color-border-tertiary);margin:12px 0}
+.section-lbl{font-size:11px;font-weight:500;color:var(--color-text-secondary);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.issue-list{display:flex;flex-direction:column;gap:6px;margin-bottom:0}
+.issue{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.55}
+.pill{font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;flex-shrink:0;margin-top:2px}
+.p-red{background:#FCEBEB;color:#A32D2D}
+.p-amber{background:#FAEEDA;color:#854F0B}
+.p-blue{background:#E6F1FB;color:#185FA5}
+.issue-text{color:var(--color-text-primary)}
+.issue-text .sub{color:var(--color-text-secondary);font-size:12px;margin-top:1px}
+.fix-list{display:flex;flex-direction:column;gap:8px}
+.fix{border:1px solid var(--color-border-tertiary);border-radius:10px;padding:11px 13px}
+.fix-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.fix-icon{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:600}
+.fi-a{background:#E6F1FB;color:#185FA5}
+.fi-b{background:#EAF3DE;color:#3B6D11}
+.fi-c{background:#EEEDFE;color:#534AB7}
+.fi-d{background:#FAEEDA;color:#854F0B}
+.fix-title{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.fix-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.55}
+.gain{display:inline-flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.gain span{font-size:11px;padding:2px 7px;border-radius:4px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+.gain .g{background:#EAF3DE;border-color:#C0DD97;color:#27500A}
+</style>
+
+<div class="w">
+<div class="tabs">
+  <button class="tab on" onclick="sw(0)">A · Tuyển dụng</button>
+  <button class="tab" onclick="sw(1)">B · Hợp đồng</button>
+  <button class="tab" onclick="sw(2)">C · Biến động</button>
+  <button class="tab" onclick="sw(3)">D · Task</button>
+  <button class="tab" onclick="sw(4)">E · KPI</button>
+</div>
+
+<!-- A -->
+<div class="panel on" id="p0">
+  <div class="score-row">
+    <div class="score-box s-amber"><span class="score-num">4</span><span class="score-lbl">/ 10</span></div>
+    <div class="score-meta"><strong>Tuyển dụng & Phỏng vấn</strong><br>Luồng trạng thái ổn, nhưng cực kỳ thủ công.<br>Dữ liệu thu được rất ít so với số lần bấm.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Vấn đề</div>
+  <div class="issue-list">
+    <div class="issue"><span class="pill p-red">Nghiêm trọng</span><div class="issue-text">Mỗi lần chuyển trạng thái là 1 action thủ công — không log <em>ai</em> bấm, <em>lúc mấy giờ</em>, <em>tại sao</em><div class="sub">→ Mất toàn bộ audit trail. Không thể biết ứng viên bị loại vì lý do gì sau 1 tháng.</div></div></div>
+    <div class="issue"><span class="pill p-red">Nghiêm trọng</span><div class="issue-text">Form Binterviewed tách rời — kết quả phỏng vấn không được structured (chỉ là note text)<div class="sub">→ Không thể lọc "ứng viên đạt tiêu chí X nhưng thiếu Y", không thể tính tỉ lệ pass/fail theo chi nhánh.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">Không có SLA — ứng viên ở SENT_TO_BRANCH có thể nằm chờ vô thời hạn<div class="sub">→ Không đo được thời gian phản hồi trung bình của từng chi nhánh.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">Mức lương lưu dạng text — không có trường structured (lương gross, net, phụ cấp riêng)<div class="sub">→ Không thể aggregate "chi phí tuyển dụng trung bình theo vị trí".</div></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Hướng cải thiện — ít thao tác, nhiều dữ liệu</div>
+  <div class="fix-list">
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-a">1</span><span class="fix-title">Auto-timestamp mọi state transition</span></div><div class="fix-desc">Mỗi khi status thay đổi, hệ thống tự ghi <code>changed_by</code>, <code>changed_at</code>, <code>from_status</code>, <code>to_status</code> vào bảng <code>candidate_logs</code> — không cần người dùng làm gì thêm.</div><div class="gain"><span class="g">Audit trail miễn phí</span><span class="g">Đo SLA tự động</span><span>0 thao tác thêm</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-b">2</span><span class="fix-title">Chuyển form phỏng vấn sang structured fields</span></div><div class="fix-desc">Thay note tự do bằng 5–7 trường định sẵn: thái độ (1–5), kỹ năng chuyên môn (1–5), ngoại ngữ (pass/fail), kinh nghiệm phù hợp (yes/no), ghi chú tự do (tùy chọn). Tổng thao tác tương đương, dữ liệu gấp 5 lần.</div><div class="gain"><span class="g">Lọc & ranking ứng viên</span><span class="g">Báo cáo pass-rate theo chi nhánh</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-c">3</span><span class="fix-title">Tách trường lương thành structured</span></div><div class="fix-desc">3 trường số: <code>salary_gross</code>, <code>allowance</code>, <code>probation_salary</code>. Điền một lần khi COMPLETED, tự tính net và hiển thị summary. Không thêm bước nào cho người dùng.</div><div class="gain"><span class="g">Phân tích chi phí tuyển dụng</span><span class="g">So sánh mức lương theo vị trí</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-d">4</span><span class="fix-title">SLA warning tự động</span></div><div class="fix-desc">Nếu ứng viên ở SENT_TO_BRANCH quá 48h mà chưa có phản hồi, tự động đánh dấu badge "Trễ" trên UI và gửi notification cho HRM. Zero thao tác — chỉ cần 1 cronjob hoặc realtime subscription.</div><div class="gain"><span class="g">Đo hiệu suất từng chi nhánh</span><span>1 lần setup</span></div></div>
+  </div>
+</div>
+
+<!-- B -->
+<div class="panel" id="p1">
+  <div class="score-row">
+    <div class="score-box s-red"><span class="score-num">2</span><span class="score-lbl">/ 10</span></div>
+    <div class="score-meta"><strong>Hợp đồng & Onboarding</strong><br>LocalStorage làm nguồn dữ liệu chính thức = quả bom hẹn giờ.<br>Checklist thủ công, không có version control hợp đồng.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Vấn đề</div>
+  <div class="issue-list">
+    <div class="issue"><span class="pill p-red">Nghiêm trọng</span><div class="issue-text">LocalStorage mất data khi xóa cache, đổi máy, hoặc trình duyệt tự clear<div class="sub">→ Hợp đồng lao động là văn bản pháp lý — không được lưu ở client storage.</div></div></div>
+    <div class="issue"><span class="pill p-red">Nghiêm trọng</span><div class="issue-text">Không có version history — nếu sửa hợp đồng, bản cũ biến mất<div class="sub">→ Không chứng minh được "bản gốc ký là bản nào" khi có tranh chấp.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">Checklist hồ sơ là checkbox thủ công — không biết <em>ai</em> tick, <em>khi nào</em><div class="sub">→ Nếu sau này phát hiện hồ sơ thiếu, không truy được trách nhiệm.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">Không capture metadata khi upload PDF (tên file, dung lượng, người upload, thời gian)<div class="sub">→ Không biết file trên Drive có phải file đã ký hay file nháp.</div></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Hướng cải thiện</div>
+  <div class="fix-list">
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-a">1</span><span class="fix-title">Migrate sang Supabase ngay lập tức</span></div><div class="fix-desc">Tạo bảng <code>contracts</code> với các trường: <code>id, candidate_id, type, status, created_by, created_at, pdf_url, version</code>. LocalStorage chỉ dùng làm cache UI, không bao giờ là source of truth.</div><div class="gain"><span class="g">Không mất data</span><span class="g">Multi-device sync</span><span>Ưu tiên số 1</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-b">2</span><span class="fix-title">Checklist tự ghi log người dùng</span></div><div class="fix-desc">Mỗi item checklist khi được tick sẽ tự lưu <code>{item_id, checked_by, checked_at}</code> vào DB. UI giữ nguyên, chỉ thêm 1 API call background.</div><div class="gain"><span class="g">Truy trách nhiệm</span><span class="g">Báo cáo compliance</span><span>0 thao tác thêm</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-c">3</span><span class="fix-title">Auto-capture metadata PDF khi upload</span></div><div class="fix-desc">Khi upload lên Drive, tự ghi: tên file, hash MD5, dung lượng, uploader_id, timestamp, Drive file_id. Người dùng chỉ cần chọn file và bấm upload như cũ.</div><div class="gain"><span class="g">Kiểm tra tính toàn vẹn file</span><span class="g">Version control</span><span>0 thao tác thêm</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-d">4</span><span class="fix-title">Pre-fill từ data ứng viên COMPLETED</span></div><div class="fix-desc">Khi HRM chọn ứng viên, form hợp đồng tự điền sẵn: họ tên, CCCD, ngày sinh, mức lương đã lưu từ luồng A. Chỉ cần review và ký — không nhập lại.</div><div class="gain"><span class="g">Giảm 70% thao tác nhập liệu</span><span class="g">Không sai sót do nhập tay</span></div></div>
+  </div>
+</div>
+
+<!-- C -->
+<div class="panel" id="p2">
+  <div class="score-row">
+    <div class="score-box s-amber"><span class="score-num">5</span><span class="score-lbl">/ 10</span></div>
+    <div class="score-meta"><strong>Biến động Nhân sự</strong><br>Nguyên tắc phân quyền đúng, nhưng REVISION loop<br>không có giới hạn và không đo được hiệu quả.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Vấn đề</div>
+  <div class="issue-list">
+    <div class="issue"><span class="pill p-red">Nghiêm trọng</span><div class="issue-text">Sync qua Fetch API + LocalStorage: nếu mất mạng giữa chừng, local và server lệch nhau, không có cơ chế reconcile<div class="sub">→ HRM thấy APPROVED, chi nhánh vẫn thấy PENDING.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">REVISION loop không có giới hạn và không đếm số lần<div class="sub">→ Một yêu cầu có thể đi REVISION → REVISION → REVISION mãi mà không ai biết đang ở vòng thứ mấy.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">Không phân biệt mức độ khẩn cấp giữa các loại biến động<div class="sub">→ Báo tăng (nhân viên chờ bắt đầu làm) xếp hàng chờ cùng đơn nghỉ phép thông thường.</div></div></div>
+    <div class="issue"><span class="pill p-blue">Nhỏ</span><div class="issue-text">Không có summary tự động — HRM phải đọc từng yêu cầu để biết tháng này bao nhiêu người vào/ra<div class="sub">→ Mất thêm thời gian tổng hợp thủ công khi báo cáo.</div></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Hướng cải thiện</div>
+  <div class="fix-list">
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-a">1</span><span class="fix-title">Optimistic update + conflict resolution</span></div><div class="fix-desc">UI cập nhật ngay lập tức (optimistic), đồng thời gọi API background. Nếu API trả lỗi, tự rollback và hiện toast cảnh báo. Không cần người dùng làm gì thêm.</div><div class="gain"><span class="g">Không lệch dữ liệu</span><span>Luôn responsive</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-b">2</span><span class="fix-title">Đếm REVISION và tự escalate</span></div><div class="fix-desc">Thêm cột <code>revision_count</code>. Sau 2 lần REVISION, tự escalate lên cấp trên và gắn badge "Cần xem xét". Không thêm bước nào cho chi nhánh.</div><div class="gain"><span class="g">Phát hiện điểm tắc nghẽn</span><span class="g">Đo chất lượng hồ sơ theo chi nhánh</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-c">3</span><span class="fix-title">Auto-priority theo loại biến động</span></div><div class="fix-desc">Hệ thống tự gán priority: Báo tăng = High (có người chờ việc), Thuyên chuyển = Medium, Nghỉ phép = Low. HRM thấy queue đã được sắp xếp sẵn, không cần đọc và phân loại thủ công.</div><div class="gain"><span class="g">Giảm thời gian xử lý</span><span>0 thao tác thêm</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-d">4</span><span class="fix-title">Dashboard tự aggregate</span></div><div class="fix-desc">Tự tính theo tháng: số vào, số ra, số đang PENDING, tỉ lệ REVISION trung bình. Hiển thị ngay trên header của view — không cần báo cáo riêng.</div><div class="gain"><span class="g">Báo cáo tháng tự động</span><span class="g">Phát hiện chi nhánh nhiều vấn đề</span></div></div>
+  </div>
+</div>
+
+<!-- D -->
+<div class="panel" id="p3">
+  <div class="score-row">
+    <div class="score-box s-amber"><span class="score-num">6</span><span class="score-lbl">/ 10</span></div>
+    <div class="score-meta"><strong>Giao nhiệm vụ (Task)</strong><br>Workflow đơn giản và phù hợp. Điểm yếu là<br>không đo được gì từ dữ liệu task hiện có.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Vấn đề</div>
+  <div class="issue-list">
+    <div class="issue"><span class="pill p-red">Nghiêm trọng</span><div class="issue-text">Không log thời điểm chuyển trạng thái — không tính được cycle time (TODO → DONE mất bao lâu)<div class="sub">→ Không thể đo năng suất thực sự của từng người/chi nhánh.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">BLOCKED là trạng thái chết — không có trường ghi lý do bị block<div class="sub">→ Leader không biết cần unblock gì, task nằm đó vô hạn.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">Không có deadline hoặc due_date trên task<div class="sub">→ Không phân biệt được task trễ hạn với task đang làm bình thường.</div></div></div>
+    <div class="issue"><span class="pill p-blue">Nhỏ</span><div class="issue-text">Không có trường estimated_hours vs actual_hours<div class="sub">→ Không học được từ sai số ước lượng để cải thiện sprint sau.</div></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Hướng cải thiện</div>
+  <div class="fix-list">
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-a">1</span><span class="fix-title">Auto-log mọi state transition vào task_events</span></div><div class="fix-desc">Mỗi lần kéo thả, backend tự insert <code>{task_id, from, to, actor_id, timestamp}</code> vào bảng <code>task_events</code>. Không thêm thao tác. Từ đây tính được cycle time, lead time, tỉ lệ BLOCKED theo người.</div><div class="gain"><span class="g">Đo năng suất thực</span><span class="g">Phát hiện bottleneck</span><span>0 thao tác thêm</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-b">2</span><span class="fix-title">Bắt buộc nhập lý do khi kéo vào BLOCKED</span></div><div class="fix-desc">Chỉ khi kéo sang BLOCKED mới hiện popup 1 dòng: "Đang bị chặn bởi?" với dropdown 5 lựa chọn sẵn + tùy chọn "Khác". Mất 3 giây, nhưng Leader thấy ngay cần làm gì.</div><div class="gain"><span class="g">Unblock nhanh hơn</span><span class="g">Phân loại nguyên nhân block</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-c">3</span><span class="fix-title">Thêm due_date khi tạo task, auto-overdue</span></div><div class="fix-desc">Trường due_date tùy chọn khi tạo. Nếu task chưa DONE sau due_date, tự đổi màu card sang đỏ và đẩy notification cho assignee + Leader. Zero thao tác ngoài việc đặt date khi tạo.</div><div class="gain"><span class="g">Visibility trễ hạn</span><span class="g">Đo tỉ lệ on-time delivery</span></div></div>
+  </div>
+</div>
+
+<!-- E -->
+<div class="panel" id="p4">
+  <div class="score-row">
+    <div class="score-box s-red"><span class="score-num">3</span><span class="score-lbl">/ 10</span></div>
+    <div class="score-meta"><strong>Đánh giá hiệu suất tháng (KPI)</strong><br>Luồng mỏng nhất trong hệ thống. Dữ liệu đầu ra<br>quá thô để ra quyết định, không có trend.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Vấn đề</div>
+  <div class="issue-list">
+    <div class="issue"><span class="pill p-red">Nghiêm trọng</span><div class="issue-text">Chấm điểm A/B/C/D hoàn toàn chủ quan — không dựa trên dữ liệu thực từ hệ thống<div class="sub">→ Hai Branch Manager chấm cùng một nhân viên có thể ra kết quả khác nhau hoàn toàn.</div></div></div>
+    <div class="issue"><span class="pill p-red">Nghiêm trọng</span><div class="issue-text">Không có cơ chế nhắc nhở — nếu Branch Manager không submit thì HRM không biết<div class="sub">→ Kết quả tổng hợp bị thiếu mà không có cảnh báo.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">Không lưu lịch sử điểm theo tháng ở dạng có thể so sánh<div class="sub">→ Không thấy được trend: nhân viên A đang giỏi hơn hay kém hơn so với 3 tháng trước.</div></div></div>
+    <div class="issue"><span class="pill p-amber">Trung bình</span><div class="issue-text">Kết quả "Xuất sắc → tính thưởng" là bước thủ công tách rời — không tự động feed vào bảng lương<div class="sub">→ HRM phải làm thêm 1 bước nhập tay, dễ nhầm.</div></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-lbl">Hướng cải thiện</div>
+  <div class="fix-list">
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-a">1</span><span class="fix-title">Pre-populate form KPI từ data hệ thống</span></div><div class="fix-desc">Trước khi Branch Manager mở form, hệ thống tự điền sẵn: số task DONE trong tháng, tỉ lệ on-time, số ngày nghỉ phép đã dùng (từ luồng C), số lần bị BLOCKED (từ luồng D). Branch Manager chỉ cần chấm phần định tính rồi submit.</div><div class="gain"><span class="g">Đánh giá khách quan hơn</span><span class="g">Giảm 60% thời gian điền form</span><span class="g">Cross-link dữ liệu các luồng</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-b">2</span><span class="fix-title">Auto-reminder + track submission status</span></div><div class="fix-desc">Ngày 25 mỗi tháng tự gửi nhắc nhở. HRM thấy dashboard: "8/12 chi nhánh đã submit" với tên chi nhánh chưa nộp. Không cần nhắn tin thủ công từng chi nhánh.</div><div class="gain"><span class="g">Không bỏ sót</span><span class="g">Áp lực xã hội qua visibility</span><span>0 thao tác</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-c">3</span><span class="fix-title">Lưu điểm dạng time-series, hiển thị trend</span></div><div class="fix-desc">Mỗi lần submit thêm 1 record vào <code>evaluations(employee_id, month, score, sub_scores)</code>. UI tự vẽ mini sparkline 6 tháng gần nhất bên cạnh tên nhân viên — không cần vào trang riêng.</div><div class="gain"><span class="g">Phát hiện nhân viên đang trượt dốc</span><span class="g">Phát hiện nhân viên tiềm năng</span></div></div>
+    <div class="fix"><div class="fix-head"><span class="fix-icon fi-d">4</span><span class="fix-title">Auto-feed kết quả vào payroll</span></div><div class="fix-desc">Sau khi HRM confirm tổng hợp, hệ thống tự tính bonus/deduction theo rule đã cài sẵn và ghi vào bảng <code>payroll_adjustments</code> của tháng đó. HRM chỉ cần review và approve — không nhập lại số.</div><div class="gain"><span class="g">Không sai sót nhập tay</span><span class="g">Tiết kiệm ~2h/tháng</span></div></div>
+  </div>
+</div>
+
+</div>
+<script>
+const tabs=document.querySelectorAll('.tab');
+const panels=document.querySelectorAll('.panel');
+function sw(i){
+  tabs.forEach((t,j)=>t.classList.toggle('on',j===i));
+  panels.forEach((p,j)=>p.classList.toggle('on',j===i));
+}
+</script>
