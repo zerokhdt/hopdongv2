@@ -1,15 +1,14 @@
 import admin from "firebase-admin";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// 🔥 init firebase (tránh init nhiều lần)
 if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT
-  );
-
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    }),
   });
 }
 
@@ -22,9 +21,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { username, password } = req.body;
+    const { username, password } = req.body || {};
 
-    // 1. tìm user
+    if (!username || !password) {
+      return res.status(400).json({ message: "Missing data" });
+    }
+
     const snapshot = await db
       .collection("accounts")
       .where("username", "==", username)
@@ -38,19 +40,16 @@ export default async function handler(req, res) {
     const doc = snapshot.docs[0];
     const user = doc.data();
 
-    // 2. check active
     if (!user.active) {
       return res.status(403).json({ message: "Account disabled" });
     }
 
-    // 3. check password
     const isValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isValid) {
       return res.status(400).json({ message: "Wrong password" });
     }
 
-    // 4. tạo token
     const token = jwt.sign(
       {
         id: doc.id,
@@ -61,7 +60,6 @@ export default async function handler(req, res) {
       { expiresIn: "8h" }
     );
 
-    // 5. update last_login
     await doc.ref.update({
       last_login: new Date(),
     });
@@ -77,7 +75,10 @@ export default async function handler(req, res) {
       },
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error" });
+    console.error("ERROR:", err);
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
   }
 }
