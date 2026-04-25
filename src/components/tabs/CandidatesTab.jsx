@@ -108,7 +108,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
     return sortedCandidates.filter(c => {
       // Global search bar
       if (searchTerm) {
-        const match = [c.name, c.gmail, c.phone, c.position, c.branch, c.desiredBranch]
+        const match = [c.name, c.email, c.phone, c.position, c.branch, c.desiredBranch]
           .some(field => field?.toLowerCase().includes(searchTerm.toLowerCase()));
         if (!match) return false;
       }
@@ -129,7 +129,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   // History rows from filtered candidates
   const historyRows = filteredSearchCandidates.length > 0 ? filteredSearchCandidates.map(candidate => ({
     name: formatName(candidate.name),
-    email: candidate.email || 'no-email@example.com',
+    email: candidate.gmail || 'no-email@example.com',
     position: formatPosition(candidate.position),
     branch: formatBranch(candidate.branch || 'Hội Sở'),
     result: candidate.locked_reason ? candidate.locked_reason :
@@ -413,7 +413,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
                     <div className="text-[15px] font-semibold text-gray-900 leading-relaxed group-hover:text-[#00288e] group-hover:underline underline-offset-2 transition-all">
                       {row.name}
                     </div>
-                    <div className="text-sm text-gray-500 leading-relaxed">{row.gmail}</div>
+                    <div className="text-sm text-gray-500 leading-relaxed">{row.email}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-[#00288e] font-medium leading-relaxed">
