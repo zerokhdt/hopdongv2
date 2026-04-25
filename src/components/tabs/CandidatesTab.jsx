@@ -4,7 +4,7 @@ import CandidateDetailModal from '../modals/CandidateDetailModal';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "../../utils/firebase";
 
 const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _branchId = '', onViewDetail, onBulkAction, onMock }) => {
   const [candidates, setCandidates] = useState([]);
