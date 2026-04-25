@@ -5,14 +5,6 @@ import { Eye, EyeOff, Lock, User, ArrowRight } from 'lucide-react';
 // Sử dụng biến tĩnh để chạy trực tiếp trên Canvas
 const LOCAL_AUTH_ENABLED = true;
 
-const LOCAL_USERS = {
-  'admin': { password: 'admin123', branch: 'HQ', role: 'admin', username: 'admin' },
-  'admin@acehrm2026.local': { password: 'admin123', branch: 'HQ', role: 'admin', username: 'admin' },
-  'user': { password: 'user123', branch: 'HN', role: 'user', username: 'user' },
-  'user@acehrm2026.local': { password: 'user123', branch: 'HN', role: 'user', username: 'user' },
-  'moon': { password: '123456', branch: 'HQ', role: 'admin', username: 'moon' }
-};
-
 export default function LoginView({ onLogin }) {
   const [username, setUsername] = useState(localStorage.getItem('saved_username') || '');
   const [password, setPassword] = useState('');
@@ -36,26 +28,43 @@ export default function LoginView({ onLogin }) {
     setIsLoading(true);
     setError('');
 
-    const uname = username.trim().toLowerCase();
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          password,
+        }),
+      });
 
-    // Giả lập logic đăng nhập cho môi trường Preview
-    setTimeout(() => {
-      if (LOCAL_AUTH_ENABLED) {
-        const localUser = LOCAL_USERS[uname];
-        if (localUser && localUser.password === password) {
-          localStorage.setItem('saved_username', localUser.username);
-          localStorage.setItem('user_branch', localUser.branch);
-          localStorage.setItem('user_role', localUser.role);
-          onLogin(`local_token_${localUser.username}`);
-          setIsLoading(false);
-          return;
-        }
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || 'Đăng nhập thất bại');
+        triggerShake();
+        setIsLoading(false);
+        return;
       }
 
-      setError('Sai tài khoản hoặc mật khẩu!');
+      // ✅ lưu thông tin user
+      localStorage.setItem('saved_username', data.user.username);
+      localStorage.setItem('user_branch', data.user.branch);
+      localStorage.setItem('user_role', data.user.role);
+      localStorage.setItem('token', data.token);
+
+      // callback login
+      onLogin(data.token);
+
+    } catch (err) {
+      console.error(err);
+      setError('Không kết nối được server');
       triggerShake();
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
 
