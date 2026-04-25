@@ -108,7 +108,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
     return sortedCandidates.filter(c => {
       // Global search bar
       if (searchTerm) {
-        const match = [c.name, c.email, c.phone, c.position, c.branch, c.desiredBranch]
+        const match = [c.name, c.gmail, c.phone, c.position, c.branch, c.desiredBranch]
           .some(field => field?.toLowerCase().includes(searchTerm.toLowerCase()));
         if (!match) return false;
       }
