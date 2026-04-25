@@ -13,7 +13,7 @@ if (!admin.apps.length) {
 }
 
 const db = admin.firestore();
-const JWT_SECRET = process.env.JWT_SECRET || "secret_key";
+const JWT_SECRET = process.env.VITE_FIREBASE_API_KEY;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
