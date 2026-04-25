@@ -413,7 +413,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
                     <div className="text-[15px] font-semibold text-gray-900 leading-relaxed group-hover:text-[#00288e] group-hover:underline underline-offset-2 transition-all">
                       {row.name}
                     </div>
-                    <div className="text-sm text-gray-500 leading-relaxed">{row.email}</div>
+                    <div className="text-sm text-gray-500 leading-relaxed">{row.gmail}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-[#00288e] font-medium leading-relaxed">
