@@ -124,7 +124,7 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
               <div className="relative">
                 <select className="appearance-none bg-gray-50 text-gray-700 text-sm font-medium py-2 pl-4 pr-10 rounded-lg focus:ring-0 border border-gray-200 cursor-pointer">
                   {branches.map(branch => (
-                    <option key={branch.value} value={branch.label}>{branch.name}</option>
+                    <option key={branch.value} value={branch.value}>{branch.label}</option>
                   ))}
                 </select>
               </div>
