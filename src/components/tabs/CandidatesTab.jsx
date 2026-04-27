@@ -56,10 +56,10 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   };
   // Calculate stats from candidates
   const totalCandidates = candidates.length;
-  const pendingCandidates = candidates.filter(c => c.status === 'PENDING').length;
-  const sentCandidates = candidates.filter(c => c.status === 'SENT_TO_BRANCH').length;
-  const completedCandidates = candidates.filter(c => c.status === 'COMPLETED').length;
-  const rejectedCandidates = candidates.filter(c => c.status === 'REJECTED').length;
+  const pendingCandidates = candidates.filter(c => c.status === 'PENDING' || c.status === null ).length;
+  const sentCandidates = candidates.filter(c => c.status === 'SENT_TO_BRANCH' || c.status === 'Đã chuyển cho chi nhánh' ).length;
+  const completedCandidates = candidates.filter(c => c.status === 'COMPLETED' || c.status === 'Nhận việc').length;
+  const rejectedCandidates = candidates.filter(c => c.status === 'REJECTED' || c.status === 'Từ chối').length;
 
   // Mock source data - Sliced to 3 for compact list view
   const sourceData = [
@@ -127,28 +127,32 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   }, [sortedCandidates, searchTerm, columnFilters]);
 
   // History rows from filtered candidates
-  const historyRows = filteredSearchCandidates.length > 0 ? filteredSearchCandidates.map(candidate => ({
+  const historyRows = filteredSearchCandidates.map(candidate => ({
     name: formatName(candidate.name),
     email: candidate.gmail || 'no-email@example.com',
     position: formatPosition(candidate.position),
     branch: formatBranch(candidate.branch || 'Hội Sở'),
-    result: candidate.locked_reason ? candidate.locked_reason :
-            candidate.status === 'COMPLETED' ? 'Nhận việc' : 
-            candidate.status === 'REJECTED' ? 'Từ chối' : 
-            candidate.status === 'SENT_TO_BRANCH' ? 'Phỏng vấn' : 
-            candidate.status === 'INTERVIEW_ASSIGNED' ? 'Đã phân phỏng vấn' : 'Đang chờ',
-    date: candidate.createdAt ? new Date(candidate.createdAt).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Hôm nay',
-    resultColor: candidate.status === 'COMPLETED' ? 'green' :
-                 candidate.status === 'REJECTED' ? 'red' :
-                 (candidate.status === 'SENT_TO_BRANCH' || candidate.status === 'INTERVIEW_ASSIGNED') ? 'blue' : 'slate',
+    result: candidate.locked_reason?.trim()
+      ? candidate.locked_reason
+      : (candidate.status === 'COMPLETED' || candidate.status === 'Nhận việc') ? 'Nhận việc' 
+      : (candidate.status === 'REJECTED' || candidate.status === 'Từ chối')? 'Từ chối' 
+      : (candidate.status === 'SENT_TO_BRANCH' || candidate.status === 'Đã chuyển cho chi nhánh') ? 'Đã chuyển cho chi nhánh' 
+      : (candidate.status === 'INTERVIEW_ASSIGNED' || candidate.status === 'Đã hẹn PV') ? 'Đã phân phỏng vấn' 
+      : (candidate.status === 'SAVE' || candidate.status === 'LƯU HỒ SƠ') ? 'Đã phân phỏng vấn' 
+      : 'Đang chờ',
+    date: candidate.date_of_submission
+      ? new Date(candidate.date_of_submission).toLocaleDateString('vi-VN', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        })
+      : 'Hôm nay',
+    resultColor: (candidate.status === 'COMPLETED' || candidate.status === 'Nhận việc') ? 'green' :
+                (candidate.status === 'REJECTED' || candidate.status === 'Từ chối') ? 'red' :
+                (candidate.status === 'SENT_TO_BRANCH' || candidate.status === 'Đã chuyển cho chi nhánh' || candidate.status === 'INTERVIEW_ASSIGNED' || candidate.status === 'Đã hẹn PV') ? 'blue' 
+                : 'slate',
     original: candidate
-  })) : [
-    // Fallback mock data if candidates array is empty for visual testing
-    { id: 'MOCK-1', name: 'Lê Đức Việt', email: 'leducviet97@gmail.com', position: 'Part-time teacher', branch: 'ACE An Sương', result: 'Phỏng vấn', date: '11 thg 4, 2023', resultColor: 'blue', phone: '0339839793', status: 'SENT_TO_BRANCH', locked: true, locked_reason: 'Đã gửi chi nhánh ACE An Sương' },
-    { id: 'MOCK-2', name: 'Đàm Việt Cường', email: 'vcdvcuong@gmail.com', position: 'Full-time teacher', branch: 'Hội Sở', result: 'Phỏng vấn', date: '18 thg 1, 2024', resultColor: 'blue', phone: '0866532415', status: 'SENT_TO_BRANCH', locked: true, locked_reason: 'Đã gửi chi nhánh Hội Sở' },
-    { id: 'MOCK-3', name: 'Tống Thành Tài', email: 'thanhtai@gmail.com', position: 'Foreign Teacher', branch: 'Chưa phân công', result: 'Mới ứng tuyển', date: 'Hôm nay', resultColor: 'gray', phone: '0988777666', status: 'PENDING', locked: false },
-    { id: 'MOCK-4', name: 'Nguyễn Xuân Trúc', email: 'xtruc10601@gmail.com', position: 'Invited Teacher', branch: 'ACE An Sương', result: 'Từ chối', date: '01 thg 1, 2025', resultColor: 'red', phone: '0708362943', status: 'REJECTED' },
-  ].map(row => ({ ...row, original: row }));
+  }));
 
   return (
     <div className="h-full flex flex-col bg-[#F2F4F7] text-gray-900 pt-2 px-4 pb-4 lg:pt-3 lg:px-6 lg:pb-6 overflow-y-auto font-sans">
@@ -183,7 +187,12 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
             Lọc
           </button>
           <button 
-            onClick={() => downloadCSV(historyRows, 'danh_sach_ung_vien')}
+            onClick={() =>
+              downloadCSV(
+                historyRows.map(({ original, resultColor, ...rest }) => rest),
+                'danh_sach_ung_vien'
+              )
+            }
             className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-lg font-medium text-sm hover:opacity-90 transition-opacity shadow-sm"
           >
             <Download size={16} />
