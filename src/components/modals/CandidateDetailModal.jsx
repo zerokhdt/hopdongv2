@@ -96,7 +96,8 @@ const CandidateDetailModal = ({
         setLoadingBranches(false);
       }
     };
-
+    console.log('branchs:', branchs);
+  console.log('branchOptions:', branchOptions);
     fetchBranches();
   }, []);
 
