@@ -80,7 +80,7 @@ const CandidateDetailModal = ({
   const branchOptions = useMemo(() => {
     return [
       ...new Set(
-        candidates
+        candidate
           .map(c => c.branch)
           .filter(Boolean)
       )
@@ -88,7 +88,7 @@ const CandidateDetailModal = ({
       value: branch,
       label: branch // hoặc format nếu cần
     }));
-  }, [candidates]);
+  }, [candidate]);
 
   const formatValue = (v) => {
     if (v === true) return 'Có';
