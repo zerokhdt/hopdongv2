@@ -68,39 +68,27 @@ const CandidateDetailModal = ({
     return url;
   };
 
-  const cvPreviewUrl = getEmbedtableUrl(candidate?.cvLink || candidate?.cvUrl);
+  const cvPreviewUrl = getEmbedtableUrl(candidate?.cvLink || candidate?.cv_url);
 
   if (!isOpen || !candidate) return null;
 
-  const isCompleted = candidate.status === 'COMPLETED';
-  const isRejected = candidate.status === 'REJECTED';
+  const isCompleted = (candidate.status === 'COMPLETED' || candidate.status === 'Nhận việc');
+  const isRejected = (candidate.status === 'REJECTED' || candidate.status === 'Từ chối');
 
   const c = candidate?.rawData ? { ...candidate.rawData, ...candidate } : candidate;
 
-  const fallbackBranchOptions = [
-    { value: 'AN SƯƠNG', label: 'ACE AN SƯƠNG' },
-    { value: 'PHAN VĂN HỚN', label: 'ACE PHAN VĂN HỚN' },
-    { value: 'HÀ HUY GIÁP', label: 'ACE HÀ HUY GIÁP' },
-    { value: 'LÊ VĂN KHƯƠNG', label: 'ACE LÊ VĂN KHƯƠNG' },
-    { value: 'TRUNG MỸ TÂY', label: 'ACE TRUNG MỸ TÂY' },
-    { value: 'THỚI AN', label: 'ACE THỚI AN' },
-    { value: 'HEAD OFFICE', label: 'TRỤ SỞ CHÍNH' },
-  ];
-
-  const branchOptions = (Array.isArray(branches) && branches.length > 0)
-    ? branches.map((b) => ({ value: b.id, label: b.name || b.id }))
-    : fallbackBranchOptions;
-
-  const pick = (obj, keys) => {
-    for (const key of keys) {
-      const v = obj?.[key];
-      if (v === 0 || v === false) return v;
-      if (v === null || v === undefined) continue;
-      if (typeof v === 'string' && !v.trim()) continue;
-      return v;
-    }
-    return undefined;
-  };
+  const branchOptions = useMemo(() => {
+    return [
+      ...new Set(
+        candidates
+          .map(c => c.branch)
+          .filter(Boolean)
+      )
+    ].map(branch => ({
+      value: branch,
+      label: branch // hoặc format nếu cần
+    }));
+  }, [candidates]);
 
   const formatValue = (v) => {
     if (v === true) return 'Có';
@@ -176,7 +164,7 @@ const CandidateDetailModal = ({
               <p className="font-bold text-xl text-gray-600 mb-2">Bản CV không khả dụng</p>
               <p className="text-sm font-medium max-w-xs mx-auto text-slate-500">Chưa có liên kết CV hoặc định dạng không hỗ trợ.</p>
               <a 
-                href={candidate?.cvLink || candidate?.cvUrl} target="_blank" rel="noreferrer"
+                href={candidate?.cvLink || candidate?.cvUrl || candidate?.cv_url} target="_blank" rel="noreferrer"
                 className="mt-8 px-6 py-3 bg-[#00288e] text-white rounded-xl font-bold text-sm hover:bg-blue-800 transition-colors shadow-lg shadow-blue-200 flex items-center gap-2"
               >
                 <ExternalLink size={18} /> Mở Google Link Trực Tiếp (Bypass)
@@ -274,15 +262,15 @@ const CandidateDetailModal = ({
                      <CandidateSectionTitle icon={User}>Hồ sơ nhân sự</CandidateSectionTitle>
                      <div className="divide-y divide-gray-100">
                         <CandidateInfoItem icon={Briefcase} label="Vị trí ứng tuyển" value={pick(c, ['position', 'Vị trí ứng tuyển', 'Vị trí'])} color="text-[#00288e] font-bold" formatValue={formatValue} />
-                        <CandidateInfoItem icon={Mail} label="Địa chỉ email" value={pick(c, ['email', 'Địa chỉ email', 'Email', 'Email liên hệ', 'Email liên hệ:'])} formatValue={formatValue} />
+                        <CandidateInfoItem icon={Mail} label="Địa chỉ email" value={pick(c, ['gmail', 'Địa chỉ email', 'Email', 'Email liên hệ', 'Email liên hệ:'])} formatValue={formatValue} />
                         <CandidateInfoItem icon={Phone} label="Số điện thoại liên hệ" value={pick(c, ['phone', 'Số điện thoại liên hệ', 'Số điện thoại', 'SĐT', 'Điện thoại'])} formatValue={formatValue} />
                         <CandidateInfoItem icon={Building} label="Chi nhánh ứng tuyển" value={formatBranch(pick(c, ['branch', 'Chi nhánh ứng tuyển', 'Chi nhánh mong muốn', 'desiredBranch', 'Bạn muốn làm việc ở địa chỉ nào của Trung tâm Á châu? -> chi nhánh ứng tuyển', 'Bạn muốn làm việc ở địa chỉ nào của Trung tâm Á châu?']))} formatValue={formatValue} />
-                        <CandidateInfoItem icon={DollarSign} label="Mức lương bạn mong muốn" value={pick(c, ['expectedSalary', 'salaryWant', 'Mức lương bạn mong muốn', 'mức lương bạn mong muốn'])} color="text-emerald-600 font-bold" formatValue={formatValue} />
+                        <CandidateInfoItem icon={DollarSign} label="Mức lương bạn mong muốn" value={pick(c, ['expected_salary', 'salaryWant', 'Mức lương bạn mong muốn', 'mức lương bạn mong muốn'])} color="text-emerald-600 font-bold" formatValue={formatValue} />
                      </div>
                      
                      {/* Links */}
                      <div className="grid grid-cols-2 gap-3 mt-4">
-                        <a href={candidate.cvLink || candidate.cvUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors">
+                        <a href={candidate.cvLink || candidate.cv_url} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors">
                            <FileText size={16} className="text-[#00288e]" />
                            <span className="text-sm font-bold text-gray-600">Mở CV</span>
                         </a>
