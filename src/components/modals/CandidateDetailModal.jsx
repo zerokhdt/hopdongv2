@@ -77,7 +77,7 @@ const CandidateDetailModal = ({
 
   const c = candidate?.rawData ? { ...candidate.rawData, ...candidate } : candidate;
 
-  const [branches, setBranches] = useState([]);
+  const [branchs, setBranchs] = useState([]);
   const [loadingBranches, setLoadingBranches] = useState(true);
   useEffect(() => {
     const fetchBranches = async () => {
@@ -89,7 +89,7 @@ const CandidateDetailModal = ({
           ...doc.data(),
         }));
 
-        setBranches(data);
+        setBranchs(data);
       } catch (err) {
         console.error(err);
       } finally {
