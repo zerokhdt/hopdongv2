@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Building2, Clock, Calendar, Star, Download, Sliders, Eye, X, Handshake } from 'lucide-react';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
