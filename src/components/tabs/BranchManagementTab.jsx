@@ -2,14 +2,38 @@ import { useMemo } from 'react';
 import { Building2, Clock, Calendar, Star, Download, Sliders, Eye, X, Handshake } from 'lucide-react';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../utils/firebase";
 
 const BranchManagementTab = ({ candidates = [], isAdmin: _isAdmin = false, onViewDetail, onAction, onNavigateSubTab }) => {
   // Filter candidates sent to branches
-  const sentCandidates = useMemo(() => {
-    return candidates
-      .filter(c => (c.status === 'Sent' || c.status === 'SENT_TO_BRANCH') && (c.assignment_type !== 'internal') && (c.branch_assigned || c.branch))
-      .sort((a, b) => new Date(b.assigned_at || b.assignedAt || b.sent_at || b.updatedAt || b.updated_at || b.createdAt || 0) - new Date(a.assigned_at || a.assignedAt || a.sent_at || a.updatedAt || a.updated_at || a.createdAt || 0));
-  }, [candidates]);
+  const [candidates, sentCandidates] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+    const fetchCandidates = async () => {
+      try {
+        const q = query(
+          collection(db, "candidates_sheet"),
+          where("status", "==", "Đã chuyển cho chi nhánh")
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        const data = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setCandidates(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCandidates();
+  }, []);
   
   // Mock branch stats
   const branchStats = [
@@ -20,21 +44,34 @@ const BranchManagementTab = ({ candidates = [], isAdmin: _isAdmin = false, onVie
   ];
 
   // Mock branch list
-  const branches = [
-    { id: 1, name: 'Tất cả chi nhánh' },
-    { id: 2, name: 'ACE AN SƯƠNG' },
-    { id: 3, name: 'ACE PHAN VĂN HỚN' },
-    { id: 4, name: 'ACE HÀ HUY GIÁP' },
-    { id: 5, name: 'ACE LÊ VĂN KHƯƠNG' },
-    { id: 6, name: 'TRỤ SỞ CHÍNH' },
-    { id: 7, name: 'ACE TRUNG MỸ TÂY' },
-  ];
+  const [branches, setBranches] = useState([]);
+    const [loadingBranches, setLoadingBranches] = useState(true);
+  
+    useEffect(() => {
+      const fetchBranches = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(db, "branchs"));
+  
+          const data = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+  
+          setBranches(data);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoadingBranches(false);
+        }
+      };
+      fetchBranches();
+    }, []);
 
   // Table data
   const tableData = sentCandidates.map(candidate => ({
     id: candidate.id,
     name: formatName(candidate.name),
-    email: candidate.email || '',
+    email: candidate.gmail || '',
     position: formatPosition(candidate.position_name || candidate.position),
     branch: formatBranch(candidate.branch_id || candidate.branch || 'Hội Sở'),
     assignedAt: candidate.assigned_at || candidate.assignedAt || candidate.sent_at || null,
