@@ -117,6 +117,17 @@ const CandidateDetailModal = ({
     const s = String(v ?? '').trim();
     return s ? s : 'không có';
   };
+  
+  const pick = (obj, keys) => {
+    for (const key of keys) {
+      const v = obj?.[key];
+      if (v === 0 || v === false) return v;
+      if (v === null || v === undefined) continue;
+      if (typeof v === 'string' && !v.trim()) continue;
+      return v;
+    }
+    return undefined;
+  };
 
   const displayName = formatName(pick(c, ['name', 'Họ và tên ứng viên', 'Họ và tên', 'Họ tên']));
   const displayPosition = formatPosition(pick(c, ['position', 'Vị trí ứng tuyển', 'Vị trí']));
