@@ -44,7 +44,23 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   // Bulk selection states
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkBranch, setBulkBranch] = useState('');
-
+  useEffect(() => {
+      const fetchBranches = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(db, "branchs"));
+  
+          const data = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+  
+          setBulkBranches(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      fetchBranches();
+    }, []);
 
   const handleViewDetails = (candidate) => {
     if (onViewDetail) {
