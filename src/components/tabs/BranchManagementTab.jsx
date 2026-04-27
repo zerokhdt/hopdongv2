@@ -230,7 +230,7 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
         {/* Pagination/Footer */}
         <div className="px-6 lg:px-8 py-4 border-t border-surface-container-low flex justify-between items-center">
           <div className="text-sm text-outline">
-            Showing <span className="font-bold text-on-surface">1-{tableData.length}</span> of <span className="font-bold text-on-surface">{sentCandidates.length}</span> candidates
+            Showing <span className="font-bold text-on-surface">1-{tableData.length}</span> of <span className="font-bold text-on-surface">{candidates.length}</span> candidates
           </div>
           <div className="flex items-center gap-2">
             <button className="px-3 py-1.5 text-sm rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">Previous</button>
