@@ -51,34 +51,6 @@ const CandidateDetailModal = ({
   const [branchs, setBranchs] = useState([]);
   const [loadingBranches, setLoadingBranches] = useState(true);
 
-  React.useEffect(() => {
-    setIsLockedLocal(candidate?.locked || false);
-    setReasonLocal(candidate?.locked_reason || '');
-  }, [candidate?.locked, candidate?.locked_reason]);
-
-  const getEmbedtableUrl = (url) => {
-    if (!url) return '';
-    if (url.includes('drive.google.com')) {
-      let id = '';
-      if (url.includes('id=')) {
-        id = url.split('id=')[1].split('&')[0];
-      } else if (url.includes('/file/d/')) {
-        id = url.split('/file/d/')[1].split('/')[0];
-      }
-      if (id) return `https://drive.google.com/file/d/${id}/preview`;
-    }
-    return url;
-  };
-
-  const cvPreviewUrl = getEmbedtableUrl(candidate?.cvLink || candidate?.cv_url);
-
-  if (!isOpen || !candidate) return null;
-
-  const isCompleted = (candidate.status === 'COMPLETED' || candidate.status === 'Nhận việc');
-  const isRejected = (candidate.status === 'REJECTED' || candidate.status === 'Từ chối');
-
-  const c = candidate?.rawData ? { ...candidate.rawData, ...candidate } : candidate;
-
   useEffect(() => {
     const fetchBranches = async () => {
       try {
@@ -122,6 +94,34 @@ const CandidateDetailModal = ({
       )
   : [];
   console.log('branchOptions:', branchOptions);
+
+  React.useEffect(() => {
+    setIsLockedLocal(candidate?.locked || false);
+    setReasonLocal(candidate?.locked_reason || '');
+  }, [candidate?.locked, candidate?.locked_reason]);
+
+  const getEmbedtableUrl = (url) => {
+    if (!url) return '';
+    if (url.includes('drive.google.com')) {
+      let id = '';
+      if (url.includes('id=')) {
+        id = url.split('id=')[1].split('&')[0];
+      } else if (url.includes('/file/d/')) {
+        id = url.split('/file/d/')[1].split('/')[0];
+      }
+      if (id) return `https://drive.google.com/file/d/${id}/preview`;
+    }
+    return url;
+  };
+
+  const cvPreviewUrl = getEmbedtableUrl(candidate?.cvLink || candidate?.cv_url);
+
+  if (!isOpen || !candidate) return null;
+
+  const isCompleted = (candidate.status === 'COMPLETED' || candidate.status === 'Nhận việc');
+  const isRejected = (candidate.status === 'REJECTED' || candidate.status === 'Từ chối');
+
+  const c = candidate?.rawData ? { ...candidate.rawData, ...candidate } : candidate;
 
   const formatValue = (v) => {
     if (v === true) return 'Có';
