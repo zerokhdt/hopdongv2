@@ -5,7 +5,7 @@ import { downloadCSV } from '../../utils/exportCsv';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 
-const BranchManagementTab = ({ candidates = [], isAdmin: _isAdmin = false, onViewDetail, onAction, onNavigateSubTab }) => {
+const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction, onNavigateSubTab }) => {
   // Filter candidates sent to branches
   const [candidates, sentCandidates] = useState([]);
     const [loading, setLoading] = useState(true);
