@@ -79,8 +79,6 @@ const CandidateDetailModal = ({
       label: b.label,
     }))
   : [];
-  console.log("branchs:", branchs);
-  console.log('branchOptions:', branchOptions);
 
   React.useEffect(() => {
     setIsLockedLocal(candidate?.locked || false);
@@ -117,7 +115,7 @@ const CandidateDetailModal = ({
     const s = String(v ?? '').trim();
     return s ? s : 'không có';
   };
-  
+
   const pick = (obj, keys) => {
     for (const key of keys) {
       const v = obj?.[key];
@@ -134,7 +132,7 @@ const CandidateDetailModal = ({
 
   const getExperienceValue = () => {
     const v = pick(c, [
-      'experience',
+      'experience_value',
       'Kinh nghiệm',
       'Bạn có bao nhiêu kinh nghiệm ở vị trí ứng tuyển?',
       'Bạn có bao nhiêu kinh nghiệm ở vị trí ứng tuyển? -> kinh nghiệm (unit: năm)',
@@ -151,7 +149,7 @@ const CandidateDetailModal = ({
     const parts = [];
     const direct = pick(c, [
       'time',
-      'workingTime',
+      'Working_Time',
       'Thời gian làm việc',
       'Thời gian làm việc mong muốn',
       'Thời gian làm việc mong muốn (kiêm tra tất cả các cột thời gian làm việc)',
@@ -481,22 +479,22 @@ const CandidateDetailModal = ({
                   <div>
                     <CandidateSectionTitle icon={User}>Thông tin cá nhân</CandidateSectionTitle>
                     <div className="divide-y divide-gray-100">
-                      <CandidateInfoItem icon={Mail} label="Địa chỉ email" value={pick(c, ['email', 'Địa chỉ email', 'Email', 'Email liên hệ', 'Email liên hệ:'])} formatValue={formatValue} />
+                      <CandidateInfoItem icon={Mail} label="Địa chỉ email" value={pick(c, ['gmail', 'Địa chỉ email', 'Email', 'Email liên hệ', 'Email liên hệ:'])} formatValue={formatValue} />
                       <CandidateInfoItem icon={Phone} label="Số điện thoại liên hệ" value={pick(c, ['phone', 'Số điện thoại liên hệ', 'Số điện thoại', 'SĐT', 'Điện thoại'])} formatValue={formatValue} />
-                      <CandidateInfoItem icon={Calendar} label="Ngày tháng năm sinh" value={pick(c, ['dob', 'Ngày tháng năm sinh', 'Ngày sinh', 'Ngày sinh:'])} formatValue={formatValue} />
-                      <CandidateInfoItem icon={MapPin} label="Địa chỉ hiện tại" value={pick(c, ['address', 'Địa chỉ hiện tại', 'Địa chỉ hiện tại:', 'Địa chỉ'])} formatValue={formatValue} />
+                      <CandidateInfoItem icon={Calendar} label="Ngày tháng năm sinh" value={pick(c, ['birth', 'Ngày tháng năm sinh', 'Ngày sinh', 'Ngày sinh:'])} formatValue={formatValue} />
+                      <CandidateInfoItem icon={MapPin} label="Địa chỉ hiện tại" value={pick(c, ['current_address', 'Địa chỉ hiện tại', 'Địa chỉ hiện tại:', 'Địa chỉ'])} formatValue={formatValue} />
                       <CandidateInfoItem icon={User} label="Giới tính" value={pick(c, ['gender', 'Giới tính'])} formatValue={formatValue} />
-                      <CandidateInfoItem icon={Home} label="Tình trạng nhà" value={pick(c, ['livingState', 'Tình trạng nhà', 'Loại nhà ở', 'housing'])} formatValue={formatValue} />
+                      <CandidateInfoItem icon={Home} label="Tình trạng nhà" value={pick(c, ['livingState', 'Tình trạng nhà', 'Loại nhà ở', 'house'])} formatValue={formatValue} />
                     </div>
                   </div>
 
                   <div>
                     <CandidateSectionTitle icon={GraduationCap}>Học vấn & Kinh nghiệm</CandidateSectionTitle>
                     <div className="divide-y divide-gray-100">
-                      <CandidateInfoItem icon={GraduationCap} label="Chuyên ngành" value={pick(c, ['major', 'Chuyên ngành', 'Chuyên ngành của bạn là gì? -> chuyên ngành', 'Chuyên ngành của bạn là gì?'])} formatValue={formatValue} />
+                      <CandidateInfoItem icon={GraduationCap} label="Chuyên ngành" value={pick(c, ['Graduation_Cap', 'Chuyên ngành', 'Chuyên ngành của bạn là gì? -> chuyên ngành', 'Chuyên ngành của bạn là gì?'])} formatValue={formatValue} />
                       <CandidateInfoItem icon={Clock} label="Kinh nghiệm (năm)" value={getExperienceValue()} formatValue={formatValue} />
-                      <CandidateInfoItem icon={Building} label="Bạn đã làm việc ở công ty/trung tâm nào?" value={pick(c, ['oldCompany', 'Nơi làm việc cũ', 'Bạn đã làm việc ở công ty hay trung tâm nào?'])} formatValue={formatValue} />
-                      <CandidateInfoItem icon={MessageSquare} label="Lí do nghỉ việc ở công ty/trung tâm cũ?" value={pick(c, ['reasonForQuitting', 'reason', 'Lí do nghỉ việc ở công ty/ trung tâm cũ?', 'Lý do nghỉ việc ở công ty/ trung tâm cũ?', 'Lý do nghỉ việc'])} color="italic text-rose-600 whitespace-pre-wrap" formatValue={formatValue} />
+                      <CandidateInfoItem icon={Building} label="Bạn đã làm việc ở công ty/trung tâm nào?" value={pick(c, ['company_old', 'Nơi làm việc cũ', 'Bạn đã làm việc ở công ty hay trung tâm nào?'])} formatValue={formatValue} />
+                      <CandidateInfoItem icon={MessageSquare} label="Lí do nghỉ việc ở công ty/trung tâm cũ?" value={pick(c, ['reason_leave', 'reason', 'Lí do nghỉ việc ở công ty/ trung tâm cũ?', 'Lý do nghỉ việc ở công ty/ trung tâm cũ?', 'Lý do nghỉ việc'])} color="italic text-rose-600 whitespace-pre-wrap" formatValue={formatValue} />
                     </div>
                   </div>
 
@@ -504,28 +502,28 @@ const CandidateDetailModal = ({
                     <CandidateSectionTitle icon={Info}>Thông tin bổ sung</CandidateSectionTitle>
                     <div className="divide-y divide-gray-100">
                       <CandidateInfoItem icon={Building} label="Chi nhánh ứng tuyển" value={formatBranch(pick(c, ['branch', 'Chi nhánh ứng tuyển', 'Chi nhánh mong muốn', 'desiredBranch', 'Bạn muốn làm việc ở địa chỉ nào của Trung tâm Á châu? -> chi nhánh ứng tuyển', 'Bạn muốn làm việc ở địa chỉ nào của Trung tâm Á châu?']))} formatValue={formatValue} />
-                      <CandidateInfoItem icon={ChevronRight} label="Sẵn sàng di chuyển theo sắp xếp công ty?" value={pick(c, ['willingToRelocate', 'Sẵn sàng di chuyển', 'Bạn có sẵn sàng di chuyển theo sự sắp xếp của công ty không?'])} formatValue={formatValue} />
+                      <CandidateInfoItem icon={ChevronRight} label="Sẵn sàng di chuyển theo sắp xếp công ty?" value={pick(c, ['ready_to_relocate', 'Sẵn sàng di chuyển', 'Bạn có sẵn sàng di chuyển theo sự sắp xếp của công ty không?'])} formatValue={formatValue} />
                       <CandidateInfoItem icon={Calendar} label="Thời gian làm việc mong muốn" value={getWorkingTimeValue()} color="whitespace-pre-wrap" formatValue={formatValue} />
                       <div className="divide-y divide-gray-100">
-                        <CandidateInfoItem icon={DollarSign} label="Mức lương bạn mong muốn" value={pick(c, ['expectedSalary', 'salaryWant', 'Mức lương bạn mong muốn', 'mức lương bạn mong muốn'])} color="text-[#00288e] font-bold whitespace-pre-wrap" formatValue={formatValue} />
-                        <CandidateInfoItem icon={UserCheck} label="Miêu tả bản thân bằng 3 từ" value={pick(c, ['self3Words', 'Hãy miêu tả bản thân bạn bằng 3 từ:', 'Hãy miêu tả bản thân bạn bằng 3 từ', '3 từ', 'describe3Words'])} color="text-gray-700 font-semibold whitespace-pre-wrap" formatValue={formatValue} />
+                        <CandidateInfoItem icon={DollarSign} label="Mức lương bạn mong muốn" value={pick(c, ['expected_salary', 'salaryWant', 'Mức lương bạn mong muốn', 'mức lương bạn mong muốn'])} color="text-[#00288e] font-bold whitespace-pre-wrap" formatValue={formatValue} />
+                        <CandidateInfoItem icon={UserCheck} label="Miêu tả bản thân bằng 3 từ" value={pick(c, ['describe_yourself', 'Hãy miêu tả bản thân bạn bằng 3 từ:', 'Hãy miêu tả bản thân bạn bằng 3 từ', '3 từ', 'describe3Words'])} color="text-gray-700 font-semibold whitespace-pre-wrap" formatValue={formatValue} />
                       </div>
                       <CandidateInfoItem icon={Award} label="Người giới thiệu" value={pick(c, ['referrer', 'Người giới thiệu', 'Referral'])} formatValue={formatValue} />
                     </div>
                   </div>
 
-                  {(candidate.cvLink || candidate.cvUrl) && (
+                  {(candidate.cvLink || candidate.cv_url) && (
                     <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
                       <div className="flex items-center gap-2 text-[#00288e] font-bold text-sm uppercase mb-3">
                          <FileText size={16} /> Link tài liệu
                       </div>
                       <div className="flex flex-col gap-2">
-                         <a href={candidate.cvLink || candidate.cvUrl} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-white border border-blue-200 rounded-xl hover:shadow-md transition-all group">
+                         <a href={candidate.cvLink || candidate.cv_url} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-white border border-blue-200 rounded-xl hover:shadow-md transition-all group">
                             <span className="text-sm font-bold text-gray-700">Xem Hồ sơ (CV)</span>
                             <ExternalLink size={16} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                          </a>
-                         {candidate.videoLink && (
-                           <a href={candidate.videoLink} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-white border border-purple-200 rounded-xl hover:shadow-md transition-all group">
+                         {candidate.video_url && (
+                           <a href={candidate.video_url} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-white border border-purple-200 rounded-xl hover:shadow-md transition-all group">
                               <span className="text-sm font-bold text-gray-700">Video giới thiệu</span>
                               <Video size={16} className="text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                            </a>
@@ -539,9 +537,9 @@ const CandidateDetailModal = ({
                        <div className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Trạng thái tuyển dụng</div>
                        <div className="text-base font-bold flex items-center gap-2">
                          <Star size={18} className="text-amber-400 fill-amber-400" />
-                         {candidate.status === 'SENT_TO_BRANCH' ? 'Đang phỏng vấn tại chi nhánh' : 
-                          candidate.status === 'COMPLETED' ? 'Tuyển dụng chính thức' : 
-                          candidate.status === 'REJECTED' ? 'Từ chối / Loại' : 'Chưa xử lý'}
+                         {(candidate.status === 'SENT_TO_BRANCH' || candidate.status === 'Đã chuyển cho chi nhánh') ? 'Đang phỏng vấn tại chi nhánh' : 
+                          (candidate.status === 'COMPLETED' || candidate.status === 'Nhận việc') ? 'Tuyển dụng chính thức' : 
+                          (candidate.status === 'REJECTED' || candidate.status === 'Từ chối') ? 'Từ chối / Loại' : 'Chưa xử lý'}
                        </div>
                        {candidate.note && (
                         <div className="mt-3 text-sm bg-white/10 p-3 rounded-xl border border-white/10 italic text-slate-200">
@@ -551,7 +549,7 @@ const CandidateDetailModal = ({
                     </div>
                   )}
 
-                  {!isHRM && candidate.status === 'SENT_TO_BRANCH' && (
+                  {!isHRM && (candidate.status === 'SENT_TO_BRANCH' || candidate.status === 'Đã chuyển cho chi nhánh') && (
                     <div className="p-4 rounded-2xl border-2 border-indigo-100 bg-indigo-50 mt-6">
                        <h3 className="text-sm font-bold text-indigo-800 uppercase tracking-widest mb-4">Phản hồi từ Chi nhánh</h3>
                        <div className="flex flex-col gap-4">
