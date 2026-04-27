@@ -167,18 +167,6 @@ const CandidateDetailModal = ({
     return String(v || '').trim() || 'không có';
   };
 
-    const re = /thời gian.*làm việc/i;
-    for (const [k, v] of Object.entries(c || {})) {
-      if (!re.test(k)) continue;
-      const sv = String(v ?? '').trim();
-      if (!sv) continue;
-      parts.push(`${k}: ${sv}`);
-    }
-
-    const unique = Array.from(new Set(parts)).filter(Boolean);
-    return unique.length ? unique.join('\n') : 'không có';
-  };
-
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
