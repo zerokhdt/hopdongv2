@@ -124,7 +124,7 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
               <div className="relative">
                 <select className="appearance-none bg-gray-50 text-gray-700 text-sm font-medium py-2 pl-4 pr-10 rounded-lg focus:ring-0 border border-gray-200 cursor-pointer">
                   {branches.map(branch => (
-                    <option key={branch.id} value={branch.id}>{branch.name}</option>
+                    <option key={branch.value} value={branch.label}>{branch.name}</option>
                   ))}
                 </select>
               </div>
@@ -170,7 +170,7 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
                   <td className="px-6 py-4 text-sm text-gray-400 text-center">{idx + 1}</td>
                   <td className="px-6 py-4">
                     <div className="text-[15px] font-semibold text-gray-900 leading-relaxed">{row.name}</div>
-                    <div className="text-sm text-gray-500 leading-relaxed">{row.email}</div>
+                    <div className="text-sm text-gray-500 leading-relaxed">{row.gmail}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-[#00288e] font-medium leading-relaxed">{row.position}</div>
