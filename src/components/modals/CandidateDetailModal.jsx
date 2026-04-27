@@ -155,16 +155,17 @@ const CandidateDetailModal = ({
 };
 
   const getWorkingTimeValue = () => {
-    const parts = [];
-    const direct = pick(c, [
-      'time',
+    const source = c?.raw_data || c;
+
+    const v = pick(source, [
       'Working_Time',
+      'time',
+      'workingTime',
       'Thời gian làm việc',
-      'Thời gian làm việc mong muốn',
-      'Thời gian làm việc mong muốn (kiêm tra tất cả các cột thời gian làm việc)',
-      'timeProb',
     ]);
-    if (direct) parts.push(String(direct).trim());
+
+    return String(v || '').trim() || 'không có';
+  };
 
     const re = /thời gian.*làm việc/i;
     for (const [k, v] of Object.entries(c || {})) {
