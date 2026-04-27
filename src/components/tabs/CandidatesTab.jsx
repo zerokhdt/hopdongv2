@@ -557,7 +557,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
           
           <select 
             value={bulkBranch}
-            onChange={(e) => setBulkBranch(e.target.value)}
+            onChange={(e) => setBulkBranch(e.label)}
             className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm font-bold text-white outline-none cursor-pointer focus:border-orange-400"
           >
             <option value="">-- Chọn chi nhánh giao việc --</option>
