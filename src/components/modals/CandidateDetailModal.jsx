@@ -100,6 +100,28 @@ const CandidateDetailModal = ({
     fetchBranches();
   }, []);
 
+  const branchOptions = Array.isArray(branchs)
+  ? branchs
+      .map((b) => {
+        const rawName = (b?.name || '').trim();
+        if (!rawName) return null;
+
+        const upper = rawName.toUpperCase();
+
+        return {
+          value: upper,
+          label: upper === 'HEAD OFFICE'
+            ? 'TRỤ SỞ CHÍNH'
+            : `ACE ${upper}`,
+        };
+      })
+      .filter(Boolean)
+      .filter(
+        (item, index, self) =>
+          index === self.findIndex((i) => i.value === item.value)
+      )
+  : [];
+
   const formatValue = (v) => {
     if (v === true) return 'Có';
     if (v === false) return 'Không';
