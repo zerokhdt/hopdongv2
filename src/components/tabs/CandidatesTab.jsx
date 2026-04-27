@@ -44,23 +44,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   // Bulk selection states
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkBranch, setBulkBranch] = useState('');
-  useEffect(() => {
-      const fetchBranches = async () => {
-        try {
-          const querySnapshot = await getDocs(collection(db, "branchs"));
-  
-          const data = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-  
-          setBulkBranch(data);
-        } catch (err) {
-          console.error(err);
-        }
-      };
-      fetchBranches();
-    }, []);
+
 
   const handleViewDetails = (candidate) => {
     if (onViewDetail) {
@@ -557,12 +541,15 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
           
           <select 
             value={bulkBranch}
-            onChange={(e) => setBulkBranch(e.label)}
+            onChange={(e) => setBulkBranch(e.target.value)}
             className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm font-bold text-white outline-none cursor-pointer focus:border-orange-400"
           >
             <option value="">-- Chọn chi nhánh giao việc --</option>
-            {branches.map(b => (
-              <option key={b.id} value={b.name}>{b.name}</option>
+
+            {uniqueBranches.map((b, index) => (
+              <option key={index} value={b}>
+                {b}
+              </option>
             ))}
           </select>
 
