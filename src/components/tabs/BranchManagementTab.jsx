@@ -7,9 +7,10 @@ import { db } from "../../utils/firebase";
 
 const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction, onNavigateSubTab }) => {
   // Filter candidates sent to branches
-  const [candidates, sentCandidates] = useState([]);
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
+  const [candidates, setCandidates] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
     const fetchCandidates = async () => {
       try {
         const q = query(
@@ -34,15 +35,11 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
 
     fetchCandidates();
   }, []);
-
-  const safeSentCandidates = Array.isArray(sentCandidates)
-  ? sentCandidates
-  : [];
   
   // Mock branch stats
   const branchStats = [
-    { title: 'Tổng chuyển chi nhánh', value: safeSentCandidates.length.toLocaleString(), icon: <Building2 size={20} />, color: 'bg-primary-container', trend: '+12% từ tháng trước', trendColor: 'text-green-600' },
-    { title: 'Chờ chi nhánh duyệt', value: safeSentCandidates.filter(c => c.status === 'Sent').length.toString(), icon: <Clock size={20} />, color: 'bg-tertiary-fixed/30', textColor: 'text-tertiary', description: 'Thời gian phản hồi TB: 2.4 ngày' },
+    { title: 'Tổng chuyển chi nhánh', value: candidates.length.toLocaleString(), icon: <Building2 size={20} />, color: 'bg-primary-container', trend: '+12% từ tháng trước', trendColor: 'text-green-600' },
+    { title: 'Chờ chi nhánh duyệt', value: candidates.filter(c => c.status === 'Sent').length.toString(), icon: <Clock size={20} />, color: 'bg-tertiary-fixed/30', textColor: 'text-tertiary', description: 'Thời gian phản hồi TB: 2.4 ngày' },
     { title: 'Lịch phỏng vấn sắp tới', value: '156', icon: <Calendar size={20} />, color: 'bg-secondary-container', textColor: 'text-secondary', description: '8 Lịch hẹn cho ngày mai' },
     { title: 'Tỷ lệ phản hồi chi nhánh', value: '94.2%', icon: <Star size={20} />, color: 'bg-green-100', textColor: 'text-green-700', description: 'Mức hiệu suất tối ưu' },
   ];
@@ -72,7 +69,7 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
     }, []);
 
   // Table data
-  const tableData = safeSentCandidates.map(candidate => ({
+  const tableData = candidates.map(candidate => ({
     id: candidate.id,
     name: formatName(candidate.name),
     email: candidate.gmail || '',
