@@ -48,6 +48,8 @@ const CandidateDetailModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLockedLocal, setIsLockedLocal] = useState(candidate?.locked || false);
   const [reasonLocal, setReasonLocal] = useState(candidate?.locked_reason || '');
+  const [branchs, setBranchs] = useState([]);
+  const [loadingBranches, setLoadingBranches] = useState(true);
 
   React.useEffect(() => {
     setIsLockedLocal(candidate?.locked || false);
@@ -77,8 +79,6 @@ const CandidateDetailModal = ({
 
   const c = candidate?.rawData ? { ...candidate.rawData, ...candidate } : candidate;
 
-  const [branchs, setBranchs] = useState([]);
-  const [loadingBranches, setLoadingBranches] = useState(true);
   useEffect(() => {
     const fetchBranches = async () => {
       try {
