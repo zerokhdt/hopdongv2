@@ -54,7 +54,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
             ...doc.data(),
           }));
   
-          setBulkBranches(data);
+          setBulkBranch(data);
         } catch (err) {
           console.error(err);
         }
