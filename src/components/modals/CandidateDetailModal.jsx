@@ -145,6 +145,15 @@ const CandidateDetailModal = ({
     return s;
   };
 
+  const formatDate = (v) => {
+  if (!v) return 'không có';
+
+  const d = new Date(v);
+  if (isNaN(d)) return v;
+
+  return d.toLocaleDateString('vi-VN'); // 👉 01/03/2025
+};
+
   const getWorkingTimeValue = () => {
     const parts = [];
     const direct = pick(c, [
@@ -481,7 +490,7 @@ const CandidateDetailModal = ({
                     <div className="divide-y divide-gray-100">
                       <CandidateInfoItem icon={Mail} label="Địa chỉ email" value={pick(c, ['gmail', 'Địa chỉ email', 'Email', 'Email liên hệ', 'Email liên hệ:'])} formatValue={formatValue} />
                       <CandidateInfoItem icon={Phone} label="Số điện thoại liên hệ" value={pick(c, ['phone', 'Số điện thoại liên hệ', 'Số điện thoại', 'SĐT', 'Điện thoại'])} formatValue={formatValue} />
-                      <CandidateInfoItem icon={Calendar} label="Ngày tháng năm sinh" value={pick(c, ['birth', 'Ngày tháng năm sinh', 'Ngày sinh', 'Ngày sinh:'])} formatValue={formatValue} />
+                      <CandidateInfoItem icon={Calendar} label="Ngày tháng năm sinh" value={pick(c, ['birth', 'Ngày tháng năm sinh', 'Ngày sinh', 'Ngày sinh:'])} formatValue={formatDate} />
                       <CandidateInfoItem icon={MapPin} label="Địa chỉ hiện tại" value={pick(c, ['current_address', 'Địa chỉ hiện tại', 'Địa chỉ hiện tại:', 'Địa chỉ'])} formatValue={formatValue} />
                       <CandidateInfoItem icon={User} label="Giới tính" value={pick(c, ['gender', 'Giới tính'])} formatValue={formatValue} />
                       <CandidateInfoItem icon={Home} label="Tình trạng nhà" value={pick(c, ['livingState', 'Tình trạng nhà', 'Loại nhà ở', 'house'])} formatValue={formatValue} />
@@ -491,7 +500,7 @@ const CandidateDetailModal = ({
                   <div>
                     <CandidateSectionTitle icon={GraduationCap}>Học vấn & Kinh nghiệm</CandidateSectionTitle>
                     <div className="divide-y divide-gray-100">
-                      <CandidateInfoItem icon={GraduationCap} label="Chuyên ngành" value={pick(c, ['Graduation_Cap', 'Chuyên ngành', 'Chuyên ngành của bạn là gì? -> chuyên ngành', 'Chuyên ngành của bạn là gì?'])} formatValue={formatValue} />
+                      <CandidateInfoItem icon={GraduationCap} label="Chuyên ngành" value={pick(c, ['graduation_cap', 'Chuyên ngành', 'Chuyên ngành của bạn là gì? -> chuyên ngành', 'Chuyên ngành của bạn là gì?'])} formatValue={formatValue} />
                       <CandidateInfoItem icon={Clock} label="Kinh nghiệm (năm)" value={getExperienceValue()} formatValue={formatValue} />
                       <CandidateInfoItem icon={Building} label="Bạn đã làm việc ở công ty/trung tâm nào?" value={pick(c, ['company_old', 'Nơi làm việc cũ', 'Bạn đã làm việc ở công ty hay trung tâm nào?'])} formatValue={formatValue} />
                       <CandidateInfoItem icon={MessageSquare} label="Lí do nghỉ việc ở công ty/trung tâm cũ?" value={pick(c, ['reason_leave', 'reason', 'Lí do nghỉ việc ở công ty/ trung tâm cũ?', 'Lý do nghỉ việc ở công ty/ trung tâm cũ?', 'Lý do nghỉ việc'])} color="italic text-rose-600 whitespace-pre-wrap" formatValue={formatValue} />
