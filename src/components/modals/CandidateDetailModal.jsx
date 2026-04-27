@@ -94,6 +94,7 @@ const CandidateDetailModal = ({
           index === self.findIndex((i) => i.value === item.value)
       )
   : [];
+  console.log("branchs:", branchs);
   console.log('branchOptions:', branchOptions);
 
   React.useEffect(() => {
