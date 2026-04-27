@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { Building2, Clock, Calendar, Star, Download, Sliders, Eye, X, Handshake } from 'lucide-react';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 
 const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction, onNavigateSubTab }) => {
