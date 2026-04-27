@@ -91,8 +91,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
   // Filter by search term
   const uniquePositions = useMemo(() => [...new Set(candidates.map(c => c.position || 'Không xác định'))].sort(), [candidates]);
-  const uniqueBranches = useMemo(() => [...new Set(candidates.map(c => c.branch || c.desiredBranch || 'Không xác định'))].sort(), [candidates]);
-  const uniqueStatuses = useMemo(() => [...new Set(candidates.map(c => c.status || 'PENDING'))].sort(), [candidates]);
+  const uniqueBranches = useMemo(() => [...new Set(candidates.map(c => c.branch || c.desiredBranch))].sort(), [candidates]);
+  const uniqueStatuses = useMemo(() => [...new Set(candidates.map(c => c.status ))].sort(), [candidates]);
 
   const toggleFilterValue = (type, value) => {
     setColumnFilters(prev => {

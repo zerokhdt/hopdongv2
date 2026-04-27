@@ -77,18 +77,30 @@ const CandidateDetailModal = ({
 
   const c = candidate?.rawData ? { ...candidate.rawData, ...candidate } : candidate;
 
-  const branchOptions = useMemo(() => {
-    return [
-      ...new Set(
-        candidate
-          .map(c => c.branch)
-          .filter(Boolean)
-      )
-    ].map(branch => ({
-      value: branch,
-      label: branch // hoặc format nếu cần
-    }));
-  }, [candidate]);
+  const fallbackBranchOptions = [
+    { value: 'AN SƯƠNG', label: 'ACE AN SƯƠNG' },
+    { value: 'PHAN VĂN HỚN', label: 'ACE PHAN VĂN HỚN' },
+    { value: 'HÀ HUY GIÁP', label: 'ACE HÀ HUY GIÁP' },
+    { value: 'LÊ VĂN KHƯƠNG', label: 'ACE LÊ VĂN KHƯƠNG' },
+    { value: 'TRUNG MỸ TÂY', label: 'ACE TRUNG MỸ TÂY' },
+    { value: 'THỚI AN', label: 'ACE THỚI AN' },
+    { value: 'HEAD OFFICE', label: 'TRỤ SỞ CHÍNH' },
+  ];
+
+  const branchOptions = (Array.isArray(branches) && branches.length > 0)
+    ? branches.map((b) => ({ value: b.id, label: b.name || b.id }))
+    : fallbackBranchOptions;
+
+  const pick = (obj, keys) => {
+    for (const key of keys) {
+      const v = obj?.[key];
+      if (v === 0 || v === false) return v;
+      if (v === null || v === undefined) continue;
+      if (typeof v === 'string' && !v.trim()) continue;
+      return v;
+    }
+    return undefined;
+  };
 
   const formatValue = (v) => {
     if (v === true) return 'Có';
