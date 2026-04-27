@@ -96,7 +96,6 @@ const CandidateDetailModal = ({
         setLoadingBranches(false);
       }
     };
-    console.log('branchs:', branchs);
   console.log('branchOptions:', branchOptions);
     fetchBranches();
   }, []);
@@ -122,6 +121,7 @@ const CandidateDetailModal = ({
           index === self.findIndex((i) => i.value === item.value)
       )
   : [];
+  console.log('branchOptions:', branchOptions);
 
   const formatValue = (v) => {
     if (v === true) return 'Có';
