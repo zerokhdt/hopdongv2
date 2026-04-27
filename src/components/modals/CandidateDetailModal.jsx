@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { 
   ChevronRight, Star, Send, ShieldAlert, FileText, ExternalLink, X, 
   CheckCircle2, MessageSquare, FileCheck, User, Briefcase, Mail, Phone, 
