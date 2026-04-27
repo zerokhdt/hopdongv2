@@ -72,7 +72,7 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
     }, []);
 
   // Table data
-  const tableData = sentCandidates.map(candidate => ({
+  const tableData = safeSentCandidates.map(candidate => ({
     id: candidate.id,
     name: formatName(candidate.name),
     email: candidate.gmail || '',
