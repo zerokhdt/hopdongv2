@@ -631,14 +631,14 @@ const CandidateDetailModal = ({
                             <button 
                               onClick={() => {
                                 if (!scheduleDate) return alert('Vui lòng chọn ngày giờ phỏng vấn');
-                                onBranchAction && onBranchAction('SCHEDULE', { interview_scheduled_date: scheduleDate.replace('T', ' ') });
+                                onInterview && onInterview({ branch: 'HRM_INTERNAL', assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, candidate.id);
                               }}
                               className="py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition-all flex justify-center items-center gap-2"
                             >
                               <CheckCircle2 size={18} /> Nhận & Hẹn phỏng vấn
                             </button>
                             <button 
-                              onClick={() => onBranchAction && onBranchAction('REJECT')}
+                              onClick={() => onReject('REJECT', candidate.id)}
                               className="py-3 bg-white text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl font-bold text-sm transition-all flex justify-center items-center gap-2 shadow-sm"
                             >
                               <Ban size={18} /> Không nhận
