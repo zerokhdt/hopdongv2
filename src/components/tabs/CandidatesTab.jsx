@@ -157,6 +157,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   const onBulkAction = async (ids, action, extra) => {
     try {
       const batch = writeBatch(db);
+      console.log("branch_send:", extra.branch, typeof extra.branch);
+      console.log("branch_send:", extra, typeof extra);
 
       ids.forEach(id => {
         const ref = doc(db, "candidates_sheet", id);
@@ -580,8 +582,6 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
             onClick={async () => {
               if (!bulkBranch) return;
               const extra = { branch: bulkBranch, branch_label: bulkBranch, assignment_type: 'branch' };
-              console.log("uniqueBranches:", uniqueBranches);
-              console.log("first item:", uniqueBranches[0], typeof uniqueBranches[0]);
               const success = await onBulkAction(selectedIds, 'SEND', extra);
 
               if (success) {
