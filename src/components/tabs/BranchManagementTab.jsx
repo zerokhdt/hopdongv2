@@ -10,7 +10,14 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [isHRM, setIsHRM] = useState(false);
+  const [userBranch, setUserBranch] = useState('');
+
   useEffect(() => {
+    setIsHRM(localStorage.getItem("user_role") === "admin");
+    setUserBranch(localStorage.getItem("user_branch") || '');
+    setIsHRM(isHRM);
+    setUserBranch(userBranch);
     setLoading(true);
 
     const q = query(
