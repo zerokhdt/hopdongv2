@@ -3,10 +3,32 @@ import { Users, Clock, Calendar, Search, Filter, Download, CheckCircle, X, Eye, 
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
 
-const InterviewTab = ({ candidates = [], isAdmin: _isAdmin = false, preselectCandidateId, onConsumedPreselect, onViewDetail, onAction, onNavigateSubTab }) => {
+const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsumedPreselect, onViewDetail, onAction, onNavigateSubTab }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', date: '', time: '' });
   const [selectedId, setSelectedId] = useState(null);
+  const [candidates, setCandidates] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+
+    const q = query(collection(db, "candidates_sheet"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter(item => item.interview_date); // chỉ lấy có lịch PV
+
+      setCandidates(data);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
   
   // Filter candidates with interview history or upcoming interviews
   const interviewCandidates = useMemo(() => {
@@ -17,20 +39,34 @@ const InterviewTab = ({ candidates = [], isAdmin: _isAdmin = false, preselectCan
   
   // Mock interview stats
   const interviewStats = [
-    { title: 'Tổng số phỏng vấn', value: interviewCandidates.length.toLocaleString(), icon: <Users size={20} />, trend: '+12.5% so với tháng trước', trendColor: 'text-emerald-600' },
+    { title: 'Tổng số phỏng vấn', value: candidates.length.toLocaleString(), icon: <Users size={20} />, trend: '+12.5% so với tháng trước', trendColor: 'text-emerald-600' },
     { title: 'Tỷ lệ tuyển dụng %', value: '18.4%', icon: <CheckCircle size={20} />, trend: 'Xu hướng ổn định', trendColor: 'text-on-surface-variant' },
     { title: 'Thời gian tuyển dụng TB', value: '22 Ngày', icon: <Clock size={20} />, trend: 'Hơn 2 ngày so với Q3', trendColor: 'text-error' },
   ];
 
   // Mock branches
-  const branches = [
-    { id: 1, name: 'Tất cả chi nhánh' },
-    { id: 2, name: 'ACE AN SƯƠNG' },
-    { id: 3, name: 'ACE PHAN VĂN HỚN' },
-    { id: 4, name: 'ACE HÀ HUY GIÁP' },
-    { id: 5, name: 'ACE LÊ VĂN KHƯƠNG' },
-    { id: 6, name: 'TRỤ SỞ CHÍNH' },
-  ];
+  const [branches, setBranches] = useState([]);
+  const [loadingBranches, setLoadingBranches] = useState(true);
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "branchs"));
+
+        const data = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setBranches(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingBranches(false);
+      }
+    };
+    fetchBranches();
+  }, []);
 
   // Mock results filter
   const resultFilters = [
