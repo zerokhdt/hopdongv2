@@ -159,8 +159,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       const batch = writeBatch(db);
 
       ids.forEach(id => {
-        console.log("selectedIds:", id);
-        console.log("selectedIds:", extra.branch);
+        console.log("Branch type:", typeof extra.branch);
+        console.log("Branch value:", extra.branch);
         const ref = doc(db, "candidates_sheet", id);
         batch.update(ref, {
           branch_send: extra.branch,
@@ -170,8 +170,6 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       });
 
       await batch.commit();
-      console.log("selectedIds:", id);
-      console.log("selectedIds:", extra.branch);
       return true;
     } catch (error) {
       console.error(error);
