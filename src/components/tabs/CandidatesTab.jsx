@@ -577,7 +577,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
           <button 
             disabled={!bulkBranch}
-            onClick={() => {
+            onClick={async () => {
               if (!bulkBranch) return;
               const extra = { branch: bulkBranch, branch_label: bulkBranch, assignment_type: 'branch' };
               console.log("uniqueBranches:", extra);
