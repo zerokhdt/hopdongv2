@@ -38,7 +38,8 @@ const CandidateDetailModal = ({
   isHRM = false,
   branches = [],
   onSubmitEval,
-  onAssign,
+  onReject={onReject},
+  onAssign={onAssign},
   onBranchAction
 }) => {
   const [decision, setDecision] = useState(candidate?.decision || 'Đạt');
@@ -96,32 +97,6 @@ const CandidateDetailModal = ({
       if (id) return `https://drive.google.com/file/d/${id}/preview`;
     }
     return url;
-  };
-
-  const onReject = async (reason, candidateId) => {
-    try {
-      const ref = doc(db, "candidates_sheet", String(candidateId));
-
-      await updateDoc(ref, {
-        status: "Từ chối",
-        updated_at: new Date()
-      });
-
-      // 👉 update local state (khuyên dùng)
-      setCandidates(prev =>
-        prev.map(c =>
-          c.id === candidateId
-            ? {
-                ...c,
-                status: "Từ chối",
-              }
-            : c
-        )
-      );
-
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   const cvPreviewUrl = getEmbedtableUrl(candidate?.cvLink || candidate?.cv_url);
