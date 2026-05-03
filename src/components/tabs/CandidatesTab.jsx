@@ -6,7 +6,7 @@ import { downloadCSV } from '../../utils/exportCsv';
 import { collection, getDocs, writeBatch, doc } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 
-const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _branchId = '', onViewDetail, onBulkAction, onMock }) => {
+const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _branchId = '', onViewDetail, onMock }) => {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
