@@ -580,10 +580,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
             onClick={async () => {
               if (!bulkBranch) return;
               const extra = { branch: bulkBranch, branch_label: bulkBranch, assignment_type: 'branch' };
-              console.log("Branch type:", typeof extra);
-              console.log("Branch value:", extra);
-              console.log("Branch type:", typeof uniqueBranches);
-              console.log("Branch value:", uniqueBranches);
+              console.log("uniqueBranches:", uniqueBranches);
+              console.log("first item:", uniqueBranches[0], typeof uniqueBranches[0]);
               const success = await onBulkAction(selectedIds, 'SEND', extra);
 
               if (success) {
