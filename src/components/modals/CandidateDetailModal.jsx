@@ -37,8 +37,7 @@ const CandidateDetailModal = ({
   setCandidates,
   mode = 'VIEW', 
   branches = [],
-  onSubmitEval,
-  onBranchAction
+  onSubmitEval
 }) => {
   const [decision, setDecision] = useState(candidate?.decision || 'Đạt');
   const [note, setNote] = useState(candidate?.note || '');
@@ -211,6 +210,22 @@ const CandidateDetailModal = ({
       branch_send: data.branch, 
       assignment_type: data.assignment_type, 
       interview_date: data.interview_date
+    });
+    onClose();
+  };
+  
+  const onBranchAction = async (reason, candidateId) => {
+    const ref = doc(db, "candidates_sheet", String(candidateId));
+    console.log("candidateId:", candidateId, typeof candidateId);
+    console.log("reject_reason:",reason);
+
+    await updateDoc(ref, {
+      status: null,
+      locked: false,
+      locked_reason: null,
+      updated_at: new Date(),
+      branch_send: null, 
+      reason_unlock: reason,
     });
     onClose();
   };
@@ -465,7 +480,7 @@ const CandidateDetailModal = ({
                                   onClick={() => {
                                     const reason = window.prompt('Nhập lý do thu hồi/mở khoá:');
                                     if (!reason) return;
-                                    onBranchAction && onBranchAction('UNLOCK', { reason });
+                                    onBranchAction && onBranchAction(reason, candidate.id);
                                   }}
                                   className="w-full py-3 bg-white text-blue-700 hover:bg-blue-50 border border-blue-200 rounded-xl font-bold text-sm transition-all flex justify-center items-center gap-2 shadow-sm"
                                 >
