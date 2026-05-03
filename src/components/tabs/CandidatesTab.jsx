@@ -189,7 +189,9 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
         batch.update(ref, {
           branch_send: extra.branch,
           updated_at: new Date(),
-          status: "Đã chuyển cho chi nhánh"
+          status: "Đã chuyển cho chi nhánh",
+          locked: true,
+          locked_reason: `Đã chuyển cho chi nhánh ${extra.branch}`,
         });
       });
       await batch.commit();

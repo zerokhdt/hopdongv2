@@ -6,7 +6,7 @@ import {
   Clock, Info, UserCheck, Award, RotateCcw 
 } from 'lucide-react';
 import { formatName, formatPosition, formatBranch } from '../../utils/formatters';
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 
 const CandidateInfoItem = ({ icon: Icon, label, value, color = 'text-gray-900', formatValue }) => (
@@ -104,8 +104,6 @@ const CandidateDetailModal = ({
 
       await updateDoc(ref, {
         status: "Từ chối",
-        locked: true,
-        locked_reason: reason,
         updated_at: new Date()
       });
 
@@ -116,8 +114,6 @@ const CandidateDetailModal = ({
             ? {
                 ...c,
                 status: "Từ chối",
-                locked: true,
-                locked_reason: reason
               }
             : c
         )
