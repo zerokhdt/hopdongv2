@@ -3,7 +3,7 @@ import { Download, Printer, Filter, Search, RefreshCw, BarChart3, Users, Trendin
 import CandidateDetailModal from '../modals/CandidateDetailModal';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
-import { collection, getDocs, writeBatch, doc } from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 
 const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _branchId = '', onViewDetail, onMock }) => {
@@ -180,7 +180,6 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
     original: candidate
   }));
   
-
   const onBulkAction = async (ids, action, extra) => {
     try {
       const batch = writeBatch(db);
@@ -214,6 +213,63 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       console.error(error);
       return false;
     }
+  };
+
+  const onReject = async (reason, candidateId) => {
+    try {
+      const ref = doc(db, "candidates_sheet", String(candidateId));
+
+      await updateDoc(ref, {
+        status: "Từ chối",
+        locked: true,
+        locked_reason: reason,
+        updated_at: new Date()
+      });
+
+      // ✅ OK vì ở đúng scope
+      setCandidates(prev =>
+        prev.map(c =>
+          c.id === candidateId
+            ? {
+                ...c,
+                status: "Từ chối",
+                locked: true,
+                locked_reason: reason
+              }
+            : c
+        )
+      );
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const onAssign = async (data, candidateId) => {
+    const ref = doc(db, "candidates_sheet", String(candidateId));
+
+    await updateDoc(ref, {
+      branch_send: data.branch,
+      status: "Đã chuyển cho chi nhánh",
+      locked: true,
+      locked_reason: `Đã phân công về chi nhánh: ${data.branch_label}`,
+      updated_at: new Date()
+    });
+
+    // ✅ Ở ĐÂY mới có setCandidates
+    setCandidates(prev =>
+      prev.map(c =>
+        c.id === candidateId
+          ? {
+              ...c,
+              branch_send: data.branch,
+              status: "Đã chuyển cho chi nhánh",
+              locked: true,
+              locked_reason: `Đã phân công về chi nhánh: ${data.branch_label}`
+            }
+          : c
+      )
+    );
   };
 
   return (
