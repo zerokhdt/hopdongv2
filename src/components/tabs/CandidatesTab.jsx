@@ -10,19 +10,19 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-  const q = collection(db, "candidates_sheet");
+    const q = collection(db, "candidates_sheet");
 
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    setCandidates(data); // 🔥 auto update realtime
-  });
+      setCandidates(data); // 🔥 auto update realtime
+    });
 
-  return () => unsubscribe(); // cleanup
-}, []);
+    return () => unsubscribe(); // cleanup
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnFilters, setColumnFilters] = useState({
     position: [],

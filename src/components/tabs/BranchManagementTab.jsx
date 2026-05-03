@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { Building2, Clock, Calendar, Star, Download, Sliders, Eye, X, Handshake } from 'lucide-react';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 
 const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction, onNavigateSubTab }) => {
@@ -11,29 +11,27 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCandidates = async () => {
-      try {
-        const q = query(
-          collection(db, "candidates_sheet"),
-          where("status", "==", "Đã chuyển cho chi nhánh")
-        );
+    setLoading(true);
 
-        const querySnapshot = await getDocs(q);
+    const q = query(
+      collection(db, "candidates_sheet"),
+      where("status", "in", [
+        "Đã chuyển cho chi nhánh",
+        "Đã hẹn PV"
+      ])
+    );
 
-        const data = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-        setCandidates(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setCandidates(data);
+      setLoading(false);
+    });
 
-    fetchCandidates();
+    return () => unsubscribe();
   }, []);
   
   // Mock branch stats
@@ -84,6 +82,39 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
     statusColor: candidate.locked_reason ? 'bg-blue-100 text-blue-700' : (candidate.status === 'Sent' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'),
     candidate
   }));
+
+  const onReject = async (reason, candidateId) => {
+      try {
+        const ref = doc(db, "candidates_sheet", String(candidateId));
+        console.log("candidateId:", candidateId, typeof candidateId);
+        console.log("reject_reason:", reason);
+        await updateDoc(ref, {
+          status: "Từ chối",
+          reject_reason: reason,
+          updated_at: new Date()
+        });
+        onClose();
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+  const onInterview = async (data, candidateId) => {
+      const ref = doc(db, "candidates_sheet", String(candidateId));
+      console.log("candidateId:", candidateId, typeof candidateId);
+      console.log("reject_reason:",data);
+  
+      await updateDoc(ref, {
+        status: "Đã hẹn PV",
+        locked: true,
+        locked_reason: "Đã phân phỏng vấn",
+        updated_at: new Date(),
+        branch_send: data.branch, 
+        assignment_type: data.assignment_type, 
+        interview_date: data.interview_date
+      });
+      onClose();
+    };
 
   return (
     <div className="h-full flex flex-col bg-[#F2F4F7] text-gray-900 pt-2 px-4 pb-4 lg:pt-3 lg:px-6 lg:pb-6 overflow-hidden">
@@ -196,9 +227,8 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
                       </button>
                       <button
                         type="button"
-                        onClick={async () => {
-                          if (!onAction) return;
-                          await onAction(row.id, 'WITHDRAW');
+                        onClick={() => {
+                          onReject("Không phù hợp văn hóa", row.id);
                         }}
                         className="w-9 h-9 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-rose-600 flex items-center justify-center"
                         title="Bỏ nhanh CV"
@@ -208,11 +238,7 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
                       <button
                         type="button"
                         onClick={async () => {
-                          if (!onAction) return;
-                          const ok = await onAction(row.id, 'TAKEOVER');
-                          if (!ok) return;
-                          if (onNavigateSubTab) onNavigateSubTab('recruitment-interview');
-                          if (onViewDetail) onViewDetail(row.candidate, 'EVALUATE');
+                          onInterview({ branch: 'HRM_INTERNAL', assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, row.id);
                         }}
                         className="w-9 h-9 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-indigo-700 flex items-center justify-center"
                         title="HRM phỏng vấn ngay"
