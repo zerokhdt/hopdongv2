@@ -38,7 +38,9 @@ const CandidateDetailModal = ({
   isHRM = false,
   branches = [],
   onSubmitEval,
-  onBranchAction
+  onBranchAction,
+  onReject,
+  onAssign
 }) => {
   const [decision, setDecision] = useState(candidate?.decision || 'Đạt');
   const [note, setNote] = useState(candidate?.note || '');
