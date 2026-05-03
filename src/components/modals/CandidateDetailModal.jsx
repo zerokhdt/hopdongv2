@@ -198,6 +198,23 @@ const CandidateDetailModal = ({
     onClose();
   };
 
+  const onInterview = async (data, candidateId) => {
+    const ref = doc(db, "candidates_sheet", String(candidateId));
+    console.log("candidateId:", candidateId, typeof candidateId);
+    console.log("reject_reason:",data);
+
+    await updateDoc(ref, {
+      status: "Đã hẹn PV",
+      locked: true,
+      locked_reason: "Đã phân phỏng vấn",
+      updated_at: new Date(),
+      branch_send: data.branch, 
+      assignment_type: data.assignment_type, 
+      interview_date: data.interview_date
+    });
+    onClose();
+  };
+
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -429,7 +446,7 @@ const CandidateDetailModal = ({
                                       return;
                                     }
                                     if (!scheduleDate) return alert('Vui lòng chọn ngày giờ phỏng vấn');
-                                    onAssign && onAssign({ branch: 'HRM_INTERNAL', assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, candidate.id);
+                                    onInterview && onInterview({ branch: 'HRM_INTERNAL', assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, candidate.id);
                                   }}
                                   disabled={isLockedLocal}
                                   className={`w-full py-4 rounded-2xl font-bold uppercase tracking-widest text-sm transition-all flex justify-center items-center gap-2 shadow-lg ${
