@@ -91,6 +91,8 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
         await updateDoc(ref, {
           status: "Từ chối",
           reject_reason: reason,
+          locked: false,
+          locked_reason: null,
           updated_at: new Date()
         });
         onClose();

@@ -51,6 +51,8 @@ const CandidateDetailModal = ({
   const [loadingBranches, setLoadingBranches] = useState(true);
 
   useEffect(() => {
+    const isHRM = localStorage.getItem("user_role") === "admin";
+    const userBranch = localStorage.getItem("user_branch");
     const fetchBranches = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "branchs"));
@@ -95,8 +97,6 @@ const CandidateDetailModal = ({
     }
     return url;
   };
-
-  const isHRM = localStorage.getItem("user_role") === "admin";
 
   const cvPreviewUrl = getEmbedtableUrl(candidate?.cvLink || candidate?.cv_url);
 
@@ -631,7 +631,7 @@ const CandidateDetailModal = ({
                             <button 
                               onClick={() => {
                                 if (!scheduleDate) return alert('Vui lòng chọn ngày giờ phỏng vấn');
-                                onInterview && onInterview({ branch: 'HRM_INTERNAL', assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, candidate.id);
+                                onInterview && onInterview({ branch: userBranch, assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, candidate.id);
                               }}
                               className="py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition-all flex justify-center items-center gap-2"
                             >
