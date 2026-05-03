@@ -251,8 +251,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
     await updateDoc(ref, {
       branch_send: data.branch,
       status: "Đã chuyển cho chi nhánh",
-      locked: true,
-      locked_reason: `Đã phân công về chi nhánh: ${data.branch_label}`,
+      reject_reason: `Đã phân công về chi nhánh: ${data.branch_label}`,
       updated_at: new Date()
     });
 
@@ -264,8 +263,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
               ...c,
               branch_send: data.branch,
               status: "Đã chuyển cho chi nhánh",
-              locked: true,
-              locked_reason: `Đã phân công về chi nhánh: ${data.branch_label}`
+              reject_reason: `Đã phân công về chi nhánh: ${data.branch_label}`
             }
           : c
       )
