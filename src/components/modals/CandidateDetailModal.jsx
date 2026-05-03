@@ -55,8 +55,6 @@ const CandidateDetailModal = ({
   useEffect(() => {
     setIsHRM(localStorage.getItem("user_role") === "admin");
     setUserBranch(localStorage.getItem("user_branch") || '');
-    setIsHRM(isHRM);
-    setUserBranch(userBranch);
     const fetchBranches = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "branchs"));
