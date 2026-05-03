@@ -570,8 +570,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
             <option value="">-- Chọn chi nhánh giao việc --</option>
 
             {uniqueBranches.map((b, index) => (
-              <option key={index} value={b}>
-                {b}
+              <option key={index} value={b.value}>
+                {b.label}
               </option>
             ))}
           </select>
