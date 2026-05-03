@@ -49,10 +49,14 @@ const CandidateDetailModal = ({
   const [reasonLocal, setReasonLocal] = useState(candidate?.locked_reason || '');
   const [branchs, setBranchs] = useState([]);
   const [loadingBranches, setLoadingBranches] = useState(true);
+  const [isHRM, setIsHRM] = useState(false);
+  const [userBranch, setUserBranch] = useState('');
 
   useEffect(() => {
-    const isHRM = localStorage.getItem("user_role") === "admin";
-    const userBranch = localStorage.getItem("user_branch");
+    setIsHRM(localStorage.getItem("user_role") === "admin");
+    setUserBranch(localStorage.getItem("user_branch") || '');
+    setIsHRM(isHRM);
+    setUserBranch(userBranch);
     const fetchBranches = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "branchs"));
