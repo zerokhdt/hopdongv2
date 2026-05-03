@@ -10,11 +10,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-
-
-    fetchCandidates();
-  }, []);
-  const fetchCandidates = async () => {
+    const fetchCandidates = async () => {
     try {
       setLoading(true);
 
@@ -38,6 +34,9 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       setLoading(false);
     }
   };
+
+    fetchCandidates();
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnFilters, setColumnFilters] = useState({
     position: [],
@@ -192,9 +191,10 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
           status: "Đã chuyển cho chi nhánh"
         });
       });
-
+      console.log("status:", columnFilters.status, typeof columnFilters.status);
+              console.log("position:", columnFilters.position, typeof columnFilters.position);
+              console.log("branch:", columnFilters.branch, typeof columnFilters.branch);
       await batch.commit();
-      await fetchCandidates();
 
       return true;
     } catch (error) {
@@ -608,9 +608,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
               if (!bulkBranch) return;
               const extra = { branch: bulkBranch, branch_label: bulkBranch, assignment_type: 'branch' };
               const success = await onBulkAction(selectedIds, 'SEND', extra);
-              console.log("status:", columnFilters.status, typeof columnFilters.status);
-              console.log("position:", columnFilters.position, typeof columnFilters.position);
-              console.log("branch:", columnFilters.branch, typeof columnFilters.branch);
+              
               if (success) {
                 setSelectedIds([]);
                 setBulkBranch('');
