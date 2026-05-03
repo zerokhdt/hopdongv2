@@ -188,7 +188,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       const batch = writeBatch(db);
       ids.forEach(id => {
         console.log("id:", id, typeof id);
-        const ref = doc(db, "candidates_sheet", id);
+        const ref = doc(db, "candidates_sheet", String(id));
         batch.update(ref, {
           branch_send: extra.branch,
           updated_at: new Date(),
