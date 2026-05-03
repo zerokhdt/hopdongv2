@@ -221,8 +221,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
       await updateDoc(ref, {
         status: "Từ chối",
-        locked: true,
-        locked_reason: reason,
+        reject_reason: reason,
         updated_at: new Date()
       });
 
@@ -233,8 +232,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
             ? {
                 ...c,
                 status: "Từ chối",
-                locked: true,
-                locked_reason: reason
+                reject_reason: reason
               }
             : c
         )
