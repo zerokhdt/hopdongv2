@@ -592,7 +592,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
               if (!bulkBranch) return;
               const extra = { branch: bulkBranch, branch_label: bulkBranch, assignment_type: 'branch' };
               const success = await onBulkAction(selectedIds, 'SEND', extra);
-              console.log("columnFilters:", columnFilters);
+              console.log("status type:", columnFilters.status, typeof columnFilters.status);
               if (success) {
                 setSelectedIds([]);
                 setBulkBranch('');
