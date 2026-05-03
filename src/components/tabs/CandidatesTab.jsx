@@ -144,8 +144,11 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
       if (columnFilters.branch.length > 0 && !columnFilters.branch.includes(c.branch || c.desiredBranch || 'Không xác định')) return false;
 
-      if (columnFilters.status.length > 0 && !columnFilters.status.includes(c.status || 'PENDING')) return false;
-
+      if (
+        Array.isArray(columnFilters.status) &&
+        columnFilters.status.length > 0 &&
+        !columnFilters.status.includes(c.status || 'PENDING')
+      ) return false;
       return true;
     });
   }, [sortedCandidates, searchTerm, columnFilters]);
