@@ -281,6 +281,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           candidate={selectedCandidate} 
+          onReject={onReject}
+          onAssign={onAssign}
         />
       )}
       
