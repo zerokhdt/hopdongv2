@@ -32,13 +32,6 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
     return () => unsubscribe();
   }, []);
   
-  // Filter candidates with interview history or upcoming interviews
-  const interviewCandidates = useMemo(() => {
-    return candidates
-      .filter(c => ['Interviewing', 'Sent', 'SENT_TO_BRANCH', 'INTERVIEW_ASSIGNED', 'COMPLETED', 'REJECTED'].includes(c.status))
-      .sort((a, b) => new Date(b.updatedAt || b.updated_at || b.createdAt || 0) - new Date(a.updatedAt || a.updated_at || a.createdAt || 0));
-  }, [candidates]);
-  
   // Mock interview stats
   const interviewStats = [
     { title: 'Tổng số phỏng vấn', value: candidates.length.toLocaleString(), icon: <Users size={20} />, trend: '+12.5% so với tháng trước', trendColor: 'text-emerald-600' },
@@ -79,7 +72,7 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
   ];
 
   // Table data
-  const tableData = interviewCandidates.map(candidate => {
+  const tableData = candidates.map(candidate => {
     const isCompleted = candidate.status === 'COMPLETED';
     const isRejected = candidate.status === 'REJECTED';
     const isSent = candidate.status === 'Sent' || candidate.status === 'SENT_TO_BRANCH';
@@ -292,7 +285,7 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
         {/* Pagination/Footer */}
         <div className="px-6 py-4 border-t border-surface-container-low flex justify-between items-center">
           <div className="text-sm text-outline">
-            Showing <span className="font-bold text-on-surface">1-{displayData.length}</span> of <span className="font-bold text-on-surface">{interviewCandidates.length + localData.length}</span> interviews
+            Showing <span className="font-bold text-on-surface">1-{displayData.length}</span> of <span className="font-bold text-on-surface">{candidates.length + localData.length}</span> interviews
           </div>
           <div className="flex items-center gap-2">
             <button className="px-3 py-1.5 text-sm rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">Previous</button>
