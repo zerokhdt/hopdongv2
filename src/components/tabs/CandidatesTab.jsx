@@ -3,7 +3,7 @@ import { Download, Printer, Filter, Search, RefreshCw, BarChart3, Users, Trendin
 import CandidateDetailModal from '../modals/CandidateDetailModal';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 
 const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _branchId = '', onViewDetail, onBulkAction, onMock }) => {
@@ -84,8 +84,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
   // Sort all candidates by newest first
   const sortedCandidates = [...candidates].sort((a, b) => {
-    const dateA = new Date(a.updatedAt || a.createdAt || 0);
-    const dateB = new Date(b.updatedAt || b.createdAt || 0);
+    const dateA = new Date(a.updated_at || a.created_at || 0);
+    const dateB = new Date(b.updated_at || b.created_at || 0);
     return dateB - dateA;
   });
 
@@ -138,7 +138,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       : (candidate.status === 'REJECTED' || candidate.status === 'Từ chối')? 'Từ chối' 
       : (candidate.status === 'SENT_TO_BRANCH' || candidate.status === 'Đã chuyển cho chi nhánh') ? 'Đã chuyển cho chi nhánh' 
       : (candidate.status === 'INTERVIEW_ASSIGNED' || candidate.status === 'Đã hẹn PV') ? 'Đã phân phỏng vấn' 
-      : (candidate.status === 'SAVE' || candidate.status === 'LƯU HỒ SƠ') ? 'Đã phân phỏng vấn' 
+      : (candidate.status === 'SAVE' || candidate.status === 'LƯU HỒ SƠ') ? 'Lưu hồ sơ' 
       : 'Đang chờ',
     date: candidate.date_of_submission
       ? new Date(candidate.date_of_submission).toLocaleDateString('vi-VN', {
@@ -558,12 +558,27 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
             onClick={() => {
               if (!bulkBranch) return;
               const extra = { branch: bulkBranch, branch_label: bulkBranch, assignment_type: 'branch' };
-              onBulkAction(selectedIds, 'SEND', extra).then(success => {
-                if (success) {
-                  setSelectedIds([]);
-                  setBulkBranch('');
+              const onBulkAction = async (ids, action, extra) => {
+                try {
+                  const batch = writeBatch(db);
+
+                  ids.forEach(id => {
+                    const ref = doc(db, "candidates_sheet", id);
+                    batch.update(ref, {
+                      branch_send: extra.branch,
+                      updated_at: new Date(),
+                      status: "Đã chuyển cho chi nhánh"
+                    });
+                  });
+
+                  await batch.commit();
+
+                  return true;
+                } catch (error) {
+                  console.error(error);
+                  return false;
                 }
-              });
+              };
             }}
             className="px-5 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
