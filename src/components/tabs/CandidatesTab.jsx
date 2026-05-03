@@ -10,25 +10,34 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const fetchCandidates = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "candidates_sheet"));
 
-        const data = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setCandidates(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchCandidates();
   }, []);
+  const fetchCandidates = async () => {
+    try {
+      setLoading(true);
+
+      const querySnapshot = await getDocs(collection(db, "candidates_sheet"));
+
+      const data = querySnapshot.docs.map(doc => {
+        const raw = doc.data();
+
+        return {
+          id: doc.id,
+          ...raw,
+          // 🔥 normalize luôn để tránh lỗi sau này
+          status: typeof raw.status === 'string' ? raw.status : 'PENDING'
+        };
+      });
+
+      setCandidates(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [columnFilters, setColumnFilters] = useState({
     position: [],
@@ -179,18 +188,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       });
 
       await batch.commit();
-      setCandidates(prev =>
-        prev.map(c =>
-          ids.includes(c.id)
-            ? {
-                ...c,
-                branch_send: extra.branch,
-                status: "Đã chuyển cho chi nhánh",
-                updated_at: new Date()
-              }
-            : c
-        )
-      );
+      await fetchCandidates();
 
       return true;
     } catch (error) {
