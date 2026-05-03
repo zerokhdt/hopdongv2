@@ -170,7 +170,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       });
 
       await batch.commit();
-
+      console.log("selectedIds:", id);
+      console.log("selectedIds:", extra.branch);
       return true;
     } catch (error) {
       console.error(error);
