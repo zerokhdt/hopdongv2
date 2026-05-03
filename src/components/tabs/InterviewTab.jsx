@@ -229,7 +229,7 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
                     <div className="text-sm text-[#00288e] font-medium leading-relaxed">{row.position}</div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 leading-relaxed">{row.branch}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600 leading-relaxed">{row.interview_date}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600 leading-relaxed">{row.interviewDate}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2 py-1 rounded-md text-sm font-semibold ${row.resultColor} bg-opacity-10 border border-current`}>
                       {row.result}
