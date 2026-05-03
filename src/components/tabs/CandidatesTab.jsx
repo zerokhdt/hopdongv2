@@ -182,9 +182,6 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
   const onBulkAction = async (ids, action, extra) => {
     try {
-      console.log("status:", columnFilters.status, typeof columnFilters.status);
-              console.log("position:", columnFilters.position, typeof columnFilters.position);
-              console.log("branch:", columnFilters.branch, typeof columnFilters.branch);
       const batch = writeBatch(db);
       ids.forEach(id => {
         console.log("id:", id, typeof id);
@@ -195,10 +192,19 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
           status: "Đã chuyển cho chi nhánh"
         });
       });
-      console.log("status:", columnFilters.status, typeof columnFilters.status);
-              console.log("position:", columnFilters.position, typeof columnFilters.position);
-              console.log("branch:", columnFilters.branch, typeof columnFilters.branch);
       await batch.commit();
+      setCandidates(prev =>
+        prev.map(c =>
+          ids.includes(c.id)
+            ? {
+                ...c,
+                status: "Đã chuyển cho chi nhánh",
+                branch_send: extra.branch,
+                updated_at: new Date()
+              }
+            : c
+        )
+      );
 
       return true;
     } catch (error) {
