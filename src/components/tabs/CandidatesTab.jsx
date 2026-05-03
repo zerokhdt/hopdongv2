@@ -45,6 +45,27 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkBranch, setBulkBranch] = useState('');
 
+  const onBulkAction = async (ids, action, extra) => {
+    try {
+      const batch = writeBatch(db);
+
+      ids.forEach(id => {
+        const ref = doc(db, "candidates_sheet", id);
+        batch.update(ref, {
+          branch_send: extra.branch,
+          updated_at: new Date(),
+          status: "Đã chuyển cho chi nhánh"
+        });
+      });
+
+      await batch.commit();
+
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  };
 
   const handleViewDetails = (candidate) => {
     if (onViewDetail) {
@@ -558,27 +579,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
             onClick={() => {
               if (!bulkBranch) return;
               const extra = { branch: bulkBranch, branch_label: bulkBranch, assignment_type: 'branch' };
-              const onBulkAction = async (ids, action, extra) => {
-                try {
-                  const batch = writeBatch(db);
-
-                  ids.forEach(id => {
-                    const ref = doc(db, "candidates_sheet", id);
-                    batch.update(ref, {
-                      branch_send: extra.branch,
-                      updated_at: new Date(),
-                      status: "Đã chuyển cho chi nhánh"
-                    });
-                  });
-
-                  await batch.commit();
-
-                  return true;
-                } catch (error) {
-                  console.error(error);
-                  return false;
-                }
-              };
+              onBulkAction(selectedIds, 'SEND', extra)
             }}
             className="px-5 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
