@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { Users, Clock, Calendar, Search, Filter, Download, CheckCircle, X, Eye, Handshake } from 'lucide-react';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
+import { collection, getDocs, query, where, onSnapshot ,doc, updateDoc } from "firebase/firestore";
+import { db } from "../../utils/firebase";
 
 const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsumedPreselect, onViewDetail, onAction, onNavigateSubTab }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -91,10 +93,10 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
     return {
       id: candidate.id,
       name: formatName(candidate.name),
-      email: candidate.email || '',
+      email: candidate.gmail || '',
       position: formatPosition(candidate.position_name || candidate.position),
       branch: formatBranch(candidate.branch_id || candidate.branch || 'Hội Sở'),
-      interviewDate: candidate.interview_scheduled_date ? new Date(candidate.interview_scheduled_date).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' }) : (candidate.applied_date || candidate.createdAt ? new Date(candidate.applied_date || candidate.createdAt).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'),
+      interviewDate: candidate.interview_date ? new Date(candidate.interview_date).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' }) : (candidate.applied_date || candidate.createdAt ? new Date(candidate.applied_date || candidate.createdAt).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'),
       result,
       resultColor,
       interviewer: 'Sarah Jenkins',
