@@ -38,7 +38,6 @@ const CandidateDetailModal = ({
   isHRM = false,
   branches = [],
   onSubmitEval,
-  onReject,
   onAssign,
   onBranchAction
 }) => {
@@ -97,6 +96,36 @@ const CandidateDetailModal = ({
       if (id) return `https://drive.google.com/file/d/${id}/preview`;
     }
     return url;
+  };
+
+  const onReject = async (reason, candidateId) => {
+    try {
+      const ref = doc(db, "candidates_sheet", String(candidateId));
+
+      await updateDoc(ref, {
+        status: "Từ chối",
+        locked: true,
+        locked_reason: reason,
+        updated_at: new Date()
+      });
+
+      // 👉 update local state (khuyên dùng)
+      setCandidates(prev =>
+        prev.map(c =>
+          c.id === candidateId
+            ? {
+                ...c,
+                status: "Từ chối",
+                locked: true,
+                locked_reason: reason
+              }
+            : c
+        )
+      );
+
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const cvPreviewUrl = getEmbedtableUrl(candidate?.cvLink || candidate?.cv_url);
@@ -441,7 +470,7 @@ const CandidateDetailModal = ({
                                 <option value="Ứng viên từ chối/Không đến">Ứng viên từ chối / Không đến</option>
                               </select>
                               <button 
-                                onClick={() => onReject && onReject(rejectReason)}
+                                onClick={() => onReject && onReject(rejectReason, candidate.id)}
                                 className="w-full py-3 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-100 rounded-xl font-bold uppercase tracking-widest text-sm transition-all flex justify-center items-center gap-2"
                               >
                                 <Ban size={16} /> Chấm dứt quy trình
