@@ -446,7 +446,8 @@ const CandidateDetailModal = ({
                                   console.log("🔥 CLICK BUTTON");
                                   console.log("onReject:", onReject);
                                   console.log("candidate.id:", candidate?.id);
-
+                                  console.log(localStorage);
+                                  console.log(isHRM, isCompleted, isRejected);
                                   if (!onReject) {
                                     console.warn("❌ onReject undefined");
                                     return;

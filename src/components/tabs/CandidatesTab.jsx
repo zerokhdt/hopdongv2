@@ -268,8 +268,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
           : c
       )
     );
-  };
-  console.log(localStorage);
+  }; 
 
   return (
     <div className="h-full flex flex-col bg-[#F2F4F7] text-gray-900 pt-2 px-4 pb-4 lg:pt-3 lg:px-6 lg:pb-6 overflow-y-auto font-sans">
