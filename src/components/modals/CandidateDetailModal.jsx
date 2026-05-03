@@ -441,7 +441,18 @@ const CandidateDetailModal = ({
                                 <option value="Ứng viên từ chối/Không đến">Ứng viên từ chối / Không đến</option>
                               </select>
                               <button 
-                                onClick={() => onReject && onReject(rejectReason, candidate.id)}
+                                onClick={() => {
+                                  console.log("🔥 CLICK BUTTON");
+                                  console.log("onReject:", onReject);
+                                  console.log("candidate.id:", candidate?.id);
+
+                                  if (!onReject) {
+                                    console.warn("❌ onReject undefined");
+                                    return;
+                                  }
+
+                                  onReject(rejectReason, candidate.id);
+                                }}
                                 className="w-full py-3 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-100 rounded-xl font-bold uppercase tracking-widest text-sm transition-all flex justify-center items-center gap-2"
                               >
                                 <Ban size={16} /> Chấm dứt quy trình
