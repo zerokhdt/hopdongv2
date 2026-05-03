@@ -34,6 +34,7 @@ const CandidateDetailModal = ({
   isOpen, 
   onClose, 
   candidate, 
+  setCandidates,
   mode = 'VIEW', 
   branches = [],
   onSubmitEval,
@@ -176,7 +177,19 @@ const CandidateDetailModal = ({
         reject_reason: reason,
         updated_at: new Date()
       });
-
+      onClose();
+      setCandidates(prev =>
+        prev.map(c =>
+          ids.includes(c.id)
+            ? {
+                ...c,
+                status: "Đã chuyển cho chi nhánh",
+                branch_send: extra.branch,
+                updated_at: new Date()
+              }
+            : c
+        )
+      );
     } catch (err) {
       console.error(err);
     }
@@ -190,9 +203,23 @@ const CandidateDetailModal = ({
     await updateDoc(ref, {
       branch_send: data.branch,
       status: "Đã chuyển cho chi nhánh",
-      reject_reason: `Đã phân công về chi nhánh: ${data.branch_label}`,
+      locked: true,
+      locked_reason: `Đã phân công về chi nhánh: ${data.branch_label}`,
       updated_at: new Date()
     });
+    onClose();
+    setCandidates(prev =>
+        prev.map(c =>
+          ids.includes(c.id)
+            ? {
+                ...c,
+                status: "Đã chuyển cho chi nhánh",
+                branch_send: extra.branch,
+                updated_at: new Date()
+              }
+            : c
+        )
+      );
   };
 
 
@@ -382,7 +409,7 @@ const CandidateDetailModal = ({
                                     if (onAssign) {
                                       setIsSubmitting(true);
                                       try {
-                                        const res = await onAssign({ branch: assignBranch, branch_label: label, assignment_type: 'branch' });
+                                        const res = await onAssign({ branch: assignBranch, branch_label: label, assignment_type: 'branch' },candidate.id);
                                         if (res) {
                                           alert('Gửi cho chi nhánh thành công! Chờ thông báo Email.');
                                           if (candidate) {
@@ -426,7 +453,7 @@ const CandidateDetailModal = ({
                                       return;
                                     }
                                     if (!scheduleDate) return alert('Vui lòng chọn ngày giờ phỏng vấn');
-                                    onAssign && onAssign({ branch: 'HRM_INTERNAL', assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') });
+                                    onAssign && onAssign({ branch: 'HRM_INTERNAL', assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, candidate.id);
                                   }}
                                   disabled={isLockedLocal}
                                   className={`w-full py-4 rounded-2xl font-bold uppercase tracking-widest text-sm transition-all flex justify-center items-center gap-2 shadow-lg ${
