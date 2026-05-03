@@ -169,9 +169,6 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   const onBulkAction = async (ids, action, extra) => {
     try {
       const batch = writeBatch(db);
-      console.log("branch_send:", extra.branch, typeof extra.branch);
-      console.log("branch_send:", extra, typeof extra);
-
       ids.forEach(id => {
         const ref = doc(db, "candidates_sheet", id);
         batch.update(ref, {
@@ -595,7 +592,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
               if (!bulkBranch) return;
               const extra = { branch: bulkBranch, branch_label: bulkBranch, assignment_type: 'branch' };
               const success = await onBulkAction(selectedIds, 'SEND', extra);
-
+              console.log("columnFilters:", columnFilters);
               if (success) {
                 setSelectedIds([]);
                 setBulkBranch('');
