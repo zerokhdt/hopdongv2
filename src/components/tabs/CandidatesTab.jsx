@@ -96,10 +96,12 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
   const toggleFilterValue = (type, value) => {
     setColumnFilters(prev => {
-      const current = prev[type];
+      const current = Array.isArray(prev[type]) ? prev[type] : []; // ✅ fix
+
       const next = current.includes(value) 
         ? current.filter(v => v !== value)
         : [...current, value];
+
       return { ...prev, [type]: next };
     });
   };
