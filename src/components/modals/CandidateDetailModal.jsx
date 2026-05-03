@@ -178,18 +178,6 @@ const CandidateDetailModal = ({
         updated_at: new Date()
       });
       onClose();
-      setCandidates(prev =>
-        prev.map(c =>
-          ids.includes(c.id)
-            ? {
-                ...c,
-                status: "Đã chuyển cho chi nhánh",
-                branch_send: extra.branch,
-                updated_at: new Date()
-              }
-            : c
-        )
-      );
     } catch (err) {
       console.error(err);
     }
@@ -208,18 +196,6 @@ const CandidateDetailModal = ({
       updated_at: new Date()
     });
     onClose();
-    setCandidates(prev =>
-        prev.map(c =>
-          ids.includes(c.id)
-            ? {
-                ...c,
-                status: "Đã chuyển cho chi nhánh",
-                branch_send: extra.branch,
-                updated_at: new Date()
-              }
-            : c
-        )
-      );
   };
 
 

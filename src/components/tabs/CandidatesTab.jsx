@@ -3,40 +3,26 @@ import { Download, Printer, Filter, Search, RefreshCw, BarChart3, Users, Trendin
 import CandidateDetailModal from '../modals/CandidateDetailModal';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
-import { collection, getDocs, writeBatch, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc, updateDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 
 const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _branchId = '', onViewDetail, onMock }) => {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const fetchCandidates = async () => {
-    try {
-      setLoading(true);
+  const q = collection(db, "candidates_sheet");
 
-      const querySnapshot = await getDocs(collection(db, "candidates_sheet"));
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
-      const data = querySnapshot.docs.map(doc => {
-        const raw = doc.data();
+    setCandidates(data); // 🔥 auto update realtime
+  });
 
-        return {
-          id: doc.id,
-          ...raw,
-          // 🔥 normalize luôn để tránh lỗi sau này
-          status: typeof raw.status === 'string' ? raw.status : 'PENDING'
-        };
-      });
-
-      setCandidates(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-    fetchCandidates();
-  }, []);
+  return () => unsubscribe(); // cleanup
+}, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnFilters, setColumnFilters] = useState({
     position: [],
@@ -223,7 +209,6 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           candidate={selectedCandidate} 
-          setCandidates={setCandidates}
         />
       )}
       
