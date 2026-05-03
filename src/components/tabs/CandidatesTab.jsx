@@ -179,6 +179,18 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       });
 
       await batch.commit();
+      setCandidates(prev =>
+        prev.map(c =>
+          ids.includes(c.id)
+            ? {
+                ...c,
+                branch_send: extra.branch,
+                status: "Đã chuyển cho chi nhánh",
+                updated_at: new Date()
+              }
+            : c
+        )
+      );
 
       return true;
     } catch (error) {
