@@ -180,58 +180,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
     original: candidate
   }));
 
-  const onReject = async (reason, candidateId) => {
-    try {
-      const ref = doc(db, "candidates_sheet", String(candidateId));
-
-      await updateDoc(ref, {
-        status: "Từ chối",
-        updated_at: new Date()
-      });
-
-      // 👉 update local state (khuyên dùng)
-      setCandidates(prev =>
-        prev.map(c =>
-          c.id === candidateId
-            ? {
-                ...c,
-                status: "Từ chối",
-              }
-            : c
-        )
-      );
-
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const onAssign = async (data, candidateId) => {
-  const ref = doc(db, "candidates_sheet", String(candidateId));
-
-  await updateDoc(ref, {
-    branch_send: data.branch,
-    status: "Đã chuyển cho chi nhánh",
-    locked: true,
-    locked_reason: `Đã phân công về chi nhánh: ${data.branch_label}`,
-    updated_at: new Date()
-  });
-
-  // ✅ Ở ĐÂY mới có setCandidates
-  setCandidates(prev =>
-    prev.map(c =>
-      c.id === candidateId
-        ? {
-            ...c,
-            branch_send: data.branch,
-            status: "Đã chuyển cho chi nhánh",
-            locked: true,
-            locked_reason: `Đã phân công về chi nhánh: ${data.branch_label}`
-          }
-        : c
-    )
-  );
-};
+  
 
   const onBulkAction = async (ids, action, extra) => {
     try {
