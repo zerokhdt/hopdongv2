@@ -184,7 +184,6 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
     try {
       const batch = writeBatch(db);
       ids.forEach(id => {
-        console.log("id:", id, typeof id);
         const ref = doc(db, "candidates_sheet", String(id));
         batch.update(ref, {
           branch_send: extra.branch,
@@ -218,7 +217,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   const onReject = async (reason, candidateId) => {
     try {
       const ref = doc(db, "candidates_sheet", String(candidateId));
-
+      console.log("candidateId:", candidateId, typeof candidateId);
+      console.log("reject_reason:", reason);
       await updateDoc(ref, {
         status: "Từ chối",
         reject_reason: reason,
@@ -245,6 +245,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
   const onAssign = async (data, candidateId) => {
     const ref = doc(db, "candidates_sheet", String(candidateId));
+    console.log("candidateId:", candidateId, typeof candidateId);
+    console.log("reject_reason:",data);
 
     await updateDoc(ref, {
       branch_send: data.branch,
