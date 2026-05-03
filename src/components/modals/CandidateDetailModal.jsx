@@ -39,9 +39,7 @@ const CandidateDetailModal = ({
   mode = 'VIEW', 
   branches = [],
   onSubmitEval,
-  onBranchAction,
-  onReject,
-  onAssign
+  onBranchAction
 }) => {
   const [decision, setDecision] = useState(candidate?.decision || 'Đạt');
   const [note, setNote] = useState(candidate?.note || '');
