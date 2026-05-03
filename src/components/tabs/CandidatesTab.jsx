@@ -126,6 +126,9 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
   };
 
   const filteredSearchCandidates = useMemo(() => {
+    if (!Array.isArray(columnFilters.status)) {
+      console.error("STATUS NOT ARRAY:", columnFilters.status);
+    }
     return sortedCandidates.filter(c => {
       // Global search bar
       if (searchTerm) {
