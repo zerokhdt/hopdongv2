@@ -182,6 +182,9 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
   const onBulkAction = async (ids, action, extra) => {
     try {
+      console.log("status:", columnFilters.status, typeof columnFilters.status);
+              console.log("position:", columnFilters.position, typeof columnFilters.position);
+              console.log("branch:", columnFilters.branch, typeof columnFilters.branch);
       const batch = writeBatch(db);
       ids.forEach(id => {
         const ref = doc(db, "candidates_sheet", id);
