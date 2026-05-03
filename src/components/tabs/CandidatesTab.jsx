@@ -580,6 +580,8 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
             onClick={() => {
               if (!bulkBranch) return;
               const extra = { branch: bulkBranch, branch_label: bulkBranch, assignment_type: 'branch' };
+              console.log("selectedIds:", selectedIds);
+              console.log("type:", typeof selectedIds);
               onBulkAction(selectedIds, 'SEND', extra)
             }}
             className="px-5 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
