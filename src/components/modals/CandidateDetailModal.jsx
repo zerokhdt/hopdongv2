@@ -99,6 +99,8 @@ const CandidateDetailModal = ({
     return url;
   };
 
+  const isHRM = localStorage.getItem("user_role") === "admin";
+
   const cvPreviewUrl = getEmbedtableUrl(candidate?.cvLink || candidate?.cv_url);
 
   if (!isOpen || !candidate) return null;
