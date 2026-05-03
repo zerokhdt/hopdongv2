@@ -192,7 +192,7 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
           <div className="flex items-center gap-3 w-full lg:w-auto">
             <select className="bg-white border-none rounded-lg px-4 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-primary min-w-[140px]">
               {branches.map(branch => (
-                <option key={branch.id} value={branch.id}>{branch.name}</option>
+                <option key={branch.value} value={branch.value}>{branch.label}</option>
               ))}
             </select>
             <select className="bg-white border-none rounded-lg px-4 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-primary min-w-[140px]">
@@ -221,7 +221,7 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {displayData.map((row, idx) => (
+              {candidates.map((row, idx) => (
                 <tr
                   key={row.id}
                   onClick={() => setSelectedId(row.id)}
