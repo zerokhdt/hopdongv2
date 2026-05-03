@@ -34,6 +34,8 @@ const CandidateDetailModal = ({
   isOpen, 
   onClose, 
   candidate, 
+  onReject,
+  onAssign,
   mode = 'VIEW', 
   branches = [],
   onSubmitEval,
