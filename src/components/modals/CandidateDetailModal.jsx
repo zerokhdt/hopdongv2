@@ -34,8 +34,6 @@ const CandidateDetailModal = ({
   isOpen, 
   onClose, 
   candidate, 
-  onReject,
-  onAssign,
   mode = 'VIEW', 
   branches = [],
   onSubmitEval,
@@ -166,6 +164,35 @@ const CandidateDetailModal = ({
     ]);
 
     return String(v || '').trim() || 'không có';
+  };
+
+  const onReject = async (reason, candidateId) => {
+    try {
+      const ref = doc(db, "candidates_sheet", String(candidateId));
+      console.log("candidateId:", candidateId, typeof candidateId);
+      console.log("reject_reason:", reason);
+      await updateDoc(ref, {
+        status: "Từ chối",
+        reject_reason: reason,
+        updated_at: new Date()
+      });
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const onAssign = async (data, candidateId) => {
+    const ref = doc(db, "candidates_sheet", String(candidateId));
+    console.log("candidateId:", candidateId, typeof candidateId);
+    console.log("reject_reason:",data);
+
+    await updateDoc(ref, {
+      branch_send: data.branch,
+      status: "Đã chuyển cho chi nhánh",
+      reject_reason: `Đã phân công về chi nhánh: ${data.branch_label}`,
+      updated_at: new Date()
+    });
   };
 
 

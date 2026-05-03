@@ -212,62 +212,6 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       console.error(error);
       return false;
     }
-  };
-
-  const onReject = async (reason, candidateId) => {
-    try {
-      const ref = doc(db, "candidates_sheet", String(candidateId));
-      console.log("candidateId:", candidateId, typeof candidateId);
-      console.log("reject_reason:", reason);
-      await updateDoc(ref, {
-        status: "Từ chối",
-        reject_reason: reason,
-        updated_at: new Date()
-      });
-
-      // ✅ OK vì ở đúng scope
-      setCandidates(prev =>
-        prev.map(c =>
-          c.id === candidateId
-            ? {
-                ...c,
-                status: "Từ chối",
-                reject_reason: reason
-              }
-            : c
-        )
-      );
-
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const onAssign = async (data, candidateId) => {
-    const ref = doc(db, "candidates_sheet", String(candidateId));
-    console.log("candidateId:", candidateId, typeof candidateId);
-    console.log("reject_reason:",data);
-
-    await updateDoc(ref, {
-      branch_send: data.branch,
-      status: "Đã chuyển cho chi nhánh",
-      reject_reason: `Đã phân công về chi nhánh: ${data.branch_label}`,
-      updated_at: new Date()
-    });
-
-    // ✅ Ở ĐÂY mới có setCandidates
-    setCandidates(prev =>
-      prev.map(c =>
-        c.id === candidateId
-          ? {
-              ...c,
-              branch_send: data.branch,
-              status: "Đã chuyển cho chi nhánh",
-              reject_reason: `Đã phân công về chi nhánh: ${data.branch_label}`
-            }
-          : c
-      )
-    );
   }; 
 
   return (
@@ -279,8 +223,6 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           candidate={selectedCandidate} 
-          onReject={onReject}
-          onAssign={onAssign}
         />
       )}
       
