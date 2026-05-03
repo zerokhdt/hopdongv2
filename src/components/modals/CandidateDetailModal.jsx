@@ -205,6 +205,8 @@ const CandidateDetailModal = ({
     const ref = doc(db, "candidates_sheet", String(candidateId));
     console.log("candidateId:", candidateId, typeof candidateId);
     console.log("reject_reason:",data);
+    console.log(userBranch,isHRM);
+    console.log(localStorage);
 
     await updateDoc(ref, {
       status: "Đã hẹn PV",
