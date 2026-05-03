@@ -238,7 +238,17 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
                       <button
                         type="button"
                         onClick={async () => {
-                          onInterview({ branch: 'HRM_INTERNAL', assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, row.id);
+                          onInterview(
+                            {
+                              branch: "HRM_INTERNAL",
+                              assignment_type: "internal",
+                              interview_date: new Date(Date.now() + 24 * 60 * 60 * 1000)
+                                .toISOString()
+                                .slice(0, 16)
+                                .replace("T", " ")
+                            },
+                            row.id
+                          );
                         }}
                         className="w-9 h-9 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-indigo-700 flex items-center justify-center"
                         title="HRM phỏng vấn ngay"
