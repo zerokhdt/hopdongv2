@@ -96,11 +96,18 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
   const toggleFilterValue = (type, value) => {
     setColumnFilters(prev => {
-      const current = Array.isArray(prev[type]) ? prev[type] : []; // ✅ fix
+      const current = prev[type];
 
-      const next = current.includes(value) 
-        ? current.filter(v => v !== value)
-        : [...current, value];
+      // 👉 Đặt ở đây
+      if (!Array.isArray(current)) {
+        console.warn("Filter type lỗi:", type, current);
+      }
+
+      const safeCurrent = Array.isArray(current) ? current : [];
+
+      const next = safeCurrent.includes(value)
+        ? safeCurrent.filter(v => v !== value)
+        : [...safeCurrent, value];
 
       return { ...prev, [type]: next };
     });
@@ -405,7 +412,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
                                 <input 
                                   type="checkbox" 
                                   className="w-3 h-3 text-blue-600 rounded"
-                                  checked={columnFilters.status.includes(s)}
+                                  checked={Array.isArray(columnFilters.status) && columnFilters.status.includes(s)}
                                   onChange={() => toggleFilterValue('status', s)}
                                 />
                                 <span className="text-[11px] font-bold text-gray-700">{s}</span>
