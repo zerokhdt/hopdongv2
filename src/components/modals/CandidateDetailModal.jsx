@@ -35,7 +35,6 @@ const CandidateDetailModal = ({
   onClose, 
   candidate, 
   mode = 'VIEW', 
-  isHRM = false,
   branches = [],
   onSubmitEval,
   onBranchAction,
