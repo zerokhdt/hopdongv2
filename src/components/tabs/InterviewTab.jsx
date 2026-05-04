@@ -163,7 +163,6 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
         locked_reason: null,
         updated_at: new Date()
       });
-      onClose();
     } catch (err) {
       console.error(err);
     }
