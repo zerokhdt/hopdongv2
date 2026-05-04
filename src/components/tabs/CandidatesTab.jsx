@@ -3,7 +3,7 @@ import { Download, Printer, Filter, Search, RefreshCw, BarChart3, Users, Trendin
 import CandidateDetailModal from '../modals/CandidateDetailModal';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters';
 import { downloadCSV } from '../../utils/exportCsv';
-import { collection, getDocs, writeBatch, doc, updateDoc, onSnapshot, query } from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc, updateDoc, onSnapshot, query,where } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 
 const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _branchId = '', onViewDetail, onMock }) => {
