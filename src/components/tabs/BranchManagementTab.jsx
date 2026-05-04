@@ -264,7 +264,10 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
                       </button>
                       <button
                         type="button"
+                        disabled={!isHRM}
                         onClick={async () => {
+                          if (!isHRM) return; // chặn luôn logic
+
                           onInterview(
                             {
                               branch: "HRM_INTERNAL",
@@ -277,8 +280,12 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
                             row.id
                           );
                         }}
-                        className="w-9 h-9 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-indigo-700 flex items-center justify-center"
-                        title="HRM phỏng vấn ngay"
+                        className={`w-9 h-9 rounded-lg border flex items-center justify-center
+                          ${isHRM
+                            ? "border-gray-200 bg-white hover:bg-gray-50 text-indigo-700"
+                            : "border-gray-100 bg-gray-100 text-gray-400 cursor-not-allowed"
+                          }`}
+                        title={isHRM ? "HRM phỏng vấn ngay" : "Chỉ HRM mới được phép"}
                       >
                         <Handshake size={16} />
                       </button>
