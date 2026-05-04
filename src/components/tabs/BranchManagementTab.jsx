@@ -14,17 +14,37 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
   const [userBranch, setUserBranch] = useState('');
 
   useEffect(() => {
-    setIsHRM(localStorage.getItem("user_role") === "admin");
-    setUserBranch(localStorage.getItem("user_branch") || '');
+    const role = localStorage.getItem("user_role");
+    const branch = localStorage.getItem("user_branch") || '';
+
+    const isAdmin = role === "admin";
+
+    setIsHRM(isAdmin);
+    setUserBranch(branch);
     setLoading(true);
 
-    const q = query(
-      collection(db, "candidates_sheet"),
-      where("status", "in", [
-        "Đã chuyển cho chi nhánh",
-        "Đã hẹn PV"
-      ])
-    );
+    let q;
+
+    if (isAdmin) {
+      // HRM: chỉ filter theo status
+      q = query(
+        collection(db, "candidates_sheet"),
+        where("status", "in", [
+          "Đã chuyển cho chi nhánh",
+          "Đã hẹn PV"
+        ])
+      );
+    } else {
+      // User thường: thêm điều kiện branch_send
+      q = query(
+        collection(db, "candidates_sheet"),
+        where("status", "in", [
+          "Đã chuyển cho chi nhánh",
+          "Đã hẹn PV"
+        ]),
+        where("branch_send", "==", branch)
+      );
+    }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({

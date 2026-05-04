@@ -11,11 +11,31 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
   const [selectedId, setSelectedId] = useState(null);
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isHRM, setIsHRM] = useState(false);
+  const [userBranch, setUserBranch] = useState('');
 
   useEffect(() => {
+    const role = localStorage.getItem("user_role");
+    const branch = localStorage.getItem("user_branch") || '';
+
+    const isAdmin = role === "admin";
+
+    setIsHRM(isAdmin);
+    setUserBranch(branch);
     setLoading(true);
 
-    const q = query(collection(db, "candidates_sheet"));
+    let q;
+
+    if (isAdmin) {
+      // HRM: lấy tất cả
+      q = query(collection(db, "candidates_sheet"));
+    } else {
+      // User thường: thêm điều kiện branch_send
+      q = query(
+        collection(db, "candidates_sheet"),
+        where("branch_send", "==", branch)
+      );
+    }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs
@@ -23,7 +43,7 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
           id: doc.id,
           ...doc.data(),
         }))
-        .filter(item => item.interview_date); // chỉ lấy có lịch PV
+        .filter(item => item.interview_date); // vẫn giữ filter này nếu cần
 
       setCandidates(data);
       setLoading(false);

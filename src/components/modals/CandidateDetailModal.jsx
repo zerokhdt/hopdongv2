@@ -174,6 +174,7 @@ const CandidateDetailModal = ({
       console.log("candidateId:", candidateId, typeof candidateId);
       console.log("reject_reason:", reason);
       await updateDoc(ref, {
+        interview_date: null,
         status: "Từ chối",
         reject_reason: reason,
         updated_at: new Date()
