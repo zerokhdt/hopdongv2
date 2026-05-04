@@ -157,7 +157,7 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
       console.log("candidateId:", candidateId, typeof candidateId);
       console.log("reject_reason:", reason);
       await updateDoc(ref, {
-        status: "Từ chối",
+        status: "REJECTE",
         reject_reason: reason,
         locked: false,
         locked_reason: null,
