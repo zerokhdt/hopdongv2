@@ -9,8 +9,30 @@ import { db } from "../../utils/firebase";
 const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _branchId = '', onViewDetail, onMock }) => {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isHRM, setIsHRM] = useState(false);
+  const [userBranch, setUserBranch] = useState('');
+
   useEffect(() => {
-    const q = collection(db, "candidates_sheet");
+    const role = localStorage.getItem("user_role");
+    const branch = localStorage.getItem("user_branch") || '';
+
+    const isAdmin = role === "admin";
+
+    setIsHRM(isAdmin);
+    setUserBranch(branch);
+
+    let q;
+
+    if (isAdmin) {
+      // HRM: lấy toàn bộ
+      q = collection(db, "candidates_sheet");
+    } else {
+      // User thường: filter theo branch_send
+      q = query(
+        collection(db, "candidates_sheet"),
+        where("branch_send", "==", branch)
+      );
+    }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({
@@ -18,10 +40,10 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
         ...doc.data(),
       }));
 
-      setCandidates(data); // 🔥 auto update realtime
+      setCandidates(data);
     });
 
-    return () => unsubscribe(); // cleanup
+    return () => unsubscribe();
   }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnFilters, setColumnFilters] = useState({

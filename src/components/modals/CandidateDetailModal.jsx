@@ -466,7 +466,7 @@ const CandidateDetailModal = ({
                                       return;
                                     }
                                     if (!scheduleDate) return alert('Vui lòng chọn ngày giờ phỏng vấn');
-                                    onInterview && onInterview({ branch: 'HRM_INTERNAL', assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, candidate.id);
+                                    onInterview && onInterview({ branch: userBranch, assignment_type: 'internal', interview_date: scheduleDate.replace('T', ' ') }, candidate.id);
                                   }}
                                   disabled={isLockedLocal}
                                   className={`w-full py-4 rounded-2xl font-bold uppercase tracking-widest text-sm transition-all flex justify-center items-center gap-2 shadow-lg ${
