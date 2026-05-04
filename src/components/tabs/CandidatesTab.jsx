@@ -30,7 +30,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
       // User thường: filter theo branch_send
       q = query(
         collection(db, "candidates_sheet"),
-        where("branch_send", "==", branch)
+        where("branch", "==", branch)
       );
     }
 
