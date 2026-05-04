@@ -31,7 +31,6 @@ const BranchManagementTab = ({ isAdmin: _isAdmin = false, onViewDetail, onAction
         collection(db, "candidates_sheet"),
         where("status", "in", [
           "Đã chuyển cho chi nhánh",
-          "Đã hẹn PV"
         ])
       );
     } else {
