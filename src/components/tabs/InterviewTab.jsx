@@ -131,6 +131,24 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
     setFormData({ name: '', date: '', time: '' });
   };
 
+  const onReject = async (reason, candidateId) => {
+    try {
+      const ref = doc(db, "candidates_sheet", String(candidateId));
+      console.log("candidateId:", candidateId, typeof candidateId);
+      console.log("reject_reason:", reason);
+      await updateDoc(ref, {
+        status: "Từ chối",
+        reject_reason: reason,
+        locked: false,
+        locked_reason: null,
+        updated_at: new Date()
+      });
+      onClose();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col bg-[#F2F4F7] text-gray-900 p-4 lg:p-6 overflow-hidden relative">
       {/* Header */}
@@ -249,8 +267,7 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
                         <button
                           type="button"
                           onClick={async () => {
-                            if (!onAction) return;
-                            await onAction(row.id, 'WITHDRAW');
+                            onReject("Không phù hợp văn hóa", row.id);
                           }}
                           className="w-9 h-9 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-rose-600 flex items-center justify-center"
                           title="Bỏ nhanh CV"
@@ -260,10 +277,6 @@ const InterviewTab = ({ isAdmin: _isAdmin = false, preselectCandidateId, onConsu
                         <button
                           type="button"
                           onClick={async () => {
-                            if (!onAction) return;
-                            const ok = await onAction(row.id, 'TAKEOVER');
-                            if (!ok) return;
-                            if (onNavigateSubTab) onNavigateSubTab('recruitment-interview');
                             if (onViewDetail) onViewDetail(row.candidate, 'EVALUATE');
                           }}
                           className="w-9 h-9 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-indigo-700 flex items-center justify-center"
