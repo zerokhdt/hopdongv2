@@ -20,6 +20,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
     setIsHRM(isAdmin);
     setUserBranch(branch);
+    console.log("branch:",branch);
 
     let q;
 
