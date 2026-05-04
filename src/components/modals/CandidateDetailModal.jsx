@@ -185,6 +185,23 @@ const CandidateDetailModal = ({
     }
   };
 
+  const onComplete = async (reason, candidateId) => {
+    try {
+      const ref = doc(db, "candidates_sheet", String(candidateId));
+      console.log("candidateId:", candidateId, typeof candidateId);
+      console.log("reject_reason:", reason);
+      await updateDoc(ref, {
+        status: "COMPLETED",
+        locked: false,
+        locked_reason: null,
+        updated_at: new Date()
+      });
+      onClose();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const onAssign = async (data, candidateId) => {
     const ref = doc(db, "candidates_sheet", String(candidateId));
     console.log("candidateId:", candidateId, typeof candidateId);
@@ -313,14 +330,10 @@ const CandidateDetailModal = ({
                        </div>
                        <div className="grid grid-cols-2 gap-3">
                           <button 
-                            onClick={() => !isCompleted && setDecision('Đạt')} 
-                            disabled={isCompleted}
-                            className={`py-3 rounded-xl font-bold text-sm transition-all border-2 ${decision === 'Đạt' ? 'bg-emerald-500 border-emerald-500 text-white shadow-md' : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200'}`}
+                            onClick={() => onComplete('COMPLETED', candidate.id)}                           
                           >Tuyển Dụng</button>
                           <button 
-                            onClick={() => !isCompleted && setDecision('Không đạt')} 
-                            disabled={isCompleted}
-                            className={`py-3 rounded-xl font-bold text-sm transition-all border-2 ${decision === 'Không đạt' ? 'bg-rose-500 border-rose-500 text-white shadow-md' : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200'}`}
+                            onClick={() => onReject('REJECTED', candidate.id)}                      
                           >Không Đạt</button>
                        </div>
                     </div>
@@ -643,7 +656,7 @@ const CandidateDetailModal = ({
                               <CheckCircle2 size={18} /> Nhận & Hẹn phỏng vấn
                             </button>
                             <button 
-                              onClick={() => onReject('REJECT', candidate.id)}
+                              onClick={() => onReject('REJECTED', candidate.id)}
                               className="py-3 bg-white text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl font-bold text-sm transition-all flex justify-center items-center gap-2 shadow-sm"
                             >
                               <Ban size={18} /> Không nhận
