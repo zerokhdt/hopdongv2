@@ -73,21 +73,31 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
     const name = newName.trim();
     if (!name) return;
 
-    const cur = JSON.parse(localStorage.getItem('ace_position_contract_mapping_v1') || '{}');
-
-    // 🚫 check trùng (ignore upper/lower)
-    const existedKey = Object.keys(cur).find(
-      k => normalize(k) === normalize(name)
+    // ✅ dùng [] thay vì {}
+    const cur = JSON.parse(
+      localStorage.getItem('ace_position_contract_mapping_v1') || '[]'
     );
 
-    if (existedKey) {
-      alert(`Đã tồn tại: "${existedKey}"`);
+    // 🚫 check trùng (theo position)
+    const existed = cur.find(
+      item => normalize(item.position) === normalize(name)
+    );
+
+    if (existed) {
+      alert(`Đã tồn tại: "${existed.position}"`);
       return;
     }
 
-    cur[name] = newDocs;
+    // ✅ push object mới
+    cur.push({
+      position: name,
+      docs: newDocs
+    });
 
-    localStorage.setItem('ace_position_contract_mapping_v1', JSON.stringify(cur));
+    localStorage.setItem(
+      'ace_position_contract_mapping_v1',
+      JSON.stringify(cur)
+    );
 
     setNewName('');
     setNewDocs('HĐLĐ + Phụ lục');
