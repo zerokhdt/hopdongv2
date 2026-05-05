@@ -64,37 +64,6 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
     return raw ? parseFloat(raw) : 1.0;
   });
 
-  const [newName, setNewName] = useState('');
-  const [newDocs, setNewDocs] = useState('HĐLĐ + Phụ lục');
-
-  const normalize = (str) => str.trim().toLowerCase();
-
-  const handleAdd = () => {
-    const name = newName.trim();
-    if (!name) return;
-
-    const cur = JSON.parse(localStorage.getItem('ace_position_contract_mapping_v1') || '{}');
-
-    // 🚫 check trùng (ignore upper/lower)
-    const existedKey = Object.keys(cur).find(
-      k => normalize(k) === normalize(name)
-    );
-
-    if (existedKey) {
-      alert(`Đã tồn tại: "${existedKey}"`);
-      return;
-    }
-
-    cur[name] = newDocs;
-
-    localStorage.setItem('ace_position_contract_mapping_v1', JSON.stringify(cur));
-
-    setNewName('');
-    setNewDocs('HĐLĐ + Phụ lục');
-
-    setMappingVersion(v => v + 1);
-  };
-
   const handleStatusChange = (status, color) => {
     setConfig(prev => ({ ...prev, statuses: { ...prev.statuses, [status]: color } }));
   };
@@ -147,17 +116,11 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
                 <p className="text-[10px] font-bold text-slate-400">Thêm cấu hình mới</p>
                 <div className="grid grid-cols-2 gap-2">
                   <input 
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
+                    id="new-pos-name"
                     placeholder="Tên vị trí (Ví dụ: Giáo viên)"
                     className="px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-400"
                   />
-
-                  <select 
-                    value={newDocs}
-                    onChange={(e) => setNewDocs(e.target.value)}
-                    className="px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-400"
-                  >
+                  <select id="new-pos-docs" className="px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-400">
                     <option value="HĐLĐ + Phụ lục">HĐLĐ + Phụ lục</option>
                     <option value="Thỏa thuận CV">Thỏa thuận CV</option>
                     <option value="Cam kết + HĐLĐ">Cam kết + HĐLĐ</option>
@@ -165,7 +128,16 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
                   </select>
                 </div>
                 <button 
-                  onClick={handleAdd}
+                  onClick={() => {
+                    const name = document.getElementById('new-pos-name').value.trim();
+                    const docs = document.getElementById('new-pos-docs').value;
+                    if (!name) return;
+                    const cur = JSON.parse(localStorage.getItem('ace_position_contract_mapping_v1') || '{}');
+                    cur[name] = docs;
+                    localStorage.setItem('ace_position_contract_mapping_v1', JSON.stringify(cur));
+                    document.getElementById('new-pos-name').value = '';
+                    setMappingVersion(v => v + 1);
+                  }}
                   className="w-full py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black hover:bg-indigo-700 transition-all"
                 >
                   Thêm cấu hình
