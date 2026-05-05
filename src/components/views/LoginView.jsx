@@ -54,6 +54,7 @@ export default function LoginView({ onLogin }) {
       localStorage.setItem('user_branch', data.user.branch);
       localStorage.setItem('user_role', data.user.role);
       localStorage.setItem('token', data.token);
+      console.log(localStorage);
 
       // callback login
       onLogin(data.token);
