@@ -2712,6 +2712,27 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
   const currentBranch = branch || localStorage.getItem('user_branch') || 'Chi nhánh';
   const isAdmin = userRole === 'admin';
 
+  const [positionOptions, setPositionOptions] = useState([]);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("ace_position_contract_mapping_v1");
+
+    if (!raw) return;
+
+    try {
+      const parsed = JSON.parse(raw);
+
+      // lấy unique position
+      const positions = [
+        ...new Set(parsed.map(item => item.position).filter(Boolean))
+      ];
+
+      setPositionOptions(positions);
+    } catch (err) {
+      console.error("Lỗi parse localStorage:", err);
+    }
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('ace_print_info_collapsed', printInfoCollapsed ? '1' : '0');
   }, [printInfoCollapsed]);
@@ -3078,7 +3099,9 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
                           ${positionSelectValue ? 'border-emerald-400 bg-emerald-50 text-emerald-800' : 'border-slate-200 text-slate-500'}`}
                       >
                         <option value="">— Chọn vị trí —</option>
-                        {positionOptions.map(p => <option key={p} value={p}>{p}</option>)}
+                        {positionOptions.map(p => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
                         <option value={CUSTOM_POSITION_VALUE}>Khác (tự nhập)</option>
                       </select>
                     </div>
