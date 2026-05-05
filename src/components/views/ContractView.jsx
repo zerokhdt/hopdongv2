@@ -2516,7 +2516,8 @@ export function ContractPreview({ data, contractTypeId, position: _position, agr
 
   const handleDownloadWord = async () => {
     console.log('Download Word with data:', localData);
-    console.log('Download Word with data:', contractTypeId, agreementTypeId, _commitmentTypeId);
+    console.log('contractTypeId', contractTypeId, 'agreementTypeId', agreementTypeId, '_commitmentTypeId', _commitmentTypeId);
+
     setDocxError('');
     setDocxBusy(true);
     try {
