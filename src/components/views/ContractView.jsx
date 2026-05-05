@@ -39,7 +39,7 @@ const CONTRACT_FIELDS = [
   { key: 'quoc_tich',     label: 'Quốc tịch',           placeholder: 'Việt Nam',         required: true },
   { key: 'ngay_sinh',     label: 'Sinh ngày',           placeholder: '',                 required: true,  type: 'date' },
   { key: 'noi_sinh',      label: 'Nơi sinh',            placeholder: 'TP. Hồ Chí Minh',  required: true },
-  { key: 'cccd',          label: 'Số CCCD / CMND',      placeholder: '000000000000',       required: true },
+  { key: 'cccd',          label: 'Số CCCD / CMND',      placeholder: '0123456789',       required: true },
   { key: 'ngay_cap',      label: 'Ngày cấp CCCD',       placeholder: '',                 required: true,  type: 'date' },
   { key: 'noi_cap',       label: 'Nơi cấp CCCD',        placeholder: 'Cục CS QLHC...',   required: true },
   { key: 'so_dien_thoai', label: 'Số điện thoại',       placeholder: '090xxxxxxx',       required: true },
@@ -2712,27 +2712,6 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
   const currentBranch = branch || localStorage.getItem('user_branch') || 'Chi nhánh';
   const isAdmin = userRole === 'admin';
 
-  const [positionOptions, setPositionOptions] = useState([]);
-
-  useEffect(() => {
-    const raw = localStorage.getItem("ace_position_contract_mapping_v1");
-
-    if (!raw) return;
-
-    try {
-      const parsed = JSON.parse(raw);
-
-      // lấy unique position
-      const positions = [
-        ...new Set(parsed.map(item => item.position).filter(Boolean))
-      ];
-
-      setPositionOptions(positions);
-    } catch (err) {
-      console.error("Lỗi parse localStorage:", err);
-    }
-  }, []);
-
   useEffect(() => {
     localStorage.setItem('ace_print_info_collapsed', printInfoCollapsed ? '1' : '0');
   }, [printInfoCollapsed]);
@@ -2745,6 +2724,20 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
     if (isAdmin) return employees;
     return employees.filter(e => e.department === currentBranch);
   }, [currentBranch, employees, isAdmin]);
+
+  const positionOptions = React.useMemo(() => {
+    const map = new Map();
+    filteredEmployees.forEach(e => {
+      const raw = String(e.position || '').trim();
+      const key = normalizePositionKey(raw);
+      if (!key) return;
+      const preferred = preferredPositionLabelByKey(key);
+      const label = preferred || raw;
+      if (!map.has(key)) map.set(key, label);
+      else if (preferred) map.set(key, preferred);
+    });
+    return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
+  }, [filteredEmployees]);
 
   const applyPositionSelection = React.useCallback((pos) => {
     const p = canonicalPositionLabel(pos);
@@ -3000,7 +2993,7 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
   }, [formData.chuc_vu]);
 
   const handleReview = () => { 
-    console.log('Review with data:', localStorage);
+    console.log('Review with data:', formData);
     if (validate()) {
       localStorage.setItem('preview_data', JSON.stringify(formData));
       localStorage.setItem('preview_contract_type', selectedContractType);
@@ -3084,7 +3077,8 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
                         className={`w-full p-3 border-2 rounded-xl outline-none font-semibold text-sm transition-colors bg-white
                           ${positionSelectValue ? 'border-emerald-400 bg-emerald-50 text-emerald-800' : 'border-slate-200 text-slate-500'}`}
                       >
-                        <option value="">— Chọn vị trí —</option>                        
+                        <option value="">— Chọn vị trí —</option>
+                        {positionOptions.map(p => <option key={p} value={p}>{p}</option>)}
                         <option value={CUSTOM_POSITION_VALUE}>Khác (tự nhập)</option>
                       </select>
                     </div>
