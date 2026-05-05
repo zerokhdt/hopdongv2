@@ -3084,8 +3084,7 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
                         className={`w-full p-3 border-2 rounded-xl outline-none font-semibold text-sm transition-colors bg-white
                           ${positionSelectValue ? 'border-emerald-400 bg-emerald-50 text-emerald-800' : 'border-slate-200 text-slate-500'}`}
                       >
-                        <option value="">— Chọn vị trí —</option>
-                        {positionOptions.map(p => <option key={p} value={p}>{p}</option>)}
+                        <option value="">— Chọn vị trí —</option>                        
                         <option value={CUSTOM_POSITION_VALUE}>Khác (tự nhập)</option>
                       </select>
                     </div>
