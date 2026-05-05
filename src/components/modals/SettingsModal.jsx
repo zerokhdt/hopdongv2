@@ -64,6 +64,25 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
     return raw ? parseFloat(raw) : 1.0;
   });
 
+  const getMapping = () => {
+    const raw = JSON.parse(localStorage.getItem('ace_position_contract_mapping_v1') || '{}');
+
+    if (Array.isArray(raw)) {
+      const obj = {};
+      raw.forEach(item => {
+        if (item?.position) {
+          obj[item.position] = item.docs || '';
+        }
+      });
+
+      // 🔥 ghi đè lại cho sạch
+      localStorage.setItem('ace_position_contract_mapping_v1', JSON.stringify(obj));
+      return obj;
+    }
+
+    return raw;
+  };
+
   const handleStatusChange = (status, color) => {
     setConfig(prev => ({ ...prev, statuses: { ...prev.statuses, [status]: color } }));
   };
@@ -145,7 +164,7 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
               </div>
 
               <div className="max-h-[200px] overflow-y-auto space-y-2 pr-2">
-                {Object.entries(JSON.parse(localStorage.getItem('ace_position_contract_mapping_v1') || '{}')).map(([pos, docs]) => (
+                {Object.entries(getMapping()).map(([pos, docs]) => (
                   <div key={pos} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl">
                     <div>
                       <div className="text-[11px] font-black text-slate-700">{pos}</div>
