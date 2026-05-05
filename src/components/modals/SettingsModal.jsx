@@ -73,12 +73,29 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
     const name = newName.trim();
     if (!name) return;
 
-    // ✅ dùng [] thay vì {}
-    const cur = JSON.parse(
-      localStorage.getItem('ace_position_contract_mapping_v1') || '[]'
-    );
+    const raw = localStorage.getItem('ace_position_contract_mapping_v1');
 
-    // 🚫 check trùng (theo position)
+    let cur = [];
+
+    try {
+      const parsed = JSON.parse(raw || '[]');
+
+      // ✅ nếu là array → dùng luôn
+      if (Array.isArray(parsed)) {
+        cur = parsed;
+      } 
+      // ✅ nếu là object → convert sang array
+      else {
+        cur = Object.entries(parsed).map(([position, docs]) => ({
+          position,
+          docs
+        }));
+      }
+    } catch {
+      cur = [];
+    }
+
+    // 🚫 check trùng
     const existed = cur.find(
       item => normalize(item.position) === normalize(name)
     );
@@ -88,11 +105,14 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
       return;
     }
 
-    // ✅ push object mới
+    // ✅ add mới
     cur.push({
       position: name,
       docs: newDocs
     });
+
+    // (optional) sort
+    cur.sort((a, b) => a.position.localeCompare(b.position, 'vi'));
 
     localStorage.setItem(
       'ace_position_contract_mapping_v1',
