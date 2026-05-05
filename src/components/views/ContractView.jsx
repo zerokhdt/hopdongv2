@@ -2515,9 +2515,6 @@ export function ContractPreview({ data, contractTypeId, position: _position, agr
   };
 
   const handleDownloadWord = async () => {
-    console.log('Download Word with data:', localData);
-    console.log('contractTypeId', contractTypeId, 'agreementTypeId', agreementTypeId, '_commitmentTypeId', _commitmentTypeId);
-
     setDocxError('');
     setDocxBusy(true);
     try {
@@ -2993,7 +2990,6 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
   }, [formData.chuc_vu]);
 
   const handleReview = () => { 
-    console.log('Review with data:', localStorage);
     if (validate()) {
       localStorage.setItem('preview_data', JSON.stringify(formData));
       localStorage.setItem('preview_contract_type', selectedContractType);
