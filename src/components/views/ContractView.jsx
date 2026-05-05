@@ -39,7 +39,7 @@ const CONTRACT_FIELDS = [
   { key: 'quoc_tich',     label: 'Quốc tịch',           placeholder: 'Việt Nam',         required: true },
   { key: 'ngay_sinh',     label: 'Sinh ngày',           placeholder: '',                 required: true,  type: 'date' },
   { key: 'noi_sinh',      label: 'Nơi sinh',            placeholder: 'TP. Hồ Chí Minh',  required: true },
-  { key: 'cccd',          label: 'Số CCCD / CMND',      placeholder: '0123456789',       required: true },
+  { key: 'cccd',          label: 'Số CCCD / CMND',      placeholder: '000000000000',       required: true },
   { key: 'ngay_cap',      label: 'Ngày cấp CCCD',       placeholder: '',                 required: true,  type: 'date' },
   { key: 'noi_cap',       label: 'Nơi cấp CCCD',        placeholder: 'Cục CS QLHC...',   required: true },
   { key: 'so_dien_thoai', label: 'Số điện thoại',       placeholder: '090xxxxxxx',       required: true },
