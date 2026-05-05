@@ -7,36 +7,6 @@ const colorOptions = Object.values(THEMES);
 function ColorPicker({ value, onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const selected = THEMES[value] || THEMES.slate;
-  const [newName, setNewName] = useState('');
-  const [newDocs, setNewDocs] = useState('HĐLĐ + Phụ lục');
-
-  const normalize = (str) => str.trim().toLowerCase();
-
-  const handleAdd = () => {
-    const name = newName.trim();
-    if (!name) return;
-
-    const cur = JSON.parse(localStorage.getItem('ace_position_contract_mapping_v1') || '{}');
-
-    // 🚫 check trùng (ignore upper/lower)
-    const existedKey = Object.keys(cur).find(
-      k => normalize(k) === normalize(name)
-    );
-
-    if (existedKey) {
-      alert(`Đã tồn tại: "${existedKey}"`);
-      return;
-    }
-
-    cur[name] = newDocs;
-
-    localStorage.setItem('ace_position_contract_mapping_v1', JSON.stringify(cur));
-
-    setNewName('');
-    setNewDocs('HĐLĐ + Phụ lục');
-
-    setMappingVersion(v => v + 1);
-  };
 
   return (
     <div className="relative">
@@ -93,6 +63,37 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
     const raw = localStorage.getItem('ace_hrm_font_scale');
     return raw ? parseFloat(raw) : 1.0;
   });
+
+  const [newName, setNewName] = useState('');
+  const [newDocs, setNewDocs] = useState('HĐLĐ + Phụ lục');
+
+  const normalize = (str) => str.trim().toLowerCase();
+
+  const handleAdd = () => {
+    const name = newName.trim();
+    if (!name) return;
+
+    const cur = JSON.parse(localStorage.getItem('ace_position_contract_mapping_v1') || '{}');
+
+    // 🚫 check trùng (ignore upper/lower)
+    const existedKey = Object.keys(cur).find(
+      k => normalize(k) === normalize(name)
+    );
+
+    if (existedKey) {
+      alert(`Đã tồn tại: "${existedKey}"`);
+      return;
+    }
+
+    cur[name] = newDocs;
+
+    localStorage.setItem('ace_position_contract_mapping_v1', JSON.stringify(cur));
+
+    setNewName('');
+    setNewDocs('HĐLĐ + Phụ lục');
+
+    setMappingVersion(v => v + 1);
+  };
 
   const handleStatusChange = (status, color) => {
     setConfig(prev => ({ ...prev, statuses: { ...prev.statuses, [status]: color } }));
