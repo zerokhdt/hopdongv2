@@ -64,37 +64,6 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
     return raw ? parseFloat(raw) : 1.0;
   });
 
-  const [newName, setNewName] = useState('');
-  const [newDocs, setNewDocs] = useState('HĐLĐ + Phụ lục');
-
-  const normalize = (str) => str.trim().toLowerCase();
-
-  const handleAdd = () => {
-    const name = newName.trim();
-    if (!name) return;
-
-    const cur = JSON.parse(localStorage.getItem('ace_position_contract_mapping_v1') || '{}');
-
-    // 🚫 check trùng (ignore upper/lower)
-    const existedKey = Object.keys(cur).find(
-      k => normalize(k) === normalize(name)
-    );
-
-    if (existedKey) {
-      alert(`Đã tồn tại: "${existedKey}"`);
-      return;
-    }
-
-    cur[name] = newDocs;
-
-    localStorage.setItem('ace_position_contract_mapping_v1', JSON.stringify(cur));
-
-    setNewName('');
-    setNewDocs('HĐLĐ + Phụ lục');
-
-    setMappingVersion(v => v + 1);
-  };
-
   const handleStatusChange = (status, color) => {
     setConfig(prev => ({ ...prev, statuses: { ...prev.statuses, [status]: color } }));
   };
@@ -165,7 +134,16 @@ export default function SettingsModal({ currentConfig, onSave, onClose, groups, 
                   </select>
                 </div>
                 <button 
-                  onClick={handleAdd}
+                  onClick={() => {
+                    const name = document.getElementById('new-pos-name').value.trim();
+                    const docs = document.getElementById('new-pos-docs').value;
+                    if (!name) return;
+                    const cur = JSON.parse(localStorage.getItem('ace_position_contract_mapping_v1') || '{}');
+                    cur[name] = docs;
+                    localStorage.setItem('ace_position_contract_mapping_v1', JSON.stringify(cur));
+                    document.getElementById('new-pos-name').value = '';
+                    setMappingVersion(v => v + 1);
+                  }}
                   className="w-full py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black hover:bg-indigo-700 transition-all"
                 >
                   Thêm cấu hình
