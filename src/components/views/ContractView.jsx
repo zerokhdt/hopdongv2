@@ -2746,20 +2746,6 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
     return employees.filter(e => e.department === currentBranch);
   }, [currentBranch, employees, isAdmin]);
 
-  const positionOptions = React.useMemo(() => {
-    const map = new Map();
-    filteredEmployees.forEach(e => {
-      const raw = String(e.position || '').trim();
-      const key = normalizePositionKey(raw);
-      if (!key) return;
-      const preferred = preferredPositionLabelByKey(key);
-      const label = preferred || raw;
-      if (!map.has(key)) map.set(key, label);
-      else if (preferred) map.set(key, preferred);
-    });
-    return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
-  }, [filteredEmployees]);
-
   const applyPositionSelection = React.useCallback((pos) => {
     const p = canonicalPositionLabel(pos);
     setSelectedPosition(p);
@@ -3099,9 +3085,7 @@ export default function ContractView({ onLogout: _onLogout, employees = [], user
                           ${positionSelectValue ? 'border-emerald-400 bg-emerald-50 text-emerald-800' : 'border-slate-200 text-slate-500'}`}
                       >
                         <option value="">— Chọn vị trí —</option>
-                        {positionOptions.map(p => (
-                          <option key={p} value={p}>{p}</option>
-                        ))}
+                        {positionOptions.map(p => <option key={p} value={p}>{p}</option>)}
                         <option value={CUSTOM_POSITION_VALUE}>Khác (tự nhập)</option>
                       </select>
                     </div>
