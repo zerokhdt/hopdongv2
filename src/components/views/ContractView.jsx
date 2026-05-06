@@ -7,6 +7,8 @@ import { renderAsync } from 'docx-preview';
 import { apiFetch } from '../../utils/api.js';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters.js';
 import { HdldFtTemplate, HdldBaseTemplate } from './contracts/index.js';
+import { db } from "./firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 // ─── Cấu hình Template Tài Liệu ───────────────────────────────────────────────
 const DOCUMENT_TEMPLATES = [
@@ -2514,6 +2516,36 @@ export function ContractPreview({ data, contractTypeId, position: _position, agr
     }
   };
 
+  const saveFullLocalData = async (localData) => {
+    try {
+      if (!localData?.so_hd) {
+        throw new Error("Thiếu so_hd");
+      }
+
+      const data = {
+        ...localData, // 👈 lưu toàn bộ
+
+        // normalize nhẹ (rất nên có)
+        luong: Number(localData.luong?.replace(/\./g, "")) || 0,
+
+        ngay_ky: localData.ngay_ky ? new Date(localData.ngay_ky) : null,
+        ngay_sinh: localData.ngay_sinh ? new Date(localData.ngay_sinh) : null,
+        tu_ngay: localData.tu_ngay ? new Date(localData.tu_ngay) : null,
+        den_ngay: localData.den_ngay ? new Date(localData.den_ngay) : null,
+        ngay_cap: localData.ngay_cap ? new Date(localData.ngay_cap) : null,
+
+        branch: localStorage.getItem("user_branch") || "",
+        createdAt: serverTimestamp(),
+      };
+
+      await setDoc(doc(db, "contract", localData.so_hd), data);
+
+      console.log("✅ Lưu FULL localData thành công");
+    } catch (err) {
+      console.error("❌ Lỗi:", err);
+    }
+  };
+
   const handleDownloadWord = async () => {
     console.log(localStorage);
     setDocxError('');
@@ -2577,6 +2609,7 @@ export function ContractPreview({ data, contractTypeId, position: _position, agr
         }
       }
       await createDocxFromTemplateUrl('/templates/hdld-ft.docx', localData, outName);
+      await saveFullLocalData(localData);
       const entry = {
         issueKey,
         method: 'DOCX_DEFAULT',
