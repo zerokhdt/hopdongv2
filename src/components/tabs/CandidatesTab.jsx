@@ -20,7 +20,7 @@ const CandidatesTab = ({ branches = [], isAdmin: _isAdmin = false, branchId: _br
 
     setIsHRM(isAdmin);
     setUserBranch(branch);
-    console.log("branch:",branch,import.meta.env.FIREBASE_CLIENT_EMAIL,import.meta.env.FIREBASE_PRIVATE_KEY, import.meta.env.JWT_SECRET);
+    console.log("branch:",branch);
 
     let q;
 
