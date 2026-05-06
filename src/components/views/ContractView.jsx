@@ -7,7 +7,7 @@ import { renderAsync } from 'docx-preview';
 import { apiFetch } from '../../utils/api.js';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters.js';
 import { HdldFtTemplate, HdldBaseTemplate } from './contracts/index.js';
-import { db } from "./firebase";
+import { db } from "../../utils/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 // ─── Cấu hình Template Tài Liệu ───────────────────────────────────────────────
