@@ -8,7 +8,7 @@ import { apiFetch } from '../../utils/api.js';
 import { formatName, formatBranch, formatPosition } from '../../utils/formatters.js';
 import { HdldFtTemplate, HdldBaseTemplate } from './contracts/index.js';
 import { db } from "../../utils/firebase";
-import { collection, addDoc, serverTimestamp,setDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp,setDoc,doc } from "firebase/firestore";
 
 // ─── Cấu hình Template Tài Liệu ───────────────────────────────────────────────
 const DOCUMENT_TEMPLATES = [
