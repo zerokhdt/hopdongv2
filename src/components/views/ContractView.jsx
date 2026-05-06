@@ -2515,6 +2515,7 @@ export function ContractPreview({ data, contractTypeId, position: _position, agr
   };
 
   const handleDownloadWord = async () => {
+    console.log(localData);
     setDocxError('');
     setDocxBusy(true);
     try {
